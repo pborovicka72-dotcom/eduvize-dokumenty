@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 BASE=Path(__file__).resolve().parent
-STORE=Path(os.environ.get("DOCUMENTS_STORAGE_DIR","/var/data/eduvize-documents"))
+STORE=Path(os.environ.get("DOCUMENTS_STORAGE_DIR","/tmp/eduvize-documents"))
 STORE.mkdir(parents=True,exist_ok=True)
 DB=STORE/"documents.sqlite3"
 TOKEN=os.environ.get("DOCUMENTS_ADMIN_TOKEN","")
