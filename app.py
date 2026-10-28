@@ -92,7 +92,7 @@ async def manifest_data(folder):
     legacy = await child_named(folder,"manifest.json")
     if legacy:
         return await read_manifest_item(legacy)
-    return {"items":[],"categories":[]}
+    return {"items":[],"categories":[],"hidden_categories":[]}
 
 async def manifest(folder):
     return (await manifest_data(folder))["items"]
@@ -103,11 +103,13 @@ async def categories(folder):
     names=DEFAULT_CATEGORIES+list(extra)+[x.get("category","") for x in data["items"]]
     return list(dict.fromkeys(x for x in names if isinstance(x,str) and x.strip()))
 
-async def save_manifest(folder,items,category_names=None):
+async def save_manifest(folder,items,category_names=None,hidden_categories=None):
     system = await system_folder(folder)
     if category_names is None:
         category_names = (await manifest_data(folder)).get("categories",[])
-    data = json.dumps({"items":items,"categories":category_names},ensure_ascii=False).encode()
+    if hidden_categories is None:
+        hidden_categories = (await manifest_data(folder)).get("hidden_categories",[])
+    data = json.dumps({"items":items,"categories":category_names,"hidden_categories":hidden_categories},ensure_ascii=False).encode()
     await graph("PUT", f"/me/drive/items/{system}:/manifest.json:/content",
                 content=data,headers={"Content-Type":"application/json"})
     # Only remove legacy metadata after the replacement was saved successfully.
@@ -146,10 +148,38 @@ async def auth_callback(code:str="",state:str="",error:str=""):
 @app.get("/api/admin/status")
 def status(authorization:str|None=Header(default=None)):
     check_admin(authorization);return {"connected":bool(tokens.get("refresh_token"))}
+@app.get("/api/document-categories")
+async def public_categories():
+    folder,items=await all_items()
+    data=await manifest_data(folder)
+    hidden=set(data.get("hidden_categories",[]))
+    visible={x.get("category","Ostatní") for x in items if x.get("visible",True)}
+    return {"categories":[name for name in await categories(folder) if name in visible and name not in hidden]}
+
+@app.patch("/api/admin/categories/visibility")
+async def category_visibility(request:Request,authorization:str|None=Header(default=None)):
+    check_admin(authorization)
+    body=await request.json()
+    name=body.get("name")
+    visible=body.get("visible")
+    if not isinstance(name,str) or not isinstance(visible,bool):
+        raise HTTPException(422,"Neplatná změna viditelnosti")
+    async with lock:
+        folder,items=await all_items()
+        if name not in await categories(folder):raise HTTPException(404,"Kategorie nenalezena")
+        data=await manifest_data(folder)
+        hidden=set(data.get("hidden_categories",[]))
+        if visible:hidden.discard(name)
+        else:hidden.add(name)
+        await save_manifest(folder,items,hidden_categories=sorted(hidden))
+    return {"ok":True}
+
 @app.get("/api/documents")
 async def list_public():
-    _,items=await all_items()
-    return {"items":public_items(items)}
+    folder,items=await all_items()
+    data=await manifest_data(folder)
+    hidden=set(data.get("hidden_categories",[]))
+    return {"items":public_items([x for x in items if x.get("category","Ostatní") not in hidden])}
 @app.get("/api/admin/documents")
 async def list_admin(authorization:str|None=Header(default=None)):
     check_admin(authorization);_,items=await all_items()
@@ -158,7 +188,8 @@ async def list_admin(authorization:str|None=Header(default=None)):
 async def list_categories(authorization:str|None=Header(default=None)):
     check_admin(authorization)
     folder=await ensure_folder()
-    return {"categories":await categories(folder)}
+    data=await manifest_data(folder)
+    return {"categories":await categories(folder),"hidden_categories":data.get("hidden_categories",[])}
 
 @app.post("/api/admin/categories")
 async def create_category(request:Request,authorization:str|None=Header(default=None)):
