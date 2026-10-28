@@ -7,5 +7,9 @@ services:
     envVars:
       - key: DOCUMENTS_ADMIN_TOKEN
         sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false
       - key: DOCUMENTS_STORAGE_DIR
         value: /tmp/eduvize-documents
