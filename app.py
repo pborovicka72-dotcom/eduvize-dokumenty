@@ -3,6 +3,8 @@ import os, json, time, uuid, secrets, asyncio
 from pathlib import Path
 from urllib.parse import urlencode, quote
 import httpx
+import psycopg
+from cryptography.fernet import Fernet, InvalidToken
 from fastapi import FastAPI, UploadFile, File, Form, Header, HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,6 +24,42 @@ MAX_SIZE=20*1024*1024
 TYPES={".pdf":"application/pdf",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp"}
 pending={}
 tokens={}
+DATABASE_URL=os.getenv("DATABASE_URL","")
+TOKEN_ENCRYPTION_KEY=os.getenv("TOKEN_ENCRYPTION_KEY","")
+
+def token_cipher():
+    if not DATABASE_URL or not TOKEN_ENCRYPTION_KEY:
+        raise HTTPException(503,"Nastavte DATABASE_URL a TOKEN_ENCRYPTION_KEY v Render Environment")
+    try:return Fernet(TOKEN_ENCRYPTION_KEY.encode())
+    except (ValueError,TypeError):raise HTTPException(503,"Neplatný TOKEN_ENCRYPTION_KEY")
+
+def load_tokens():
+    cipher=token_cipher()
+    try:
+        with psycopg.connect(DATABASE_URL,connect_timeout=10) as conn:
+            with conn.cursor() as cur:
+                cur.execute("CREATE TABLE IF NOT EXISTS eduvize_oauth_tokens (key TEXT PRIMARY KEY, encrypted_value BYTEA NOT NULL)")
+                cur.execute("SELECT encrypted_value FROM eduvize_oauth_tokens WHERE key=%s",("microsoft",))
+                row=cur.fetchone()
+        return json.loads(cipher.decrypt(bytes(row[0]))) if row else None
+    except InvalidToken:raise HTTPException(503,"Nelze dešifrovat uložené připojení OneDrive")
+    except psycopg.Error:raise HTTPException(503,"Databáze pro připojení OneDrive není dostupná")
+
+def persist_tokens():
+    cipher=token_cipher()
+    encrypted=cipher.encrypt(json.dumps(tokens).encode())
+    try:
+        with psycopg.connect(DATABASE_URL,connect_timeout=10) as conn:
+            with conn.cursor() as cur:
+                cur.execute("CREATE TABLE IF NOT EXISTS eduvize_oauth_tokens (key TEXT PRIMARY KEY, encrypted_value BYTEA NOT NULL)")
+                cur.execute("INSERT INTO eduvize_oauth_tokens (key,encrypted_value) VALUES (%s,%s) ON CONFLICT (key) DO UPDATE SET encrypted_value=EXCLUDED.encrypted_value",("microsoft",encrypted))
+    except psycopg.Error:raise HTTPException(503,"Nepodařilo se bezpečně uložit připojení OneDrive")
+
+def restore_tokens():
+    if not tokens.get("refresh_token"):
+        stored=load_tokens()
+        if stored:tokens.update(stored)
+
 lock=asyncio.Lock()
 app=FastAPI(title="Eduvize – Dokumenty / OneDrive")
 app.add_middleware(CORSMiddleware,allow_origins=["https://pborovicka72-dotcom.github.io"],allow_methods=["GET","POST","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
@@ -33,6 +71,7 @@ def require_config():
     if not (CLIENT and SECRET and BASE):raise HTTPException(503,"Set MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET and PUBLIC_BASE_URL")
 def redirect_uri():return BASE+"/auth/microsoft/callback"
 def connected():
+    restore_tokens()
     if not tokens.get("refresh_token"):raise HTTPException(503,"OneDrive není připojen. Přihlaste se v administraci.")
 async def access_token():
     connected()
@@ -41,6 +80,7 @@ async def access_token():
         r=await client.post(AUTH+"/token",data={"client_id":CLIENT,"client_secret":SECRET,"grant_type":"refresh_token","refresh_token":tokens["refresh_token"],"scope":SCOPES})
     if r.status_code!=200:raise HTTPException(503,"OneDrive připojení vypršelo, přihlaste se znovu")
     t=r.json();tokens.update(access_token=t["access_token"],refresh_token=t.get("refresh_token",tokens["refresh_token"]),expires=time.time()+t.get("expires_in",3600))
+    persist_tokens()
     return tokens["access_token"]
 async def graph(method,path,**kwargs):
     token=await access_token()
@@ -122,7 +162,7 @@ async def all_items():
 def public_items(items):
     return sorted([{k:v for k,v in item.items() if k!="file_id"} for item in items if item.get("visible",True)],key=lambda x:(x.get("position",0),x["name"]))
 @app.get("/health")
-def health():return {"status":"ok","onedrive_configured":bool(CLIENT and SECRET and BASE),"onedrive_connected":bool(tokens.get("refresh_token")),"admin_configured":bool(ADMIN)}
+def health():return {"status":"ok","onedrive_configured":bool(CLIENT and SECRET and BASE),"token_storage_configured":bool(DATABASE_URL and TOKEN_ENCRYPTION_KEY),"onedrive_connected_in_memory":bool(tokens.get("refresh_token")),"admin_configured":bool(ADMIN)}
 @app.get("/")
 @app.get("/display")
 def display():return FileResponse(ROOT/"index.html")
@@ -144,10 +184,11 @@ async def auth_callback(code:str="",state:str="",error:str=""):
     t=r.json()
     tokens.update(access_token=t["access_token"],refresh_token=t.get("refresh_token"),expires=time.time()+t.get("expires_in",3600))
     if not tokens.get("refresh_token"):raise HTTPException(400,"Microsoft nevrátil obnovovací token")
+    persist_tokens()
     return RedirectResponse("/config?connected=1")
 @app.get("/api/admin/status")
 def status(authorization:str|None=Header(default=None)):
-    check_admin(authorization);return {"connected":bool(tokens.get("refresh_token"))}
+    check_admin(authorization);restore_tokens();return {"connected":bool(tokens.get("refresh_token"))}
 @app.get("/api/document-categories")
 async def public_categories():
     folder,items=await all_items()
