@@ -4,6 +4,18 @@ let categoryNames=[];
 async function loadCategories(){
 const result=await request('/api/admin/categories');
 categoryNames=result.categories;
+const old=document.getElementById('category-visibility');if(old)old.remove();
+const panel=document.createElement('section');panel.id='category-visibility';
+const title=document.createElement('h3');title.textContent='Viditelnost kategorií';panel.append(title);
+const hint=document.createElement('p');hint.textContent='Prázdné kategorie se skrývají automaticky. Zde lze skrýt i kategorii s dokumenty.';panel.append(hint);
+for(const name of categoryNames){
+const label=document.createElement('label');label.style.display='block';
+const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=!(result.hidden_categories||[]).includes(name);
+checkbox.onchange=async()=>{try{await request('/api/admin/categories/visibility',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,visible:checkbox.checked})});status('Viditelnost kategorie uložena.','success')}catch(error){checkbox.checked=!checkbox.checked;status(error.message)}};
+label.append(checkbox,document.createTextNode(' '+name));panel.append(label);
+}
+document.getElementById('items').before(panel);
+
 const select=$('category'),previous=select.value;
 select.replaceChildren();
 for(const name of categoryNames){const option=document.createElement('option');option.value=name;option.textContent=name;select.append(option)}
