@@ -17,6 +17,7 @@ SCOPES="offline_access User.Read Files.ReadWrite"
 AUTH=f"https://login.microsoftonline.com/{TENANT}/oauth2/v2.0"
 GRAPH="https://graph.microsoft.com/v1.0"
 FOLDER="Eduvize-Dokumenty"
+DEFAULT_CATEGORIES=["Oznámení","Akce a události","Výuka a vzdělávání","Úspěchy školy","Kroužky a aktivity","Jídelna","Dokumenty a formuláře","Ostatní"]
 MAX_SIZE=20*1024*1024
 TYPES={".pdf":"application/pdf",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp"}
 pending={}
@@ -77,9 +78,9 @@ async def read_manifest_item(item):
     data = response.json()
     if not isinstance(data,dict) or not isinstance(data.get("items"),list):
         raise HTTPException(502,"Neplatná struktura systémového manifestu")
-    return data["items"]
+    return data
 
-async def manifest(folder):
+async def manifest_data(folder):
     system = await child_named(folder, "_Eduvize-system")
     if system and "folder" not in system:
         raise HTTPException(409,"Systémový adresář koliduje se souborem")
@@ -91,11 +92,22 @@ async def manifest(folder):
     legacy = await child_named(folder,"manifest.json")
     if legacy:
         return await read_manifest_item(legacy)
-    return []
+    return {"items":[],"categories":[]}
 
-async def save_manifest(folder,items):
+async def manifest(folder):
+    return (await manifest_data(folder))["items"]
+
+async def categories(folder):
+    data=await manifest_data(folder)
+    extra=data.get("categories",[])
+    names=DEFAULT_CATEGORIES+list(extra)+[x.get("category","") for x in data["items"]]
+    return list(dict.fromkeys(x for x in names if isinstance(x,str) and x.strip()))
+
+async def save_manifest(folder,items,category_names=None):
     system = await system_folder(folder)
-    data = json.dumps({"items":items},ensure_ascii=False).encode()
+    if category_names is None:
+        category_names = (await manifest_data(folder)).get("categories",[])
+    data = json.dumps({"items":items,"categories":category_names},ensure_ascii=False).encode()
     await graph("PUT", f"/me/drive/items/{system}:/manifest.json:/content",
                 content=data,headers={"Content-Type":"application/json"})
     # Only remove legacy metadata after the replacement was saved successfully.
@@ -142,6 +154,28 @@ async def list_public():
 async def list_admin(authorization:str|None=Header(default=None)):
     check_admin(authorization);_,items=await all_items()
     return {"items":sorted(items,key=lambda x:(x.get("position",0),x["name"]))}
+@app.get("/api/admin/categories")
+async def list_categories(authorization:str|None=Header(default=None)):
+    check_admin(authorization)
+    folder=await ensure_folder()
+    return {"categories":await categories(folder)}
+
+@app.post("/api/admin/categories")
+async def create_category(request:Request,authorization:str|None=Header(default=None)):
+    check_admin(authorization)
+    payload=await request.json()
+    name=str(payload.get("name","")).strip()
+    if not name or len(name)>80 or any(ord(c)<32 for c in name):
+        raise HTTPException(422,"Název kategorie musí mít 1–80 znaků")
+    async with lock:
+        folder,items=await all_items()
+        existing=await categories(folder)
+        if any(x.casefold()==name.casefold() for x in existing):
+            raise HTTPException(409,"Kategorie již existuje")
+        current=(await manifest_data(folder)).get("categories",[])
+        await save_manifest(folder,items,current+[name])
+    return {"name":name}
+
 @app.post("/api/admin/documents")
 async def upload(file:UploadFile=File(...),category:str=Form("Ostatní"),authorization:str|None=Header(default=None)):
     check_admin(authorization)
@@ -153,6 +187,8 @@ async def upload(file:UploadFile=File(...),category:str=Form("Ostatní"),authori
     if not checks[ext]:raise HTTPException(415,"Neplatný formát souboru")
     async with lock:
         folder,items=await all_items()
+        allowed=await categories(folder)
+        if category not in allowed:raise HTTPException(422,"Vyberte kategorii ze seznamu")
         doc_id=uuid.uuid4().hex
         name=doc_id+ext
         r=await graph("PUT",f"/me/drive/items/{folder}:/{name}:/content",content=data,headers={"Content-Type":TYPES[ext]})
@@ -169,6 +205,7 @@ async def edit(doc_id:str,request:Request,authorization:str|None=Header(default=
         if not item:raise HTTPException(404,"Dokument nenalezen")
         for key in ("name","category"):
             if key in body:item[key]=str(body[key]).strip()[:180 if key=="name" else 80] or "Ostatní"
+        if "category" in body and item["category"] not in await categories(folder):raise HTTPException(422,"Neznámá kategorie")
         if "position" in body:item["position"]=int(body["position"])
         if "visible" in body:item["visible"]=bool(body["visible"])
         await save_manifest(folder,items)
