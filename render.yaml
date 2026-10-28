@@ -8,8 +8,4 @@ services:
       - key: DOCUMENTS_ADMIN_TOKEN
         sync: false
       - key: DOCUMENTS_STORAGE_DIR
-        value: /var/data/eduvize-documents
-    disk:
-      name: eduvize-documents-data
-      mountPath: /var/data
-      sizeGB: 1
+        value: /tmp/eduvize-documents
