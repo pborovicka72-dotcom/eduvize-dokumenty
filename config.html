@@ -9,9 +9,49 @@ select.replaceChildren();
 for(const name of categoryNames){const option=document.createElement('option');option.value=name;option.textContent=name;select.append(option)}
 select.value=categoryNames.includes(previous)?previous:'Ostatní';
 }
-async function load(){try{await loadCategories();const d=await request('/api/admin/documents');$('items').replaceChildren();if(!d.items.length){$('items').textContent='Zatím nebyly nahrány žádné dokumenty.';return}for(const item of d.items){const row=document.createElement('article');const name=document.createElement('input');name.value=item.name;name.title='Název';const category=document.createElement('select');category.title='Kategorie';
-for(const name of [...new Set([...categoryNames,item.category])]){const option=document.createElement('option');option.value=name;option.textContent=name;category.append(option)}
-category.value=item.category;const pos=document.createElement('input');pos.type='number';pos.value=item.position;pos.title='Pořadí';const visible=document.createElement('label');visible.textContent='Zobrazit ';const check=document.createElement('input');check.type='checkbox';check.checked=!!item.visible;visible.append(check);const save=document.createElement('button');save.textContent='Uložit';save.onclick=async()=>{try{await request('/api/admin/documents/'+item.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name.value,category:category.value,position:Number(pos.value),visible:check.checked})});status('Změny uloženy.','success');await load()}catch(e){status(e.message)}};const del=document.createElement('button');del.textContent='Smazat';del.className='danger';del.onclick=async()=>{if(!confirm('Opravdu trvale smazat '+item.name+'?'))return;try{await request('/api/admin/documents/'+item.id,{method:'DELETE'});await load()}catch(e){status(e.message)}};row.append(name,category,pos,visible,save,del);$('items').append(row)}}catch(e){status(e.message)}}
+async function saveOrder(){
+const ids=[...document.querySelectorAll('#items article[data-doc-id]')].map(el=>el.dataset.docId);
+await request('/api/admin/documents/reorder',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids})});
+status('Pořadí dokumentů uloženo.','success');
+}
+async function load(){
+try{
+await loadCategories();
+const data=await request('/api/admin/documents');
+const container=$('items');container.replaceChildren();
+if(!data.items.length){container.textContent='Zatím nebyly nahrány žádné dokumenty.';return}
+const groups=new Map();
+for(const item of data.items){if(!groups.has(item.category))groups.set(item.category,[]);groups.get(item.category).push(item)}
+let dragged=null;
+for(const [groupName,items] of groups){
+const section=document.createElement('section');
+const heading=document.createElement('h3');heading.textContent=groupName+' ('+items.length+')';
+section.append(heading);
+const list=document.createElement('div');list.className='document-group';
+for(const item of items){
+const row=document.createElement('article');row.dataset.docId=item.id;row.draggable=true;
+const grip=document.createElement('span');grip.textContent='☰';grip.title='Přetáhněte pro změnu pořadí';grip.style.cursor='grab';
+const name=document.createElement('input');name.value=item.name;name.title='Název';
+const category=document.createElement('select');category.title='Kategorie';
+for(const label of [...new Set([...categoryNames,item.category])]){const option=document.createElement('option');option.value=label;option.textContent=label;category.append(option)}
+category.value=item.category;
+const visible=document.createElement('label');visible.textContent='Zobrazit ';
+const check=document.createElement('input');check.type='checkbox';check.checked=!!item.visible;visible.append(check);
+const save=document.createElement('button');save.textContent='Uložit';
+save.onclick=async()=>{try{await request('/api/admin/documents/'+item.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name.value,category:category.value,visible:check.checked})});status('Změny uloženy.','success');await load()}catch(e){status(e.message)}};
+const del=document.createElement('button');del.textContent='Smazat';del.className='danger';
+del.onclick=async()=>{if(!confirm('Opravdu trvale smazat '+item.name+'?'))return;try{await request('/api/admin/documents/'+item.id,{method:'DELETE'});await load()}catch(e){status(e.message)}};
+row.append(grip,name,category,visible,save,del);
+row.addEventListener('dragstart',event=>{if(event.target!==row)return;dragged=row;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',item.id);row.style.opacity='.5'});
+row.addEventListener('dragend',()=>{row.style.opacity='';dragged=null});
+row.addEventListener('dragover',event=>{if(dragged&&dragged.parentElement===list){event.preventDefault();event.dataTransfer.dropEffect='move'}});
+row.addEventListener('drop',async event=>{if(!dragged||dragged===row||dragged.parentElement!==list)return;event.preventDefault();const rect=row.getBoundingClientRect();list.insertBefore(dragged,event.clientY<rect.top+rect.height/2?row:row.nextSibling);try{await saveOrder()}catch(error){status(error.message);await load()}});
+list.append(row);
+}
+section.append(list);container.append(section);
+}
+}catch(error){status(error.message)}
+}
 $('connect').onclick=load;
 $('add-category').onclick=async()=>{
 const name=$('new-category').value.trim();
