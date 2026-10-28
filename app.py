@@ -196,6 +196,22 @@ async def upload(file:UploadFile=File(...),category:str=Form("Ostatní"),authori
         items.append(entry)
         await save_manifest(folder,items)
     return {"id":doc_id,"name":entry["name"]}
+@app.post("/api/admin/documents/reorder")
+async def reorder_documents(request:Request,authorization:str|None=Header(default=None)):
+    check_admin(authorization)
+    body=await request.json()
+    order=body.get("ids")
+    if not isinstance(order,list) or not all(isinstance(x,str) for x in order) or len(order)!=len(set(order)):
+        raise HTTPException(422,"Neplatné pořadí dokumentů")
+    async with lock:
+        folder,items=await all_items()
+        if set(order)!={x["id"] for x in items}:
+            raise HTTPException(409,"Seznam dokumentů se změnil, načtěte jej znovu")
+        positions={doc_id:i for i,doc_id in enumerate(order)}
+        for item in items:item["position"]=positions[item["id"]]
+        await save_manifest(folder,items)
+    return {"ok":True}
+
 @app.patch("/api/admin/documents/{doc_id}")
 async def edit(doc_id:str,request:Request,authorization:str|None=Header(default=None)):
     check_admin(authorization);body=await request.json()
