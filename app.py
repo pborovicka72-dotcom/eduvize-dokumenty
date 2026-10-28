@@ -53,20 +53,55 @@ async def ensure_folder():
         if item["name"]==FOLDER and "folder" in item:return item["id"]
     r=await graph("POST","/me/drive/root/children",json={"name":FOLDER,"folder":{},"@microsoft.graph.conflictBehavior":"fail"})
     return r.json()["id"]
-async def manifest(folder):
-    r=await graph("GET",f"/me/drive/items/{folder}/children",params={"$select":"id,name","$top":200})
-    m=next((x for x in r.json()["value"] if x["name"]=="manifest.json"),None)
-    if not m:return []
-    response=await graph("GET",f"/me/drive/items/{m['id']}/content")
-    # /content redirects to a short-lived download URL
+async def child_named(parent, name):
+    # Read folder children; do not silently replace metadata if the lookup fails.
+    r = await graph("GET", f"/me/drive/items/{parent}/children", params={"$select":"id,name,folder", "$top":200})
+    return next((x for x in r.json().get("value", []) if x["name"] == name), None)
+
+async def system_folder(folder):
+    item = await child_named(folder, "_Eduvize-system")
+    if item:
+        if "folder" not in item:
+            raise HTTPException(409, "Systémový adresář koliduje se souborem")
+        return item["id"]
+    r = await graph("POST", f"/me/drive/items/{folder}/children",
+                    json={"name":"_Eduvize-system","folder":{},"@microsoft.graph.conflictBehavior":"fail"})
+    return r.json()["id"]
+
+async def read_manifest_item(item):
+    response = await graph("GET", f"/me/drive/items/{item['id']}/content")
     if response.status_code in (301,302,303,307,308):
         async with httpx.AsyncClient(timeout=30) as client:
-            response=await client.get(response.headers["location"])
+            response = await client.get(response.headers["location"])
             response.raise_for_status()
-    return response.json().get("items",[])
+    data = response.json()
+    if not isinstance(data,dict) or not isinstance(data.get("items"),list):
+        raise HTTPException(502,"Neplatná struktura systémového manifestu")
+    return data["items"]
+
+async def manifest(folder):
+    system = await child_named(folder, "_Eduvize-system")
+    if system and "folder" not in system:
+        raise HTTPException(409,"Systémový adresář koliduje se souborem")
+    if system:
+        current = await child_named(system["id"],"manifest.json")
+        if current:
+            return await read_manifest_item(current)
+    # Backwards compatibility: old installations stored manifest.json beside documents.
+    legacy = await child_named(folder,"manifest.json")
+    if legacy:
+        return await read_manifest_item(legacy)
+    return []
+
 async def save_manifest(folder,items):
-    data=json.dumps({"items":items},ensure_ascii=False).encode()
-    await graph("PUT",f"/me/drive/items/{folder}:/manifest.json:/content",content=data,headers={"Content-Type":"application/json"})
+    system = await system_folder(folder)
+    data = json.dumps({"items":items},ensure_ascii=False).encode()
+    await graph("PUT", f"/me/drive/items/{system}:/manifest.json:/content",
+                content=data,headers={"Content-Type":"application/json"})
+    # Only remove legacy metadata after the replacement was saved successfully.
+    legacy = await child_named(folder,"manifest.json")
+    if legacy:
+        await graph("DELETE",f"/me/drive/items/{legacy['id']}")
 async def all_items():
     folder=await ensure_folder()
     return folder,await manifest(folder)
