@@ -1,22 +1,10 @@
-# Eduvize – Dokumenty
+# Eduvize – Dokumenty (OneDrive testovací verze)
 
-Samostatný modul školní informační nástěnky. Bez Google Drive a OAuth.
+Dokumenty PDF/JPG/PNG/WebP se nahrávají z administrace přímo na OneDrive pomocí Microsoft Graph. Ve složce `Eduvize-Dokumenty` se ukládají soubory a `manifest.json` s kategoriemi, pořadím a viditelností.
 
-## Funkce
-- Administrace: `/config` – nahrávání PDF/JPG/PNG/WebP (do 20 MB), kategorie, pořadí, viditelnost a mazání.
-- Kiosk: `/display` – veřejně viditelné dokumenty, automatické střídání, parametr `seconds` (3–3600), volitelně `layout=signage`.
-- API: `/api/documents`, `/api/admin/documents`, `/api/documents/{id}/file`.
-- Administrační API používá hlavičku `Authorization: Bearer <DOCUMENTS_ADMIN_TOKEN>`.
-- Soubory i databáze SQLite jsou uloženy v `DOCUMENTS_STORAGE_DIR`.
+## Render
+Nastavte proměnné `MICROSOFT_CLIENT_ID`, `MICROSOFT_TENANT_ID`, `MICROSOFT_CLIENT_SECRET`, `PUBLIC_BASE_URL` (například `https://eduvize-dokumenty-api.onrender.com`) a silný `DOCUMENTS_ADMIN_TOKEN`. Přesměrování v Microsoft Entra musí přesně odpovídat `PUBLIC_BASE_URL/auth/microsoft/callback`. Instalujte závislosti přes `pip install -r requirements.txt`.
 
-## Nasazení na Render
-Konfigurace `render.yaml` vyžaduje **persistent disk** (placená funkce Renderu). Bez disku se soubory po restartu či novém nasazení ztratí. Alternativou je jiné persistentní úložiště nebo hosting. Než aplikaci předáme školám, musí být trvalé úložiště skutečně aktivní.
-Nastavte silný tajný `DOCUMENTS_ADMIN_TOKEN` v proměnných prostředí služby. Bez něj administrace odmítne zápis. Administrační klíč nezadávejte do veřejných odkazů.
-Pro lokální vývoj: `pip install -r requirements.txt`, `DOCUMENTS_STORAGE_DIR=./data DOCUMENTS_ADMIN_TOKEN=... uvicorn app:app --reload`.
+Otevřete `/config`, vložte administrační klíč, klikněte **Připojit OneDrive**, autorizujte účet a po návratu znovu zadejte klíč. Poté lze nahrávat dokumenty. Kiosk je na `/display`, podporuje `?seconds=15&layout=signage`.
 
-## Bezpečnost a omezení
-- Publikované soubory jsou veřejně dostupné; nenahrávejte osobní údaje ani interní dokumenty.
-- Pouze PDF a obrázky; Word a PowerPoint nejsou v této verzi podporovány.
-- PDF se vykreslují pomocí vestavěného prohlížeče PDF; chování může záviset na zařízení kiosku.
-- Základní administrace používá jeden společný tajný klíč. Pro více škol je nutné oddělení tenantů, uživatelů a úložišť.
-- Vzhledem k tomu, že backend běží na jiném originu než GitHub Pages, používejte administraci přímo na URL backendu `/config`.
+**Omezení testovací verze:** Obnovovací token je pouze v paměti procesu. Restart Renderu vyžaduje nové připojení OneDrivu; do té doby kiosk nemůže číst soubory. Pro ostrý provoz je nutné zabezpečené trvalé uložení tokenu, nezávislé na procesu, víceuživatelská správa a ověření souhlasu správce tenanta. Zobrazené dokumenty jsou veřejné. Nahrávejte pouze dokumenty určené ke zveřejnění. Pro více instancí služby současně tento prototyp není vhodný.
