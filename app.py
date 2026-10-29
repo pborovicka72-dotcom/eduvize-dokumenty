@@ -168,6 +168,8 @@ def health():return {"status":"ok","onedrive_configured":bool(CLIENT and SECRET 
 def display():return FileResponse(ROOT/"index.html")
 @app.get("/config")
 def config():return FileResponse(ROOT/"config.html")
+@app.get("/segments.js")
+def segments_script():return FileResponse(ROOT/"segments.js",media_type="application/javascript")
 @app.post("/api/admin/microsoft/start")
 def auth_start(authorization:str|None=Header(default=None)):
     check_admin(authorization);require_config()
