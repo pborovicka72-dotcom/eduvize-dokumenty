@@ -142,7 +142,7 @@ $('save-settings').onclick=()=>{
  catch(e){status('Nastavení se nepodařilo uložit: '+e.message)}
 };
 $('open').onclick=()=>window.open(link(),'_blank');$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(link());status('Odkaz zkopírován.','success')}catch{status(link())}};
-</script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=3" onerror="var fallback=document.createElement('script');fallback.src='/segments.js?v=20261029-4';document.head.appendChild(fallback)"></script><script id="eduvize-central-theme-loader">
+</script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=3"></script><script id="eduvize-central-theme-loader">
 (function(){
  const endpoint='/api/design-system/themes';
  const badge=document.createElement('div');badge.id='ev-theme-status';badge.setAttribute('role','status');badge.style.cssText='position:fixed;right:12px;bottom:12px;z-index:9999;padding:7px 11px;border-radius:10px;background:#fff;color:#234;border:1px solid #ccd;box-shadow:0 3px 12px #0002;font:600 12px system-ui;max-width:300px';
