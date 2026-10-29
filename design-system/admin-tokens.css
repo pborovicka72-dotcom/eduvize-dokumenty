@@ -1,0 +1,18 @@
+:root {
+  --edu-admin-bg: #eaf2f8;
+  --edu-admin-ink: #142c46;
+  --edu-admin-muted: #638098;
+  --edu-admin-surface: #ffffff;
+  --edu-admin-primary: #087c91;
+  --edu-admin-primary-text: #ffffff;
+  --edu-admin-secondary: #e7f0f4;
+  --edu-admin-secondary-text: #35536a;
+  --edu-admin-accent: #00a995;
+  --edu-admin-border: #dce6ed;
+  --edu-admin-input-border: #bed8e3;
+  --edu-admin-control-height: 40px;
+  --edu-admin-control-radius: 10px;
+  --edu-admin-card-radius: 20px;
+  --edu-admin-gap: 16px;
+  --edu-admin-font: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
