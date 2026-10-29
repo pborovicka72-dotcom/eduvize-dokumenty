@@ -291,8 +291,8 @@ async def edit(doc_id:str,request:Request,authorization:str|None=Header(default=
         folder,items=await all_items()
         item=next((x for x in items if x["id"]==doc_id),None)
         if not item:raise HTTPException(404,"Dokument nenalezen")
-        for key in ("name","category"):
-            if key in body:item[key]=str(body[key]).strip()[:180 if key=="name" else 80] or "Ostatní"
+        for key in ("name","category","title"):
+            if key in body:item[key]=str(body[key]).strip()[:180 if key in ("name","title") else 80] or ("" if key=="title" else "Ostatní")
         if "category" in body and item["category"] not in await categories(folder):raise HTTPException(422,"Neznámá kategorie")
         if "position" in body:item["position"]=int(body["position"])
         if "visible" in body:item["visible"]=bool(body["visible"])
