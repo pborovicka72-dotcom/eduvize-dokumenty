@@ -145,11 +145,6 @@ $('open').onclick=()=>window.open(link(),'_blank');$('copy').onclick=async()=>{t
 </script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=3"></script><script id="eduvize-central-theme-loader">
 (function(){
  const endpoint='/api/design-system/themes';
- const badge=document.createElement('div');badge.id='ev-theme-status';badge.setAttribute('role','status');badge.style.cssText='position:fixed;right:12px;bottom:12px;z-index:9999;padding:7px 11px;border-radius:10px;background:#fff;color:#234;border:1px solid #ccd;box-shadow:0 3px 12px #0002;font:600 12px system-ui;max-width:300px';
- document.body.append(badge);
- function status(message,ok){badge.textContent=message;badge.style.borderColor=ok?'#30a482':'#d98a65'}
- function colorOf(selector,property){const el=document.querySelector(selector);return el?getComputedStyle(el).getPropertyValue(property).trim():'nenalezeno'}
- function rgb(hex){const x=hex.replace('#','');return 'rgb('+[0,2,4].map(i=>parseInt(x.slice(i,i+2),16)).join(', ')+')'}
  function validColor(s){return typeof s==='string'&&/^#[0-9a-fA-F]{6}$/.test(s)}
  function apply(t){
   if(!t||!t.colors||!t.controls||!t.cards)throw Error('Neúplná konfigurace stylu');
@@ -158,11 +153,8 @@ $('open').onclick=()=>window.open(link(),'_blank');$('copy').onclick=async()=>{t
   for(const [key,cssVar] of Object.entries(mapping)){if(!validColor(colors[key]))throw Error('Neplatná barva: '+key);root.style.setProperty(cssVar,colors[key])}
   for(const [v,n] of [['--ev-control-height',t.controls.heightPx],['--ev-control-radius',t.controls.radiusPx],['--ev-card-radius',t.cards.radiusPx]])if(Number.isInteger(n)&&n>=0&&n<=80)root.style.setProperty(v,n+'px');
   document.body.classList.add('ev-theme-ready');
-  const actual=colorOf('body','background-color');const card=colorOf('.wrap .card','background-color');const primary=colorOf('.wrap button:not(.secondary):not(.danger)','background-color');
-  badge.title='Očekávané pozadí: '+colors.background+' | Skutečné: '+actual+'\nOčekávaná karta: '+colors.surface+' | Skutečná: '+card+'\nOčekávané tlačítko: '+colors.primary+' | Skutečné: '+primary;
-  badge.dataset.themeMatch=actual===rgb(colors.background)&&card===rgb(colors.surface)?'yes':'no';
  }
- async function load(){try{const response=await fetch(endpoint,{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);const themes=await response.json();if(!Array.isArray(themes))throw Error('Neplatný seznam stylů');const selected=themes.find(t=>t.active)||themes.find(t=>t.id==='standard');if(selected){apply(selected.config);status('Aktivní styl: '+selected.name+(badge.dataset.themeMatch==='yes'?' ✓ barvy odpovídají':' ⚠ vykreslené barvy se liší'),badge.dataset.themeMatch==='yes')}else status('Žádný aktivní styl nebyl nalezen',false)}catch(e){status('Styl se nenačetl: '+e.message,false);console.warn('Eduvize: centrální styl není dostupný, ponechán výchozí vzhled.',e)}}
+ async function load(){try{const response=await fetch(endpoint,{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);const themes=await response.json();if(!Array.isArray(themes))throw Error('Neplatný seznam stylů');const selected=themes.find(t=>t.active)||themes.find(t=>t.id==='standard');if(selected)apply(selected.config)
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
  window.setInterval(()=>{if(!document.hidden)load()},60000);
