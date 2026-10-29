@@ -22,7 +22,17 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 #upload>.row:first-child{grid-template-columns:minmax(0,1fr) minmax(200px,280px)}
 #upload>.row:nth-child(2){grid-template-columns:minmax(0,520px) auto;justify-content:start}
 #upload>.row:nth-child(2)>button{justify-self:start;margin-bottom:10px}
-#items article{display:grid;grid-template-columns:35px minmax(130px,1.3fr) minmax(170px,1.6fr) minmax(120px,1fr) 85px auto auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--ev-border)}
+#items article{position:relative;display:grid;grid-template-columns:46px minmax(170px,1.2fr) minmax(190px,1.5fr) minmax(140px,1fr) 86px auto auto;gap:12px;align-items:center;padding:14px 10px;border-bottom:1px solid var(--ev-border);border-radius:var(--ev-control-radius);transition:background .12s}
+#items .document-group{display:grid;gap:4px}
+#items article:hover{background:var(--ev-secondary)}
+#items .drag-handle{width:42px;height:44px;display:grid;place-items:center;font-size:28px;font-weight:800;line-height:1;color:var(--ev-primary);background:var(--ev-secondary);border:1px solid var(--ev-border);border-radius:var(--ev-control-radius);cursor:grab;user-select:none;touch-action:none}
+#items .drag-handle:active{cursor:grabbing}
+#items article.dragging{opacity:.42}
+#items article.drop-before:before,#items article.drop-after:after{content:"";position:absolute;left:4px;right:4px;height:5px;background:var(--ev-accent);border-radius:4px;z-index:2;pointer-events:none}
+#items article.drop-before:before{top:-5px}#items article.drop-after:after{bottom:-5px}
+#items article .document-visible{margin:0;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px}
+#items article .document-visible input{width:18px;height:18px}
+#items article>button{white-space:nowrap}
 #items article input:not([type=checkbox]){width:100%;min-width:0}
 #status{min-height:24px;color:var(--ev-accent);font-weight:650}
 #auth-status{font-weight:700}#auth-status.success{color:#16805d}#auth-status.error{color:#ae3951}
@@ -89,22 +99,24 @@ section.append(heading);
 const list=document.createElement('div');list.className='document-group';
 for(const item of items){
 const row=document.createElement('article');row.dataset.docId=item.id;row.draggable=true;
-const grip=document.createElement('span');grip.textContent='☰';grip.title='Přetáhněte pro změnu pořadí';grip.style.cursor='grab';
+const grip=document.createElement('span');grip.className='drag-handle';grip.textContent='☰';grip.title='Přetáhněte pro změnu pořadí';grip.setAttribute('aria-label','Přesunout dokument');
 const name=document.createElement('input');name.value=item.name;name.title='Název';
 const title=document.createElement('input');title.value=item.title||'';title.placeholder='Titulek pro zobrazení (nepovinné)';title.title='Titulek v kiosku – původní název souboru se nemění';const category=document.createElement('select');category.title='Kategorie';
 for(const label of [...new Set([...categoryNames,item.category])]){const option=document.createElement('option');option.value=label;option.textContent=label;category.append(option)}
 category.value=item.category;
-const visible=document.createElement('label');visible.textContent='Zobrazit ';
+const visible=document.createElement('label');visible.className='document-visible';visible.textContent='Zobrazit ';
 const check=document.createElement('input');check.type='checkbox';check.checked=!!item.visible;visible.append(check);
 const save=document.createElement('button');save.textContent='Uložit';
 save.onclick=async()=>{try{await request('/api/admin/documents/'+item.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name.value,title:title.value,category:category.value,visible:check.checked})});status('Změny uloženy.','success');await load()}catch(e){status(e.message)}};
 const del=document.createElement('button');del.textContent='Smazat';del.className='danger';
 del.onclick=async()=>{if(!confirm('Opravdu trvale smazat '+item.name+'?'))return;try{await request('/api/admin/documents/'+item.id,{method:'DELETE'});await load()}catch(e){status(e.message)}};
 row.append(grip,name,title,category,visible,save,del);
-row.addEventListener('dragstart',event=>{if(event.target!==row)return;dragged=row;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',item.id);row.style.opacity='.5'});
-row.addEventListener('dragend',()=>{row.style.opacity='';dragged=null});
-row.addEventListener('dragover',event=>{if(dragged&&dragged.parentElement===list){event.preventDefault();event.dataTransfer.dropEffect='move'}});
-row.addEventListener('drop',async event=>{if(!dragged||dragged===row||dragged.parentElement!==list)return;event.preventDefault();const rect=row.getBoundingClientRect();list.insertBefore(dragged,event.clientY<rect.top+rect.height/2?row:row.nextSibling);try{await saveOrder()}catch(error){status(error.message);await load()}});
+row.addEventListener('dragstart',event=>{dragged=row;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',String(item.id));row.classList.add('dragging')});
+const clearDrop=()=>list.querySelectorAll('.drop-before,.drop-after').forEach(el=>el.classList.remove('drop-before','drop-after'));
+row.addEventListener('dragend',()=>{row.classList.remove('dragging');clearDrop();dragged=null});
+row.addEventListener('dragover',event=>{if(!dragged||dragged===row||dragged.parentElement!==list)return;event.preventDefault();event.dataTransfer.dropEffect='move';clearDrop();row.classList.add(event.clientY<row.getBoundingClientRect().top+row.offsetHeight/2?'drop-before':'drop-after')});
+row.addEventListener('dragleave',event=>{if(!row.contains(event.relatedTarget)){row.classList.remove('drop-before','drop-after')}});
+row.addEventListener('drop',async event=>{if(!dragged||dragged===row||dragged.parentElement!==list)return;event.preventDefault();const before=row.classList.contains('drop-before');clearDrop();list.insertBefore(dragged,before?row:row.nextSibling);try{await saveOrder()}catch(error){status(error.message);await load()}});
 list.append(row);
 }
 section.append(list);container.append(section);
