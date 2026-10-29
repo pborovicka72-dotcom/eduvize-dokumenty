@@ -204,7 +204,7 @@ def list_admin_themes(authorization:str|None=Header(default=None)):
     with theme_db() as conn:
         rows=conn.execute("SELECT id,name,config,active FROM eduvize_admin_themes ORDER BY name").fetchall()
     custom=[{"id":row[0],"name":row[1],"config":row[2],"active":row[3]} for row in rows]
-    return [{"id":"standard","name":"EDUVIZE Standard","config":theme_default(),"active":not any(t["active"] for t in custom),"locked":True}]+[{**t,"locked":False} for t in custom]
+    return [{"id":"standard","name":"EDUVIZE Standard","config":next((t["config"] for t in custom if t["id"]=="standard"),theme_default()),"active":not any(t["active"] for t in custom if t["id"]!="standard"),"locked":True}]+[{**t,"locked":False} for t in custom if t["id"]!="standard"]
 
 @app.post("/api/design-system/themes")
 async def create_admin_theme(request:Request,authorization:str|None=Header(default=None)):
@@ -221,12 +221,14 @@ async def create_admin_theme(request:Request,authorization:str|None=Header(defau
 @app.put("/api/design-system/themes/{theme_id}")
 async def update_admin_theme(theme_id:str,request:Request,authorization:str|None=Header(default=None)):
     check_admin(authorization)
-    if theme_id=="standard":raise HTTPException(403,"Výchozí styl nelze změnit")
     payload=await request.json()
     name=str(payload.get("name","")).strip()
     if not 1<=len(name)<=80:raise HTTPException(422,"Název musí mít 1–80 znaků")
     config=theme_validate(payload.get("config"))
     with theme_db() as conn:
+        if theme_id=="standard":
+            conn.execute("INSERT INTO eduvize_admin_themes (id,name,config,active) VALUES (%s,%s,%s::jsonb,FALSE) ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name,config=EXCLUDED.config",("standard","EDUVIZE Standard",json.dumps(config)))
+            return {"id":"standard","name":"EDUVIZE Standard"}
         row=conn.execute("UPDATE eduvize_admin_themes SET name=%s,config=%s::jsonb WHERE id=%s RETURNING id",(name,json.dumps(config),theme_id)).fetchone()
     if not row:raise HTTPException(404,"Styl nenalezen")
     return {"id":theme_id,"name":name}
