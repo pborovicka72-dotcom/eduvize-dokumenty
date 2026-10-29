@@ -1,130 +1,50 @@
-<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize – Správa dokumentů</title><style>:root{font-family:system-ui,Arial;color:#19364d;background:#eff6fa}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1120px;margin:auto;padding:24px}h1{font-size:36px;margin:8px 0 25px}.eyebrow{font-size:13px;font-weight:800;color:#009f9c;letter-spacing:.13em}.card{background:#fff;border:1px solid #d6e5ed;border-radius:17px;padding:22px;margin:16px 0;box-shadow:0 8px 22px #16435b0b}label{display:block;font-weight:650;margin:10px 0}input,select{font:inherit;padding:11px;border:1px solid #bcd3df;border-radius:9px;max-width:100%}input[type=text],input[type=password]{width:100%}button,.btn{font:700 14px system-ui;border:0;border-radius:9px;padding:11px 15px;background:#087ca7;color:white;cursor:pointer;text-decoration:none;display:inline-block}.secondary{background:#e5f0f5;color:#17526b}.danger{background:#ae3951}.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.row>*{flex:1}#items article{display:grid;grid-template-columns:35px minmax(120px,1.3fr) minmax(170px,1.6fr) minmax(110px,1fr) 85px auto auto;gap:9px;align-items:center;padding:12px 0;border-bottom:1px solid #e4edf3}#items article input{width:100%}small,.muted{color:#668093}#status{min-height:24px;color:#087c91;font-weight:650}#auth-status{font-weight:700}#auth-status.success{color:#16805d}#auth-status.error{color:#ae3951}@media(max-width:850px){#items article{grid-template-columns:1fr 1fr}} </style><style id="eduvize-shared-admin-v1">
-:root{--edu-ink:#142c46;--edu-muted:#668093;--edu-blue:#0876bb;--edu-teal:#009f9c;--edu-border:#d1e6e5;--edu-surface:#fff;--edu-radius:20px;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important;color:var(--edu-ink)!important;font-synthesis:none}
-body{min-height:100vh!important;background:radial-gradient(ellipse at 90% 0%,#d7f6ef 0%,transparent 34%),linear-gradient(135deg,#eef5fb,#e7f2f6)!important}
-.wrap{width:min(100%,1800px)!important;max-width:1800px!important;margin:auto!important;padding:clamp(14px,2.2vw,36px)!important}
-.eyebrow{font-size:clamp(12px,1vw,16px)!important;letter-spacing:.16em!important;font-weight:800!important;color:#078b9e!important;text-transform:uppercase}
-h1{font-size:clamp(25px,2.4vw,40px)!important;letter-spacing:-.04em!important;line-height:1.12!important;margin:3px 0 12px!important}
-h2{font-size:clamp(19px,1.6vw,26px)!important;letter-spacing:-.025em!important;color:#153d5b!important;margin:0 0 17px!important}
-.muted,small{color:var(--edu-muted)!important;line-height:1.55}
-.card{background:var(--edu-surface)!important;border:1px solid #d7e7ed!important;border-radius:clamp(16px,1.6vw,24px)!important;padding:clamp(18px,2vw,32px)!important;margin:clamp(14px,1.6vw,24px) 0!important;box-shadow:0 10px 28px #16435b0b!important}
-label{font-weight:700!important;color:#25475c!important;line-height:1.5}
-input:not([type=checkbox]):not([type=file]),select{min-height:44px!important;background:#f9fcfd!important;border:1px solid #bdd5df!important;border-radius:11px!important;color:#183b55!important;transition:border-color .15s,box-shadow .15s}
-input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid #00a995!important;outline-offset:2px!important}
-input[type=file]{border:1px dashed #a7c8d4!important;border-radius:11px!important;background:#f7fbfc!important;padding:12px!important;width:100%}
-input[type=checkbox]{accent-color:#009f9c!important}
-button,.btn{min-height:43px!important;border-radius:11px!important;background:linear-gradient(125deg,#0876bb,#078a9f)!important;color:white!important;font-weight:750!important;padding:11px 18px!important;box-shadow:0 4px 12px #0876bb16!important}
-button:hover,.btn:hover{filter:brightness(1.07)}
-button.secondary,.btn.secondary{background:#e6f3f4!important;color:#086d78!important;border:1px solid #bfe4e3!important;box-shadow:none!important}
-button.danger,.btn.danger{background:#ae3951!important;color:#fff!important}
-#status,#auth-status{line-height:1.5}
-#items article{border-bottom:1px solid #e4edf3!important;gap:12px!important}
-@media(max-width:700px){.wrap{padding:14px!important}.row{flex-direction:column!important;align-items:stretch!important}.row>*{width:100%!important}#items article{grid-template-columns:1fr 1fr!important}}
-</style><style id="eduvize-admin-header-v1">.edu-admin-header{display:flex;align-items:center;gap:15px;margin:4px 0 18px}.edu-admin-brandmark{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#0876bb,#00b79b);box-shadow:0 8px 20px #008fa62e;color:#fff}.edu-admin-brandmark svg{width:29px;height:29px}</style><style id="eduvize-admin-form-alignment-v2">
-/* Standardized compact admin controls: consistent heights, sensible widths and alignment. */
-:root{--edu-control-height:44px;--edu-control-radius:10px;--edu-control-max:520px;--edu-action-max:220px}
-.wrap .row{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:end!important;gap:clamp(12px,1.5vw,22px)!important}
-.wrap .row>*{min-width:0!important;width:100%!important;flex:none!important}
-.wrap label{display:flex!important;flex-direction:column!important;gap:7px!important;margin:10px 0!important;min-width:0!important}
-.wrap label:has(>input[type=checkbox]){display:flex!important;flex-direction:row!important;align-items:center!important}
-.wrap input:not([type=checkbox]),.wrap select{height:var(--edu-control-height)!important;min-height:var(--edu-control-height)!important;max-height:var(--edu-control-height)!important;line-height:normal!important;font-size:15px!important;padding:9px 12px!important;width:100%!important;max-width:var(--edu-control-max)!important;box-sizing:border-box!important}
-.wrap input[type=file]{padding:7px 10px!important;line-height:28px!important;overflow:hidden!important}
-.wrap input[type=file]::file-selector-button{border:0;border-radius:7px;background:#e5f0f5;color:#17526b;padding:5px 11px;margin-right:12px;font:650 14px system-ui;cursor:pointer}
-.wrap select{appearance:auto!important}
-.wrap button,.wrap .btn{min-height:var(--edu-control-height)!important;height:var(--edu-control-height)!important;max-height:var(--edu-control-height)!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;vertical-align:middle!important;white-space:nowrap!important;padding:8px 17px!important;font-size:14px!important;line-height:1.2!important;max-width:var(--edu-action-max)!important}
-.wrap .row>button{width:fit-content!important;min-width:160px!important;justify-self:start!important;margin-bottom:10px!important}
-#upload>.row:first-child{grid-template-columns:minmax(0,1fr) minmax(200px,280px)!important}
-#upload>.row:first-child label:first-child input{max-width:100%!important}
-#upload>.row:first-child label:last-child select{max-width:100%!important}
-#upload>.row:nth-child(2){grid-template-columns:minmax(0,520px) auto!important;justify-content:start!important}
-#upload>.row:nth-child(2) label{max-width:520px!important}
-#items article{grid-template-columns:35px minmax(130px,1.3fr) minmax(170px,1.6fr) minmax(120px,1fr) 85px auto auto!important}
-#items article input:not([type=checkbox]){width:100%!important;max-width:100%!important}
-#items article button{min-width:80px!important}
-#token{max-width:520px!important}
-#connect,#microsoft{min-width:175px!important}
-@media(max-width:850px){#items article{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:650px){#upload>.row:first-child,#upload>.row:nth-child(2),.wrap .row{grid-template-columns:minmax(0,1fr)!important}#upload>.row:nth-child(2)>button{margin:0!important}.wrap input:not([type=checkbox]),.wrap select{max-width:100%!important}#items article{grid-template-columns:1fr!important}}
-</style><style id="eduvize-admin-output-standard-v3">
-/* Shared admin standard based on Holidays: compact controls, output selector above actions. */
-:root{--edu-control-height:40px}
-.wrap input:not([type=checkbox]),.wrap select{height:40px!important;min-height:40px!important;max-height:40px!important;padding:7px 11px!important}
-.wrap button,.wrap .btn{height:40px!important;min-height:40px!important;max-height:40px!important}
-.edu-output-type{display:flex!important;flex-direction:column!important;align-items:flex-start!important;max-width:340px!important;gap:7px!important;margin:18px 0 12px!important}
-.edu-output-type select{width:100%!important;max-width:340px!important}
-.edu-output-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:15px 0!important}
-.edu-output-actions button{width:auto!important;max-width:none!important}
-#ev-segments{margin:12px 0 18px!important;grid-column:1/-1!important;max-width:none!important}
-#ev-segments button{height:auto!important;max-height:none!important;min-height:0!important;max-width:none!important;white-space:normal!important;display:block!important;padding:10px!important;box-shadow:none!important}#ev-tabs button,#ev-blocks button{display:inline-block!important;width:auto!important}#ev-cards button{text-align:left!important}#ev-segments .ev-box{display:grid!important}
-</style><style id="eduvize-exact-holidays-segment-skin">
-/* Scoped overrides: preserve the identical component styling from eduvize-svatky/segments.js.
-   Documents' generic !important button rules must never bleed into the Newline picker. */
-#ev-segments{background:#f5f9fc!important;border:1px solid #dce6ed!important;border-radius:16px!important;color:#172b4d!important;padding:18px!important;box-shadow:none!important}
-#ev-segments button{font:inherit!important;cursor:pointer!important;filter:none!important;text-decoration:none!important;box-shadow:none!important;letter-spacing:normal!important}
-#ev-segments #ev-tabs button,#ev-segments #ev-blocks button{display:inline-block!important;width:auto!important;height:auto!important;min-height:0!important;max-height:none!important;max-width:none!important;padding:10px!important;border:2px solid #d5e4ed!important;border-radius:10px!important;background:#fff!important;color:#172b4d!important;font-weight:400!important;text-align:center!important;line-height:normal!important}
-#ev-segments #ev-tabs button.active,#ev-segments #ev-blocks button.active{border-color:#00a995!important;background:#e4faf4!important;color:#172b4d!important}
-#ev-segments #ev-blocks button.active{font-weight:700!important}
-#ev-segments #ev-cards button{display:block!important;width:100%!important;max-width:none!important;height:auto!important;max-height:none!important;min-height:0!important;padding:10px!important;border:2px solid #d5e4ed!important;border-radius:12px!important;background:#fff!important;color:#172b4d!important;font-weight:700!important;text-align:left!important;line-height:normal!important}
-#ev-segments #ev-cards button.active{border-color:#00a995!important;background:#e4faf4!important}
-#ev-segments #ev-cards button:hover:not(.active),#ev-segments #ev-tabs button:hover:not(.active),#ev-segments #ev-blocks button:hover:not(.active){filter:none!important;background:#f7fcfd!important}
-#ev-segments #ev-blocks button:disabled{opacity:.4!important;cursor:not-allowed!important}
-#ev-segments .ev-mini{background:#eaf2f8!important;border:1px solid #a9c4d3!important}
-#ev-segments .ev-box{display:grid!important;place-items:center!important;background:linear-gradient(135deg,#0c416e,#009f9c)!important;color:#fff!important;border:1px solid #fff!important;font-weight:800!important}
-#ev-segments .ev-box.active{outline:3px solid #ffce45!important;outline-offset:-4px!important}
-#ev-segments #ev-preview-wrap{background:#eaf2f8!important;border-radius:14px!important}
-#ev-segments #ev-preview{background:#fff!important}
-</style><style id="eduvize-holidays-buttons-v1">
-/* Exact button rules from eduvize-svatky/config.html, scoped to Documents admin actions. */
-.wrap button:not(#ev-segments button),.wrap .btn:not(#ev-segments .btn){display:inline-flex!important;justify-content:center!important;align-items:center!important;gap:8px!important;padding:10px 14px!important;border:0!important;border-radius:10px!important;background:#087c91!important;color:#fff!important;cursor:pointer!important;font-weight:700!important;font-size:13px!important;text-decoration:none!important;box-shadow:none!important;filter:none}
-.wrap button.secondary:not(#ev-segments button),.wrap .btn.secondary:not(#ev-segments .btn){background:#e7f0f4!important;color:#35536a!important}
-.wrap button.danger:not(#ev-segments button){background:#ae3951!important;color:#fff!important}
-.edu-output-actions{gap:10px!important}
-</style><style id="eduvize-admin-section-order">
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize – Správa dokumentů</title><style id="eduvize-admin-clean">
+:root{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;--ev-bg:#eaf2f8;--ev-text:#142c46;--ev-muted:#638098;--ev-surface:#fff;--ev-primary:#087c91;--ev-primary-text:#fff;--ev-secondary:#e7f0f4;--ev-secondary-text:#35536a;--ev-accent:#00a995;--ev-border:#dce6ed;--ev-control-height:40px;--ev-control-radius:10px;--ev-card-radius:20px;color:var(--ev-text);background:var(--ev-bg)}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--ev-bg);color:var(--ev-text)}
+.wrap{width:min(100%,1800px);margin:auto;padding:clamp(14px,2.2vw,36px)}
+.eyebrow{font-size:13px;font-weight:800;letter-spacing:.13em;color:var(--ev-accent);text-transform:uppercase}
+h1{font-size:clamp(25px,2.4vw,40px);line-height:1.12;margin:3px 0 12px}h2{font-size:clamp(19px,1.6vw,26px);margin:0 0 17px}
+.muted,small{color:var(--ev-muted);line-height:1.5}
+.card{background:var(--ev-surface);border:1px solid var(--ev-border);border-radius:var(--ev-card-radius);padding:clamp(18px,2vw,32px);margin:clamp(14px,1.6vw,24px) 0;box-shadow:0 10px 28px #16435b0b}
+label{display:flex;flex-direction:column;gap:7px;margin:10px 0;font-weight:700;min-width:0}
+input,select{font:inherit;max-width:100%}
+input:not([type=checkbox]),select{height:var(--ev-control-height);min-height:var(--ev-control-height);padding:7px 11px;border:1px solid var(--ev-border);border-radius:var(--ev-control-radius);background:var(--ev-surface);color:var(--ev-text)}
+input[type=text],input[type=password]{width:100%;max-width:520px}
+input[type=file]{width:100%;padding:5px 10px;border-style:dashed}
+input[type=file]::file-selector-button{border:0;border-radius:7px;padding:5px 11px;background:var(--ev-secondary);color:var(--ev-secondary-text);cursor:pointer}
+input[type=checkbox]{accent-color:var(--ev-accent)}
+button,.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--ev-control-height);padding:8px 14px;border:0;border-radius:var(--ev-control-radius);background:var(--ev-primary);color:var(--ev-primary-text);font:700 13px system-ui;cursor:pointer;text-decoration:none}
+button.secondary,.btn.secondary{background:var(--ev-secondary);color:var(--ev-secondary-text)}
+button.danger,.btn.danger{background:#ae3951;color:#fff}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ev-accent);outline-offset:2px}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 22px;align-items:end}.row>*{min-width:0}
+#upload>.row:first-child{grid-template-columns:minmax(0,1fr) minmax(200px,280px)}
+#upload>.row:nth-child(2){grid-template-columns:minmax(0,520px) auto;justify-content:start}
+#upload>.row:nth-child(2)>button{justify-self:start;margin-bottom:10px}
+#items article{display:grid;grid-template-columns:35px minmax(130px,1.3fr) minmax(170px,1.6fr) minmax(120px,1fr) 85px auto auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--ev-border)}
+#items article input:not([type=checkbox]){width:100%;min-width:0}
+#status{min-height:24px;color:var(--ev-accent);font-weight:650}
+#auth-status{font-weight:700}#auth-status.success{color:#16805d}#auth-status.error{color:#ae3951}
+.edu-admin-header{display:flex;align-items:center;gap:15px;margin:4px 0 18px}
+.edu-admin-brandmark{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--ev-primary),var(--ev-accent));color:var(--ev-primary-text)}
+.edu-admin-brandmark svg{width:29px;height:29px}
 .edu-app-settings{display:grid;grid-template-columns:repeat(2,minmax(0,340px));gap:8px 22px;align-items:end}
-.edu-app-settings>label{width:100%!important;max-width:340px!important}
-.edu-app-settings .edu-check{display:flex!important;flex-direction:row!important;align-items:center!important;gap:9px!important}
-.edu-app-settings .edu-check input{width:auto!important;height:auto!important;min-height:0!important}
-.edu-settings-hint{grid-column:1/-1;margin:0!important}
-.edu-output-section .edu-output-mode-row{display:block!important}
-.edu-output-section .edu-output-type{margin:0 0 14px!important}
-.edu-output-section #ev-segments{width:100%!important;max-width:none!important}
-.edu-output-section .edu-output-actions{margin:18px 0 0!important}
-@media(max-width:720px){.edu-app-settings{grid-template-columns:1fr}}
-</style><style id="eduvize-central-theme-v1">
-/* Central admin theme overrides; deliberately scoped to configuration page. */
-:root{--ev-bg:#eff6fa;--ev-muted:#638098;--ev-text:#142c46;--ev-surface:#fff;--ev-primary:#087c91;--ev-primary-text:#fff;--ev-secondary:#e7f0f4;--ev-secondary-text:#35536a;--ev-accent:#00a995;--ev-border:#dce6ed;--ev-control-height:40px;--ev-control-radius:10px;--ev-card-radius:20px}
-html:has(body.ev-theme-ready),body.ev-theme-ready{color:var(--ev-text)!important;background:var(--ev-bg)!important}
-body.ev-theme-ready{background:var(--ev-bg)!important;color:var(--ev-text)!important}
-body.ev-theme-ready .card{background:var(--ev-surface)!important;border-color:var(--ev-border)!important;border-radius:var(--ev-card-radius)!important;color:var(--ev-text)!important}
-body.ev-theme-ready h1,body.ev-theme-ready h2,body.ev-theme-ready label{color:var(--ev-text)!important}
-body.ev-theme-ready .eyebrow,body.ev-theme-ready #status{color:var(--ev-accent)!important}
-body.ev-theme-ready .wrap input:not([type=checkbox]),body.ev-theme-ready .wrap select{border-color:var(--ev-border)!important;border-radius:var(--ev-control-radius)!important;height:var(--ev-control-height)!important;min-height:var(--ev-control-height)!important;max-height:var(--ev-control-height)!important;color:var(--ev-text)!important;background:var(--ev-surface)!important}
-body.ev-theme-ready .wrap button:not(#ev-segments button),body.ev-theme-ready .wrap .btn:not(#ev-segments .btn){background:var(--ev-primary)!important;color:var(--ev-primary-text)!important;border-radius:var(--ev-control-radius)!important;height:var(--ev-control-height)!important;min-height:var(--ev-control-height)!important;max-height:var(--ev-control-height)!important}
-body.ev-theme-ready .wrap button.secondary:not(#ev-segments button),body.ev-theme-ready .wrap .btn.secondary:not(#ev-segments .btn){background:var(--ev-secondary)!important;color:var(--ev-secondary-text)!important}
-body.ev-theme-ready .wrap button.danger:not(#ev-segments button){background:#ae3951!important;color:#fff!important}
-body.ev-theme-ready #ev-segments #ev-tabs button.active,body.ev-theme-ready #ev-segments #ev-blocks button.active{background:var(--ev-primary)!important;color:var(--ev-primary-text)!important;border-color:var(--ev-accent)!important}
-body.ev-theme-ready #ev-segments #ev-tabs button:not(.active),body.ev-theme-ready #ev-segments #ev-blocks button:not(.active){background:var(--ev-secondary)!important;color:var(--ev-secondary-text)!important;border-color:var(--ev-border)!important}
-body.ev-theme-ready .wrap input[type=checkbox]{accent-color:var(--ev-accent)!important}
-body.ev-theme-ready .wrap input:focus-visible,body.ev-theme-ready .wrap select:focus-visible,body.ev-theme-ready .wrap button:focus-visible{outline-color:var(--ev-accent)!important}
-body.ev-theme-ready #ev-segments #ev-cards button.active{border-color:var(--ev-accent)!important;background:var(--ev-secondary)!important;color:var(--ev-secondary-text)!important}
-body.ev-theme-ready #ev-segments #ev-cards button{border-radius:var(--ev-card-radius)!important;border-color:var(--ev-border)!important}
-body.ev-theme-ready .edu-admin-brandmark{background:linear-gradient(135deg,var(--ev-primary),var(--ev-accent))!important}
-
-/* Reference parity: replace remaining hardcoded legacy admin colors. */
-body.ev-theme-ready .muted,body.ev-theme-ready small,body.ev-theme-ready .wrap .muted,body.ev-theme-ready .wrap small{color:var(--ev-muted)!important}
-body.ev-theme-ready #items article{border-bottom-color:var(--ev-border)!important}
-body.ev-theme-ready .wrap input[type=file]{background:var(--ev-surface)!important;border-color:var(--ev-border)!important}
-body.ev-theme-ready .wrap input[type=file]::file-selector-button{background:var(--ev-secondary)!important;color:var(--ev-secondary-text)!important}
-body.ev-theme-ready #ev-segments .ev-mini,body.ev-theme-ready #ev-segments #ev-preview-wrap{background:var(--ev-secondary)!important;border-color:var(--ev-border)!important}
-body.ev-theme-ready #ev-segments .ev-box{background:var(--ev-primary)!important;color:var(--ev-primary-text)!important}
-body.ev-theme-ready #ev-segments #ev-cards button:hover:not(.active),body.ev-theme-ready #ev-segments #ev-tabs button:hover:not(.active),body.ev-theme-ready #ev-segments #ev-blocks button:hover:not(.active){background:var(--ev-secondary)!important}
-body.ev-theme-ready #ev-segments #ev-preview{background:var(--ev-surface)!important}
-body.ev-theme-ready #auth-status.success{color:var(--ev-accent)!important}
-
-
-body.ev-theme-ready .wrap .card,body.ev-theme-ready .wrap section.card{background-color:var(--ev-surface)!important;border-color:var(--ev-border)!important}
-body.ev-theme-ready .wrap .eyebrow{color:var(--ev-accent)!important}
-body.ev-theme-ready .wrap .secondary{background-color:var(--ev-secondary)!important;color:var(--ev-secondary-text)!important}
-body.ev-theme-ready .wrap #ev-segments button.active{border-color:var(--ev-accent)!important}
+.edu-app-settings>label{width:100%;max-width:340px}
+.edu-app-settings .edu-check{flex-direction:row;align-items:center;gap:9px}
+.edu-app-settings .edu-check input{width:auto;height:auto;min-height:0}
+.edu-settings-hint{grid-column:1/-1;margin:0}
+.edu-output-section .edu-output-mode-row{display:block}
+.edu-output-section .edu-output-type{margin:0 0 14px;max-width:340px}
+.edu-output-section #ev-segments{width:100%;max-width:none}
+.edu-output-section .edu-output-actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0}
+#ev-segments{color:var(--ev-text)}
+#ev-segments button{color:var(--ev-text)}
+#ev-segments #ev-cards button.active{border-color:var(--ev-accent);background:var(--ev-secondary)}
+#ev-segments #ev-tabs button.active,#ev-segments #ev-blocks button.active{background:var(--ev-primary);color:var(--ev-primary-text)}
+@media(max-width:850px){#items article{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.edu-app-settings,.row,#upload>.row:first-child,#upload>.row:nth-child(2){grid-template-columns:1fr}}
+@media(max-width:550px){#items article{grid-template-columns:1fr}}
 </style></head><body><main class="wrap"><header class="edu-admin-header"><div class="edu-admin-brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10l4 4v14H5z"/><path d="M15 3v5h4M8 12h8M8 16h8"/></svg></div><div><div class="eyebrow">EDUVIZE · DOKUMENTY</div><h1>Administrace dokumentů</h1></div></header><p class="muted">Nahrajte veřejné dokumenty školy. PDF, obrázky a videa lze zobrazit v kiosku. Soubory Word a PowerPoint lze stáhnout a otevřít v příslušné aplikaci. Limit každého souboru je 20 MB.</p><section class="card"><label>Administrační klíč<input type="password" id="token" autocomplete="off" placeholder="Klíč nastavený na serveru"></label><button id="microsoft" type="button">Připojit OneDrive</button> <button id="connect" type="button" class="secondary">Načíst dokumenty</button><p id="auth-status" role="alert" aria-live="polite"></p><p class="muted"><small>Klíč se uchovává pouze v této kartě prohlížeče, také při návratu z Microsoftu. Po zavření karty se odstraní. Používejte důvěryhodné zařízení.</small></p></section><section class="card"><h2>Nahrát dokument</h2><form id="upload"><div class="row"><label>PDF, obrázek, video, Word nebo PowerPoint<input id="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.mp4,.webm,.docx,.pptx" required></label><label>Kategorie<select id="category"><option>Ostatní</option></select></label></div><div class="row"><label>Vlastní kategorie<input id="new-category" type="text" maxlength="80" placeholder="Název nové kategorie"></label><button id="add-category" type="button" class="secondary">Přidat kategorii</button></div><button id="upload-button" type="submit">Nahrát soubor</button><div id="upload-progress" hidden aria-live="polite" style="margin-top:14px"><progress id="upload-bar" max="100" value="0" style="width:100%;height:18px;accent-color:#16805d"></progress><div id="upload-text" style="color:#16805d;font-weight:650;margin-top:6px">Připravuji nahrávání…</div></div></form></section><section class="card"><h2>Správa dokumentů</h2><div id="items">Nejprve zadejte administrační klíč a načtěte dokumenty.</div></section><section class="card"><h2>Nastavení aplikace</h2><div class="edu-app-settings"><label>Interval střídání (sekundy)<input id="seconds" type="number" min="3" max="3600" value="15"></label><label>Počet stránek PDF vedle sebe<select id="pdf-columns"><option value="1">1 stránka</option><option value="2">2 stránky</option><option value="3">3 stránky</option><option value="4">4 stránky</option><option value="5">5 stránek</option><option value="6">6 stránek</option></select></label><label class="edu-check"><input id="video-sound" type="checkbox"> Přehrávat videa se zvukem</label><p class="muted edu-settings-hint"><small>Ve výchozím nastavení jsou videa bez zvuku. Automatické přehrávání se zvukem může prohlížeč blokovat.</small></p></div></section><section class="card edu-output-section"><h2>Výstup a šablona Newline</h2><div class="row edu-output-mode-row"><label class="edu-output-type">Typ výstupu<select id="layout"><option value="signage">Newline Signage Pro</option><option value="normal">Běžná stránka</option></select></label></div><div class="edu-output-actions"><button id="open" type="button">Použít a otevřít výstup</button><button id="copy" type="button" class="secondary">Kopírovat odkaz</button></div></section><p id="status" role="status"></p></main><script>
 const $=id=>document.getElementById(id);const base=location.origin;let adminToken='';const tokenInput=$('token');try{adminToken=sessionStorage.getItem('eduvize-documents-admin-token')||'';tokenInput.value=adminToken}catch(e){}tokenInput.addEventListener('input',()=>{adminToken=tokenInput.value.trim();try{if(adminToken)sessionStorage.setItem('eduvize-documents-admin-token',adminToken);else sessionStorage.removeItem('eduvize-documents-admin-token')}catch(e){}});const auth=()=>({'Authorization':'Bearer '+(adminToken||tokenInput.value.trim())});function status(t,kind='error'){$('status').textContent=t;$('status').style.color=kind==='success'?'#16805d':'#ae3951';$('auth-status').textContent=t;$('auth-status').className=kind}async function request(path,options={}){const r=await fetch(path,{...options,headers:{...auth(),...(options.headers||{})}});let d=await r.json().catch(()=>({}));if(!r.ok)throw Error(typeof d.detail==='string'?d.detail:'Chyba serveru '+r.status);return d}
 let categoryNames=[];
