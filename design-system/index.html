@@ -7,15 +7,47 @@
 const defs=[['colors.background','Pozadí','color'],['colors.text','Barva textu','color'],['colors.surface','Pozadí karet','color'],['colors.primary','Hlavní tlačítko','color'],['colors.primaryText','Text tlačítka','color'],['colors.secondary','Vedlejší tlačítko','color'],['colors.secondaryText','Text vedlejšího tlačítka','color'],['colors.accent','Zvýraznění','color'],['colors.border','Rámečky','color'],['controls.heightPx','Výška polí a tlačítek','number'],['controls.radiusPx','Zaoblení tlačítek','number'],['cards.radiusPx','Zaoblení karet','number']];
 let original,theme;const deep=o=>JSON.parse(JSON.stringify(o));const get=(o,path)=>path.split('.').reduce((v,k)=>v[k],o);const set=(o,path,val)=>{const p=path.split('.');o[p[0]][p[1]]=val};
 function render(){const p=document.getElementById('preview');const map={'colors.background':'--p-bg','colors.text':'--p-text','colors.surface':'--p-surface','colors.primary':'--p-primary','colors.primaryText':'--p-primary-text','colors.secondary':'--p-secondary','colors.secondaryText':'--p-secondary-text','colors.accent':'--p-accent','colors.border':'--p-border','controls.heightPx':'--p-height','controls.radiusPx':'--p-radius','cards.radiusPx':'--p-card-radius'};for(const [k,v] of Object.entries(map))p.style.setProperty(v,get(theme,k)+(k.endsWith('Px')?'px':''))}
-function fields(){const root=document.getElementById('fields');root.replaceChildren();for(const [key,label,type] of defs){const wrap=document.createElement('label');wrap.className='field';wrap.textContent=label;const input=document.createElement('input');input.type=type;input.value=get(theme,key);if(type==='number'){input.min='0';input.max='80';input.step='1'}input.oninput=()=>{const v=type==='number'?Math.max(0,Math.min(80,Number(input.value)||0)):input.value;set(theme,key,v);localStorage.setItem('eduvize-admin-theme-draft',JSON.stringify(theme));render()};wrap.append(input);root.append(wrap)}render()}
-async function init(){try{const r=await fetch('/design-system/admin-theme.json',{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);original=await r.json();const draft=JSON.parse(localStorage.getItem('eduvize-admin-theme-draft')||'null');theme=draft?.schemaVersion===original.schemaVersion?draft:deep(original);fields()}catch(e){document.getElementById('state').textContent='Nepodařilo se načíst základní konfiguraci: '+e.message}}let themes=[],selected='standard';
+function fields(){const root=document.getElementById('fields');root.replaceChildren();for(const [key,label,type] of defs){const wrap=document.createElement('label');wrap.className='field';wrap.textContent=label;const input=document.createElement('input');input.type=type;input.value=get(theme,key);if(type==='number'){input.min='0';input.max='80';input.step='1'}input.oninput=()=>{const v=type==='number'?Math.max(0,Math.min(80,Number(input.value)||0)):input.value;set(theme,key,v);render()};wrap.append(input);root.append(wrap)}render()}
+async function init(){try{const r=await fetch('/design-system/admin-theme.json',{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);original=await r.json();theme=deep(original);fields()}catch(e){document.getElementById('state').textContent='Nepodařilo se načíst základní konfiguraci: '+e.message}}let themes=[],selected='standard';
 const tokenEl=document.getElementById('admin-token');tokenEl.value=sessionStorage.getItem('eduvize-documents-admin-token')||'';
 tokenEl.onchange=()=>{sessionStorage.setItem('eduvize-documents-admin-token',tokenEl.value.trim());loadThemes()};
 const msg=t=>document.getElementById('state').textContent=t;
 async function api(path,method='GET',body){const r=await fetch('/api/design-system/'+path,{method,headers:{'Authorization':'Bearer '+tokenEl.value.trim(),'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.detail||'HTTP '+r.status);return d}
-async function loadThemes(pick){try{themes=await api('themes');const sel=document.getElementById('theme-select');sel.replaceChildren();for(const t of themes){const o=document.createElement('option');o.value=t.id;o.textContent=t.name+(t.active?' ✓ aktivní':'')+(t.locked?' · výchozí':'');sel.append(o)}const list=document.getElementById('theme-list-items');list.replaceChildren();for(const t of themes){const b=document.createElement('button');b.type='button';b.innerHTML='';const swatch=document.createElement('span');swatch.style.cssText='display:inline-block;vertical-align:middle;width:44px;height:26px;margin-right:10px;border-radius:6px;border:1px solid #bccdd8;background:linear-gradient(90deg,'+t.config.colors.primary+' 0 45%,'+t.config.colors.background+' 45% 75%,'+t.config.colors.accent+' 75% 100%)';b.append(swatch,document.createTextNode(t.name+(t.active?' · aktivní':'')+(t.locked?' · chráněný':'')));b.className='btn secondary';b.style.cssText='display:block;margin:6px 0;width:100%;text-align:left';if(t.id===selected)b.style.outline='2px solid #00a995';b.onclick=()=>{document.getElementById('theme-select').value=t.id;choose()};list.append(b)}selected=themes.some(t=>t.id===(pick||selected))?(pick||selected):'standard';sel.value=selected;choose();msg('Styly načteny z databáze.')}catch(e){document.getElementById('theme-list-items').textContent='Styly se nepodařilo načíst.';msg('Nelze načíst uložené styly: '+e.message)}}
-function choose(){selected=document.getElementById('theme-select').value;const t=themes.find(t=>t.id===selected);if(!t)return;theme=deep(t.config);document.getElementById('theme-name').value=t.name;fields();document.getElementById('preview-selection').textContent='Náhled stylu: '+t.name+(t.active?' · aktivní':'')+(t.locked?' · výchozí, chráněný':'');document.getElementById('save').disabled=!!t.locked;document.getElementById('remove').disabled=!!t.locked}
-document.getElementById('theme-select').onchange=choose;
+function selectTheme(id){
+ const t=themes.find(x=>x.id===id);
+ if(!t){msg('Vybraný styl nebyl nalezen.');return}
+ selected=id;document.getElementById('theme-select').value=id;
+ theme=deep(t.config);
+ document.getElementById('theme-name').value=t.name;
+ fields();
+ document.getElementById('preview-selection').textContent='Právě zobrazen: '+t.name+(t.active?' · aktivní':'')+(t.locked?' · výchozí (nelze přepsat ani smazat)':'');
+ document.getElementById('save').disabled=!!t.locked;
+ document.getElementById('remove').disabled=!!t.locked;
+ for(const button of document.querySelectorAll('#theme-list-items button[data-theme-id]')){
+  const active=button.dataset.themeId===id;
+  button.setAttribute('aria-pressed',String(active));
+  button.style.border=active?'2px solid #00a995':'2px solid #dce6ed';
+  button.style.background=active?'#e4faf4':'#fff';
+  button.style.color='#172b4d';
+ }
+ msg('Zobrazen náhled stylu: '+t.name);
+}
+async function loadThemes(pick){
+ try{
+  themes=await api('themes');
+  const sel=document.getElementById('theme-select'),list=document.getElementById('theme-list-items');
+  sel.replaceChildren();list.replaceChildren();
+  for(const t of themes){
+   const option=document.createElement('option');option.value=t.id;option.textContent=t.name+(t.active?' ✓ aktivní':'')+(t.locked?' · výchozí':'');sel.append(option);
+   const button=document.createElement('button');button.type='button';button.dataset.themeId=t.id;button.className='btn secondary';button.style.cssText='display:flex;align-items:center;margin:6px 0;width:100%;text-align:left;gap:10px;cursor:pointer';
+   const swatch=document.createElement('span');swatch.style.cssText='flex:0 0 44px;height:26px;border-radius:6px;border:1px solid #bccdd8;background:linear-gradient(90deg,'+t.config.colors.primary+' 0 45%,'+t.config.colors.background+' 45% 75%,'+t.config.colors.accent+' 75% 100%)';
+   const label=document.createElement('span');label.textContent=t.name+(t.active?' · aktivní':'')+(t.locked?' · výchozí':'');
+   button.append(swatch,label);button.addEventListener('click',()=>selectTheme(t.id));list.append(button);
+  }
+  selectTheme(themes.some(t=>t.id===(pick||selected))?(pick||selected):'standard');
+ }catch(e){document.getElementById('theme-list-items').textContent='Styly se nepodařilo načíst.';msg('Nelze načíst uložené styly: '+e.message)}
+}
+document.getElementById('theme-select').addEventListener('change',e=>selectTheme(e.target.value));
 async function run(fn){try{await fn()}catch(e){msg('Chyba: '+e.message)}}
 document.getElementById('create').onclick=()=>run(async()=>{const name=document.getElementById('theme-name').value.trim();const t=await api('themes','POST',{name,config:theme});await loadThemes(t.id);msg('Styl „'+name+'“ byl uložen do databáze a zobrazen v seznamu výše.')});
 document.getElementById('save').onclick=()=>run(async()=>{if(selected==='standard')throw Error('Výchozí styl je neměnný');await api('themes/'+selected,'PUT',{name:document.getElementById('theme-name').value.trim(),config:theme});await loadThemes(selected);msg('Styl aktualizován.')});
