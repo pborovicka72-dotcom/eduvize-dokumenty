@@ -28,6 +28,22 @@ html.kiosk-output .shell>header::after{
  pointer-events:none!important;
  z-index:20!important;
 }
+</style><style>html.kiosk-output .shell>header{display:flex!important}</style><style>
+/* Eduvize kiosk framing contract v5: identical top inset and overlay border. */
+html.kiosk-output .shell{padding-top:clamp(6px,.9vmin,14px)!important;box-sizing:border-box!important}
+html.kiosk-output .shell>header{
+ border:0!important;border-radius:12px!important;overflow:hidden!important;
+ position:relative!important;isolation:isolate!important;
+ box-shadow:0 6px 18px #006b7740!important;
+ margin-top:0!important;box-sizing:border-box!important;
+}
+html.kiosk-output .shell>header::after{
+ content:""!important;position:absolute!important;inset:0!important;
+ width:auto!important;height:auto!important;
+ border:2px solid #00a995!important;border-radius:12px!important;
+ box-shadow:inset 0 0 0 1px #00a995!important;
+ background:none!important;pointer-events:none!important;z-index:50!important;
+}
 </style><style>html.kiosk-output .shell>header{display:flex!important}</style></head><body><main class="shell"><header><div><div class="eyebrow">EDUVIZE · DOKUMENTY</div><h1>Dokumenty školy</h1><div class="subtitle">Prohlížejte oznámení, soubory a informace školy</div></div></header><section class="card">
 <div class="section-heading" id="heading"><h2 id="heading-title">Kategorie dokumentů</h2><span id="heading-count" class="pill"></span></div>
 <div id="browse"></div>
