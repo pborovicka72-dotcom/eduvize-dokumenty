@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "name": "Eduvize Admin UI – Dokumenty",
+  "reference": "eduvize-dokumenty/config.html",
+  "scope": "admin-only",
+  "colors": {
+    "background": "#eaf2f8",
+    "text": "#142c46",
+    "muted": "#638098",
+    "surface": "#ffffff",
+    "primary": "#087c91",
+    "primaryText": "#ffffff",
+    "secondary": "#e7f0f4",
+    "secondaryText": "#35536a",
+    "accent": "#00a995",
+    "border": "#dce6ed"
+  },
+  "controls": {
+    "heightPx": 40,
+    "radiusPx": 10
+  },
+  "cards": {
+    "radiusPx": 20
+  },
+  "layout": {
+    "gapPx": 16,
+    "sections": [
+      "header",
+      "application-settings",
+      "output-type",
+      "newline-templates",
+      "output-actions"
+    ]
+  },
+  "displayThemeEnabled": false
+}
