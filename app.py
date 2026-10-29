@@ -168,6 +168,87 @@ def health():return {"status":"ok","onedrive_configured":bool(CLIENT and SECRET 
 def display():return FileResponse(ROOT/"index.html")
 @app.get("/config")
 def config():return FileResponse(ROOT/"config.html")
+
+# Design System: immutable default and database-backed named themes.
+def theme_default():
+    return json.loads((ROOT/"design-system"/"admin-theme.json").read_text(encoding="utf-8"))
+
+def theme_db():
+    if not DATABASE_URL:raise HTTPException(503,"Pro ukládání stylů je nutná DATABASE_URL")
+    try:
+        conn=psycopg.connect(DATABASE_URL,connect_timeout=10)
+        conn.execute("CREATE TABLE IF NOT EXISTS eduvize_admin_themes (id TEXT PRIMARY KEY, name TEXT NOT NULL, config JSONB NOT NULL, active BOOLEAN NOT NULL DEFAULT FALSE)")
+        conn.commit()
+        return conn
+    except psycopg.Error:raise HTTPException(503,"Databáze stylů není dostupná")
+
+def theme_validate(value):
+    if not isinstance(value,dict):raise HTTPException(422,"Neplatná konfigurace")
+    reference=theme_default()
+    if value.get("schemaVersion")!=reference["schemaVersion"]:raise HTTPException(422,"Nepodporovaná verze konfigurace")
+    for key in reference["colors"]:
+        color=value.get("colors",{}).get(key)
+        if not isinstance(color,str) or len(color)!=7 or color[0]!="#" or any(c not in "0123456789abcdefABCDEF" for c in color[1:]):raise HTTPException(422,"Neplatná barva: "+key)
+    for group,key in [("controls","heightPx"),("controls","radiusPx"),("cards","radiusPx")]:
+        v=value.get(group,{}).get(key)
+        if type(v) is not int or not 0<=v<=80:raise HTTPException(422,"Neplatná hodnota: "+key)
+    safe=reference.copy()
+    safe["colors"]={k:value["colors"][k] for k in reference["colors"]}
+    safe["controls"]={k:value["controls"][k] for k in reference["controls"]}
+    safe["cards"]={k:value["cards"][k] for k in reference["cards"]}
+    return safe
+
+@app.get("/api/design-system/themes")
+def list_admin_themes(authorization:str|None=Header(default=None)):
+    check_admin(authorization)
+    with theme_db() as conn:
+        rows=conn.execute("SELECT id,name,config,active FROM eduvize_admin_themes ORDER BY name").fetchall()
+    custom=[{"id":row[0],"name":row[1],"config":row[2],"active":row[3]} for row in rows]
+    return [{"id":"standard","name":"EDUVIZE Standard","config":theme_default(),"active":not any(t["active"] for t in custom),"locked":True}]+[{**t,"locked":False} for t in custom]
+
+@app.post("/api/design-system/themes")
+async def create_admin_theme(request:Request,authorization:str|None=Header(default=None)):
+    check_admin(authorization)
+    payload=await request.json()
+    name=str(payload.get("name","")).strip()
+    if not 1<=len(name)<=80:raise HTTPException(422,"Název musí mít 1–80 znaků")
+    config=theme_validate(payload.get("config"))
+    ident=str(uuid.uuid4())
+    with theme_db() as conn:
+        conn.execute("INSERT INTO eduvize_admin_themes (id,name,config) VALUES (%s,%s,%s::jsonb)",(ident,name,json.dumps(config)))
+    return {"id":ident,"name":name}
+
+@app.put("/api/design-system/themes/{theme_id}")
+async def update_admin_theme(theme_id:str,request:Request,authorization:str|None=Header(default=None)):
+    check_admin(authorization)
+    if theme_id=="standard":raise HTTPException(403,"Výchozí styl nelze změnit")
+    payload=await request.json()
+    name=str(payload.get("name","")).strip()
+    if not 1<=len(name)<=80:raise HTTPException(422,"Název musí mít 1–80 znaků")
+    config=theme_validate(payload.get("config"))
+    with theme_db() as conn:
+        row=conn.execute("UPDATE eduvize_admin_themes SET name=%s,config=%s::jsonb WHERE id=%s RETURNING id",(name,json.dumps(config),theme_id)).fetchone()
+    if not row:raise HTTPException(404,"Styl nenalezen")
+    return {"id":theme_id,"name":name}
+
+@app.post("/api/design-system/themes/{theme_id}/activate")
+def activate_admin_theme(theme_id:str,authorization:str|None=Header(default=None)):
+    check_admin(authorization)
+    with theme_db() as conn:
+        if theme_id!="standard" and not conn.execute("SELECT 1 FROM eduvize_admin_themes WHERE id=%s",(theme_id,)).fetchone():raise HTTPException(404,"Styl nenalezen")
+        conn.execute("UPDATE eduvize_admin_themes SET active=FALSE WHERE active=TRUE")
+        if theme_id!="standard":conn.execute("UPDATE eduvize_admin_themes SET active=TRUE WHERE id=%s",(theme_id,))
+    return {"active":theme_id}
+
+@app.delete("/api/design-system/themes/{theme_id}")
+def delete_admin_theme(theme_id:str,authorization:str|None=Header(default=None)):
+    check_admin(authorization)
+    if theme_id=="standard":raise HTTPException(403,"Výchozí styl nelze smazat")
+    with theme_db() as conn:
+        row=conn.execute("DELETE FROM eduvize_admin_themes WHERE id=%s RETURNING id",(theme_id,)).fetchone()
+    if not row:raise HTTPException(404,"Styl nenalezen")
+    return {"deleted":theme_id}
+
 @app.get("/design-system")
 @app.get("/design-system/")
 def design_system_editor():return FileResponse(ROOT/"design-system"/"index.html")
