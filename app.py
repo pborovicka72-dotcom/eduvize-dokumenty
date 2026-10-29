@@ -62,7 +62,7 @@ def restore_tokens():
 
 lock=asyncio.Lock()
 app=FastAPI(title="Eduvize – Dokumenty / OneDrive")
-app.add_middleware(CORSMiddleware,allow_origins=["https://pborovicka72-dotcom.github.io"],allow_methods=["GET","POST","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
+app.add_middleware(CORSMiddleware,allow_origins=["https://pborovicka72-dotcom.github.io","https://eduvize-weather.onrender.com"],allow_methods=["GET","POST","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
 
 def check_admin(auth):
     if not ADMIN:raise HTTPException(503,"Set DOCUMENTS_ADMIN_TOKEN in Render Environment")
