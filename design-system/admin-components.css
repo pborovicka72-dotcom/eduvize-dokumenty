@@ -1,0 +1,11 @@
+/* Eduvize Admin UI — component baseline derived from Documents.
+   Namespaced classes prevent unintended changes to application-specific controls. */
+.edu-admin {font-family:var(--edu-admin-font);color:var(--edu-admin-ink);background:var(--edu-admin-bg)}
+.edu-admin__card{background:var(--edu-admin-surface);border:1px solid var(--edu-admin-border);border-radius:var(--edu-admin-card-radius);padding:clamp(18px,2vw,30px)}
+.edu-admin__field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.edu-admin__field :is(input:not([type=checkbox]),select){height:var(--edu-admin-control-height);min-height:var(--edu-admin-control-height);padding:7px 11px;border:1px solid var(--edu-admin-input-border);border-radius:var(--edu-admin-control-radius);font:inherit;background:#fff;color:var(--edu-admin-ink)}
+.edu-admin__actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.edu-admin__button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--edu-admin-control-height);padding:10px 14px;border:0;border-radius:var(--edu-admin-control-radius);background:var(--edu-admin-primary);color:var(--edu-admin-primary-text);font:700 13px var(--edu-admin-font);cursor:pointer}
+.edu-admin__button--secondary{background:var(--edu-admin-secondary);color:var(--edu-admin-secondary-text)}
+.edu-admin__button:focus-visible,.edu-admin__field :is(input,select):focus-visible{outline:2px solid var(--edu-admin-accent);outline-offset:2px}
+.edu-admin__nsp{width:100%;min-width:0}
