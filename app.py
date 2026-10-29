@@ -21,7 +21,7 @@ GRAPH="https://graph.microsoft.com/v1.0"
 FOLDER="Eduvize-Dokumenty"
 DEFAULT_CATEGORIES=["Oznámení","Akce a události","Výuka a vzdělávání","Úspěchy školy","Kroužky a aktivity","Jídelna","Dokumenty a formuláře","Ostatní"]
 MAX_SIZE=20*1024*1024
-TYPES={".pdf":"application/pdf",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp"}
+TYPES={".pdf":"application/pdf",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp",".mp4":"video/mp4",".webm":"video/webm",".docx":"application/vnd.openxmlformats-officedocument.wordprocessingml.document",".pptx":"application/vnd.openxmlformats-officedocument.presentationml.presentation"}
 pending={}
 tokens={}
 DATABASE_URL=os.getenv("DATABASE_URL","")
@@ -252,10 +252,10 @@ async def create_category(request:Request,authorization:str|None=Header(default=
 async def upload(file:UploadFile=File(...),category:str=Form("Ostatní"),authorization:str|None=Header(default=None)):
     check_admin(authorization)
     ext=Path(file.filename or "").suffix.lower()
-    if ext not in TYPES:raise HTTPException(415,"Povoleny PDF, PNG, JPG a WebP")
+    if ext not in TYPES:raise HTTPException(415,"Povoleny PDF, obrázky, MP4, WebM, DOCX a PPTX")
     data=await file.read(MAX_SIZE+1)
     if not data or len(data)>MAX_SIZE:raise HTTPException(413,"Limit je 20 MB")
-    checks={".pdf":data.startswith(b"%PDF-"),".png":data.startswith(bytes.fromhex("89504e470d0a1a0a")),".jpg":data.startswith(bytes.fromhex("ffd8ff")),".jpeg":data.startswith(bytes.fromhex("ffd8ff")),".webp":data.startswith(b"RIFF") and data[8:12]==b"WEBP"}
+    checks={".mp4":len(data)>12 and data[4:8]==b"ftyp",".webm":data.startswith(bytes.fromhex("1a45dfa3")),".docx":data.startswith(b"PK\\x03\\x04") and b"word/" in data,".pptx":data.startswith(b"PK\\x03\\x04") and b"ppt/" in data,".pdf":data.startswith(b"%PDF-"),".png":data.startswith(bytes.fromhex("89504e470d0a1a0a")),".jpg":data.startswith(bytes.fromhex("ffd8ff")),".jpeg":data.startswith(bytes.fromhex("ffd8ff")),".webp":data.startswith(b"RIFF") and data[8:12]==b"WEBP"}
     if not checks[ext]:raise HTTPException(415,"Neplatný formát souboru")
     async with lock:
         folder,items=await all_items()
