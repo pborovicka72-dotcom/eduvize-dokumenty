@@ -168,6 +168,14 @@ def health():return {"status":"ok","onedrive_configured":bool(CLIENT and SECRET 
 def display():return FileResponse(ROOT/"index.html")
 @app.get("/config")
 def config():return FileResponse(ROOT/"config.html")
+@app.get("/design-system")
+@app.get("/design-system/")
+def design_system_editor():return FileResponse(ROOT/"design-system"/"index.html")
+@app.get("/design-system/{asset_name}")
+def design_system_asset(asset_name:str):
+    allowed={"admin-tokens.css":"text/css","admin-components.css":"text/css","admin-theme.json":"application/json"}
+    if asset_name not in allowed:raise HTTPException(404,"Soubor nenalezen")
+    return FileResponse(ROOT/"design-system"/asset_name,media_type=allowed[asset_name])
 @app.get("/segments.js")
 def segments_script():return FileResponse(ROOT/"segments.js",media_type="application/javascript")
 @app.post("/api/admin/microsoft/start")
