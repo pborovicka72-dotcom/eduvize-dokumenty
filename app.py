@@ -199,8 +199,7 @@ def theme_validate(value):
     return safe
 
 @app.get("/api/design-system/themes")
-def list_admin_themes(authorization:str|None=Header(default=None)):
-    check_admin(authorization)
+def list_admin_themes():
     with theme_db() as conn:
         rows=conn.execute("SELECT id,name,config,active FROM eduvize_admin_themes ORDER BY name").fetchall()
     custom=[{"id":row[0],"name":row[1],"config":row[2],"active":row[3]} for row in rows]
