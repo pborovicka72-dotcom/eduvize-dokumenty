@@ -101,6 +101,8 @@ body.ev-theme-ready .wrap input:not([type=checkbox]),body.ev-theme-ready .wrap s
 body.ev-theme-ready .wrap button:not(#ev-segments button),body.ev-theme-ready .wrap .btn:not(#ev-segments .btn){background:var(--ev-primary)!important;color:var(--ev-primary-text)!important;border-radius:var(--ev-control-radius)!important;height:var(--ev-control-height)!important;min-height:var(--ev-control-height)!important;max-height:var(--ev-control-height)!important}
 body.ev-theme-ready .wrap button.secondary:not(#ev-segments button),body.ev-theme-ready .wrap .btn.secondary:not(#ev-segments .btn){background:var(--ev-secondary)!important;color:var(--ev-secondary-text)!important}
 body.ev-theme-ready .wrap button.danger:not(#ev-segments button){background:#ae3951!important;color:#fff!important}
+body.ev-theme-ready #ev-segments #ev-tabs button.active,body.ev-theme-ready #ev-segments #ev-blocks button.active{background:var(--ev-primary)!important;color:var(--ev-primary-text)!important;border-color:var(--ev-accent)!important}
+body.ev-theme-ready #ev-segments #ev-tabs button:not(.active),body.ev-theme-ready #ev-segments #ev-blocks button:not(.active){background:var(--ev-secondary)!important;color:var(--ev-secondary-text)!important;border-color:var(--ev-border)!important}
 body.ev-theme-ready .wrap input[type=checkbox]{accent-color:var(--ev-accent)!important}
 body.ev-theme-ready .wrap input:focus-visible,body.ev-theme-ready .wrap select:focus-visible,body.ev-theme-ready .wrap button:focus-visible{outline-color:var(--ev-accent)!important}
 body.ev-theme-ready #ev-segments #ev-cards button.active{border-color:var(--ev-accent)!important;background:var(--ev-secondary)!important;color:var(--ev-secondary-text)!important}
@@ -186,6 +188,9 @@ $('open').onclick=()=>window.open(link(),'_blank');$('copy').onclick=async()=>{t
 </script><script src="/segments.js?v=20261029-2"></script><script id="eduvize-central-theme-loader">
 (function(){
  const endpoint='/api/design-system/themes';
+ const badge=document.createElement('div');badge.id='ev-theme-status';badge.setAttribute('role','status');badge.style.cssText='position:fixed;right:12px;bottom:12px;z-index:9999;padding:7px 11px;border-radius:10px;background:#fff;color:#234;border:1px solid #ccd;box-shadow:0 3px 12px #0002;font:600 12px system-ui;max-width:300px';
+ document.body.append(badge);
+ function status(message,ok){badge.textContent=message;badge.style.borderColor=ok?'#30a482':'#d98a65'}
  function validColor(s){return typeof s==='string'&&/^#[0-9a-fA-F]{6}$/.test(s)}
  function apply(t){
   if(!t||!t.colors||!t.controls||!t.cards)return;
@@ -195,7 +200,7 @@ $('open').onclick=()=>window.open(link(),'_blank');$('copy').onclick=async()=>{t
   for(const [v,n] of [['--ev-control-height',t.controls.heightPx],['--ev-control-radius',t.controls.radiusPx],['--ev-card-radius',t.cards.radiusPx]])if(Number.isInteger(n)&&n>=0&&n<=80)root.style.setProperty(v,n+'px');
   document.body.classList.add('ev-theme-ready');
  }
- async function load(){try{const response=await fetch(endpoint,{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);const themes=await response.json();if(!Array.isArray(themes))throw Error('Neplatný seznam stylů');const selected=themes.find(t=>t.active)||themes.find(t=>t.id==='standard');if(selected)apply(selected.config)}catch(e){console.warn('Eduvize: centrální styl není dostupný, ponechán výchozí vzhled.',e)}}
+ async function load(){try{const response=await fetch(endpoint,{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);const themes=await response.json();if(!Array.isArray(themes))throw Error('Neplatný seznam stylů');const selected=themes.find(t=>t.active)||themes.find(t=>t.id==='standard');if(selected){apply(selected.config);status('Aktivní styl: '+selected.name+' ✓',true)}else status('Žádný aktivní styl nebyl nalezen',false)}catch(e){status('Styl se nenačetl: '+e.message,false);console.warn('Eduvize: centrální styl není dostupný, ponechán výchozí vzhled.',e)}}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
  window.setInterval(()=>{if(!document.hidden)load()},60000);
