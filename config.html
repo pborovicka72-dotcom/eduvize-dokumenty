@@ -34,6 +34,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 #items article .document-visible input{width:18px;height:18px}
 #items article>button{white-space:nowrap}
 #items article input:not([type=checkbox]){width:100%;min-width:0}
+#category-visibility{margin:0 0 22px;border:1px solid var(--ev-border);border-radius:var(--ev-control-radius);background:var(--ev-secondary);padding:0 16px}
+#category-visibility summary{cursor:pointer;padding:13px 0;font-weight:700;color:var(--ev-text)}
+#category-visibility>p{margin:0 0 12px;color:var(--ev-muted);font-size:13px}
+.category-visibility-grid{display:flex;flex-wrap:wrap;gap:9px;padding-bottom:15px}
+#category-visibility .category-visibility-item{display:inline-flex;flex-direction:row;align-items:center;gap:7px;margin:0;padding:8px 12px;background:var(--ev-surface);border:1px solid var(--ev-border);border-radius:var(--ev-control-radius);font-size:13px;font-weight:600;cursor:pointer}
+.category-visibility-item input{margin:0;accent-color:var(--ev-accent)}
 #status{min-height:24px;color:var(--ev-accent);font-weight:650}
 #auth-status{font-weight:700}#auth-status.success{color:#16805d}#auth-status.error{color:#ae3951}
 .edu-admin-header{display:flex;align-items:center;gap:15px;margin:4px 0 18px}
@@ -62,15 +68,21 @@ async function loadCategories(){
 const result=await request('/api/admin/categories');
 categoryNames=result.categories;
 const old=document.getElementById('category-visibility');if(old)old.remove();
-const panel=document.createElement('section');panel.id='category-visibility';
-const title=document.createElement('h3');title.textContent='Viditelnost kategorií';panel.append(title);
+const panel=document.createElement('details');panel.id='category-visibility';panel.open=window.eduvizeCategoryPanelOpen===true;
+const summary=document.createElement('summary');
+const hidden=(result.hidden_categories||[]).length;
+summary.textContent='Viditelnost kategorií · '+(categoryNames.length-hidden)+' z '+categoryNames.length+' zobrazeno';
+panel.append(summary);
+panel.addEventListener('toggle',()=>{window.eduvizeCategoryPanelOpen=panel.open});
 const hint=document.createElement('p');hint.textContent='Prázdné kategorie se skrývají automaticky. Zde lze skrýt i kategorii s dokumenty.';panel.append(hint);
+const choices=document.createElement('div');choices.className='category-visibility-grid';
 for(const name of categoryNames){
-const label=document.createElement('label');label.style.display='block';
+const label=document.createElement('label');label.className='category-visibility-item';
 const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=!(result.hidden_categories||[]).includes(name);
-checkbox.onchange=async()=>{try{await request('/api/admin/categories/visibility',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,visible:checkbox.checked})});status('Viditelnost kategorie uložena.','success')}catch(error){checkbox.checked=!checkbox.checked;status(error.message)}};
-label.append(checkbox,document.createTextNode(' '+name));panel.append(label);
+checkbox.onchange=async()=>{try{await request('/api/admin/categories/visibility',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,visible:checkbox.checked})});summary.textContent='Viditelnost kategorií · '+choices.querySelectorAll('input:checked').length+' z '+categoryNames.length+' zobrazeno';status('Viditelnost kategorie uložena.','success')}catch(error){checkbox.checked=!checkbox.checked;status(error.message)}};
+label.append(checkbox,document.createTextNode(name));choices.append(label);
 }
+panel.append(choices);
 document.getElementById('items').before(panel);
 
 const select=$('category'),previous=select.value;
