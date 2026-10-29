@@ -18,7 +18,7 @@ const palettePresets=[
 {name:'Petrolej a korál',background:'#ECF5F4',text:'#193E45',surface:'#FFFFFF',primary:'#146D76',primaryText:'#FFFFFF',secondary:'#D9EBE9',secondaryText:'#21565A',accent:'#DF816F',border:'#BFD9D8'}
 ];
 function swatchGradient(colors){return 'linear-gradient(90deg,'+colors.primary+' 0 34%,'+colors.secondary+' 34% 56%,'+colors.background+' 56% 78%,'+colors.accent+' 78% 100%)'}
-function updateThemeSwatches(){for(const button of document.querySelectorAll('#theme-list-items button[data-theme-id]')){const t=themes.find(item=>item.id===button.dataset.themeId);if(t){const swatch=button.querySelector('.theme-swatch');if(swatch)swatch.style.background=swatchGradient(t.config.colors);swatch.style.color=t.config.colors.text;swatch.textContent='T'}}}
+function updateThemeSwatches(){for(const button of document.querySelectorAll('#theme-list-items button[data-theme-id]')){const t=themes.find(item=>item.id===button.dataset.themeId);if(t){const swatch=button.querySelector('.theme-swatch');if(swatch){swatch.style.background=swatchGradient(t.config.colors);swatch.style.color=t.config.colors.text;swatch.textContent='T'}}}}
 function renderPalettes(){const grid=document.getElementById('palette-grid');grid.replaceChildren();for(const p of palettePresets){const button=document.createElement('button');button.type='button';button.className='palette-choice';const swatch=document.createElement('span');swatch.className='palette-swatch';swatch.style.background=swatchGradient(p);const label=document.createElement('span');label.textContent=p.name;button.append(swatch,label);button.onclick=()=>{for(const [key,value] of Object.entries(p))if(key!=='name')theme.colors[key]=value;fields();msg('Paleta „'+p.name+'“ byla použita v náhledu. Pro trvalé uložení použijte Uložit jako nový styl nebo Uložit změny.')};grid.append(button)}}
 let standardUnlocked=false;let original,theme;const deep=o=>JSON.parse(JSON.stringify(o));const get=(o,path)=>path.split('.').reduce((v,k)=>v[k],o);const set=(o,path,val)=>{const p=path.split('.');o[p[0]][p[1]]=val};
 function editable(){return selected!=='standard'||standardUnlocked}
@@ -29,7 +29,7 @@ async function init(){try{const r=await fetch('/design-system/admin-theme.json',
 const tokenEl=document.getElementById('admin-token');tokenEl.value=sessionStorage.getItem('eduvize-documents-admin-token')||'';
 tokenEl.onchange=()=>{sessionStorage.setItem('eduvize-documents-admin-token',tokenEl.value.trim());loadThemes()};
 const msg=t=>document.getElementById('state').textContent=t;
-async function api(path,method='GET',body){const r=await fetch('/api/design-system/'+path,{method,headers:{'Authorization':'Bearer '+tokenEl.value.trim(),'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.detail||'HTTP '+r.status);return d}
+async function api(path,method='GET',body){let r;try{r=await fetch('/api/design-system/'+path,{method,headers:{'Authorization':'Bearer '+tokenEl.value.trim(),'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined})}catch(e){throw Error('Server není dostupný: '+e.message)}const d=await r.json().catch(()=>({}));if(!r.ok){const detail=typeof d.detail==='string'?d.detail:'HTTP '+r.status;if(r.status===401||r.status===403)throw Error('Neplatný nebo chybějící administrační token ('+r.status+').');if(r.status===503)throw Error('Databáze stylů není dostupná (503). '+detail);throw Error(detail)}return d}
 function selectTheme(id){
  const t=themes.find(x=>x.id===id);
  if(!t){msg('Vybraný styl nebyl nalezen.');return}
@@ -62,7 +62,7 @@ async function loadThemes(pick){
    button.append(swatch,label);button.addEventListener('click',()=>selectTheme(t.id));list.append(button);
   }
   selectTheme(themes.some(t=>t.id===(pick||selected))?(pick||selected):'standard');
- }catch(e){document.getElementById('theme-list-items').textContent='Styly se nepodařilo načíst.';msg('Nelze načíst uložené styly: '+e.message)}
+ }catch(e){document.getElementById('theme-list-items').textContent='Styly se nepodařilo načíst: '+e.message;msg('Nelze načíst uložené styly: '+e.message);console.error('Eduvize theme loading failed',e)}
 }
 document.getElementById('theme-select').addEventListener('change',e=>selectTheme(e.target.value));
 async function run(fn){try{await fn()}catch(e){msg('Chyba: '+e.message)}}
