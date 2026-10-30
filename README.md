@@ -1,10 +1,18 @@
-# Eduvize – Dokumenty (OneDrive testovací verze)
+# Eduvize – Dokumenty
 
-Dokumenty PDF/JPG/PNG/WebP se nahrávají z administrace přímo na OneDrive pomocí Microsoft Graph. Ve složce `Eduvize-Dokumenty` se ukládají soubory a `manifest.json` s kategoriemi, pořadím a viditelností.
+Samostatný modul pro správu a zobrazování školních dokumentů. Dokumenty se ukládají na OneDrive prostřednictvím Microsoft Graph; manifest určuje kategorie, pořadí a viditelnost.
 
-## Render
-Nastavte proměnné `MICROSOFT_CLIENT_ID`, `MICROSOFT_TENANT_ID`, `MICROSOFT_CLIENT_SECRET`, `PUBLIC_BASE_URL` (například `https://eduvize-dokumenty-api.onrender.com`) a silný `DOCUMENTS_ADMIN_TOKEN`. Přesměrování v Microsoft Entra musí přesně odpovídat `PUBLIC_BASE_URL/auth/microsoft/callback`. Instalujte závislosti přes `pip install -r requirements.txt`.
+## Stránky a API
+- Administrace: https://eduvize-dokumenty-api.onrender.com/config
+- Zobrazení: https://eduvize-dokumenty-api.onrender.com/display
+- Veřejné dokumenty: `/api/documents`
 
-Otevřete `/config`, vložte administrační klíč, klikněte **Připojit OneDrive**, autorizujte účet a po návratu znovu zadejte klíč. Poté lze nahrávat dokumenty. Kiosk je na `/display`, podporuje `?seconds=15&layout=signage`.
+## Nasazení
+Render spouští FastAPI. Konfigurace prostředí: `MICROSOFT_CLIENT_ID`, `MICROSOFT_TENANT_ID`, `MICROSOFT_CLIENT_SECRET`, `PUBLIC_BASE_URL`, `DOCUMENTS_ADMIN_TOKEN`, `DATABASE_URL` a `TOKEN_ENCRYPTION_KEY`. Přesměrování Microsoft Entra musí odpovídat `PUBLIC_BASE_URL/auth/microsoft/callback`.
 
-**Omezení testovací verze:** Obnovovací token je pouze v paměti procesu. Restart Renderu vyžaduje nové připojení OneDrivu; do té doby kiosk nemůže číst soubory. Pro ostrý provoz je nutné zabezpečené trvalé uložení tokenu, nezávislé na procesu, víceuživatelská správa a ověření souhlasu správce tenanta. Zobrazené dokumenty jsou veřejné. Nahrávejte pouze dokumenty určené ke zveřejnění. Pro více instancí služby současně tento prototyp není vhodný.
+OAuth tokeny se při správném nastavení databáze a šifrovacího klíče ukládají šifrovaně do PostgreSQL. Nezveřejňovat přístupové klíče ani soukromé dokumenty.
+
+## Architektura
+Tento repozitář vlastní správu dokumentů, OneDrive integraci a vlastní administraci. Společné barvy, komponenty administrace a Newline šablony načítá z `eduvize-styly`. Neudržovat zde další kopii centrálního editoru nebo geometrie segmentů.
+
+Změny CSS administrace testovat odděleně od zobrazovací stránky a ověřovat také vodorovné a svislé šablony Newline.
