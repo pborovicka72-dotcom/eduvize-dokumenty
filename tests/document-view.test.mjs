@@ -3,10 +3,11 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const source=html.match(/async function renderPdfSheets\([\s\S]*?\n\}(?=\nfunction updatePageButtons)/)[0];
-const requested=[],grid={classList:{add(){},toggle(){}},style:{setProperty(){}},clientWidth:500,clientHeight:400,children:[],replaceChildren(){this.children=[]},append(n){this.children.push(n)}};
+const requested=[],grid={classList:{add(){},toggle(){}},style:{setProperty(){}},clientWidth:700,clientHeight:400,children:[],replaceChildren(){this.children=[]},append(n){this.children.push(n)}};
 const pdf={numPages:5,async getPage(n){requested.push(n);return {getViewport:({scale})=>({width:100*scale,height:200*scale}),render:()=>({promise:Promise.resolve()})}}};
 let enlarged;
-const context={pdfViewport:{bind(){},scale:(p,w,h)=>w/p.width,zoomIn(){}},directDocument:true,pdfPage:0,pdfColumns:3,pdfTotal:5,pdfZoomed:false,pdfRenderId:1,Math,enlargePdfPage:n=>enlarged=n,showPdfOverview(){},node:()=>({style:{},classList:{toggle(){}},dataset:{},setAttribute(){},getContext(){return {}}})};
+const shared={window:{}};vm.runInNewContext(fs.readFileSync(new URL('../../eduvize-styly/design-system/document-viewport.js',import.meta.url),'utf8'),shared);
+const context={window:shared.window,pdfOverviewSample:Array(3).fill({width:100,height:200}),pdfOverviewColumns:3,updatePageButtons(){},pdfViewport:{bind(){},scale:(p,w,h)=>w/p.width,zoomIn(){}},directDocument:true,pdfPage:0,pdfColumns:3,pdfTotal:5,pdfZoomed:false,pdfRenderId:1,Math,enlargePdfPage:n=>enlarged=n,showPdfOverview(){},node:()=>({style:{},classList:{toggle(){}},dataset:{},setAttribute(){},getContext(){return {}}})};
 vm.runInNewContext(source,context);
 await context.renderPdfSheets(pdf,grid,1);
 assert.deepEqual(requested,[1,2,3]);assert.equal(grid.children.length,3);assert.ok(grid.children[0].height<=376);
@@ -19,3 +20,12 @@ assert.ok(html.includes('html.document-output #heading{display:none}'));
 console.log('PDF overview renders up to three pages, supports enlarging and protects current render.');
 
 context.pdfPage=0;context.pdfColumns=1;context.pdfTotal=1;context.pdfZoomed=false;await context.renderPdfSheets({...pdf,numPages:1},grid,1);assert.equal(typeof grid.children[0].onclick,"function");
+
+grid.clientWidth=300;grid.clientHeight=650;context.pdfZoomed=false;context.pdfPage=0;
+await context.renderPdfSheets(pdf,grid,1);assert.equal(grid.children.length,1);
+grid.clientWidth=700;grid.clientHeight=400;context.pdfPage=4;
+await context.renderPdfSheets(pdf,grid,1);assert.equal(context.pdfPage,3);assert.equal(grid.children.length,2);
+const navigation=html.split('\n').find(line=>line.startsWith('function movePages('));
+vm.runInNewContext(navigation,context);context.pdfFile=pdf;context.pdfGrid=grid;context.pdfTotal=5;context.redrawPdf=()=>{};
+context.movePages(-1);assert.equal(context.pdfPage,0);context.movePages(1);assert.equal(context.pdfPage,3);
+console.log('Responsive overview keeps current pages visible and returns correctly from a partial last group.');
