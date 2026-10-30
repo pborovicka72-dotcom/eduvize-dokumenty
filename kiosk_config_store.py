@@ -4,7 +4,7 @@ import re
 from datetime import datetime, timezone
 
 MAX_BYTES = 2 * 1024 * 1024
-CONFIG_KEYS = {'showInfoPanel','title','subtitle','idleSeconds','pages','school','menuLayout','menuPosition','defaultApp','keyboardMode','layoutOrientation','layoutStyle','layoutBlock','outputType'}
+CONFIG_KEYS = {'showLogo','tileColumns','tileRows','showInfoPanel','title','subtitle','idleSeconds','pages','school','menuLayout','menuPosition','defaultApp','keyboardMode','layoutOrientation','layoutStyle','layoutBlock','outputType'}
 
 def configuration_name(name):
     if not isinstance(name, str) or not re.fullmatch(r'[a-zA-Z0-9_-]{1,64}', name):
