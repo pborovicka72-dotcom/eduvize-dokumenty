@@ -7,7 +7,7 @@ const requested=[],grid={classList:{add(){},toggle(){}},style:{setProperty(){}},
 const pdf={numPages:5,async getPage(n){requested.push(n);return {getViewport:({scale})=>({width:100*scale,height:200*scale}),render:()=>({promise:Promise.resolve()})}}};
 let enlarged;
 const shared={window:{}};vm.runInNewContext(fs.readFileSync(new URL('../../eduvize-styly/design-system/document-viewport.js',import.meta.url),'utf8'),shared);
-const context={window:shared.window,pdfOverviewSample:Array(3).fill({width:100,height:200}),pdfOverviewColumns:3,updatePageButtons(){},pdfViewport:{bind(){},scale:(p,w,h)=>w/p.width,zoomIn(){}},directDocument:true,pdfPage:0,pdfColumns:3,pdfTotal:5,pdfZoomed:false,pdfRenderId:1,Math,enlargePdfPage:n=>enlarged=n,showPdfOverview(){},node:()=>({style:{},classList:{toggle(){}},dataset:{},setAttribute(){},getContext(){return {}}})};
+const context={documentReady(){},window:shared.window,pdfOverviewSample:Array(3).fill({width:100,height:200}),pdfOverviewColumns:3,updatePageButtons(){},pdfViewport:{bind(){},scale:(p,w,h)=>w/p.width,zoomIn(){}},directDocument:true,pdfPage:0,pdfColumns:3,pdfTotal:5,pdfZoomed:false,pdfRenderId:1,Math,enlargePdfPage:n=>enlarged=n,showPdfOverview(){},node:()=>({style:{},classList:{toggle(){}},dataset:{},setAttribute(){},getContext(){return {}}})};
 vm.runInNewContext(source,context);
 await context.renderPdfSheets(pdf,grid,1);
 assert.deepEqual(requested,[1,2,3]);assert.equal(grid.children.length,3);assert.ok(grid.children[0].height<=376);

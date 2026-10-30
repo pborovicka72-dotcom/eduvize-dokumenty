@@ -9,6 +9,7 @@ from fastapi import FastAPI, UploadFile, File, Form, Header, HTTPException, Requ
 from fastapi.responses import FileResponse, RedirectResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from kiosk_config_store import KioskConfigStore, MAX_BYTES
+from document_delivery import DocumentDelivery
 
 ROOT=Path(__file__).resolve().parent
 CLIENT=os.getenv("MICROSOFT_CLIENT_ID","")
@@ -156,6 +157,7 @@ async def save_manifest(folder,items,category_names=None,hidden_categories=None)
     data = json.dumps({"items":items,"categories":category_names,"hidden_categories":hidden_categories},ensure_ascii=False).encode()
     await graph("PUT", f"/me/drive/items/{system}:/manifest.json:/content",
                 content=data,headers={"Content-Type":"application/json"})
+    document_delivery.invalidate()
     # Only remove legacy metadata after the replacement was saved successfully.
     legacy = await child_named(folder,"manifest.json")
     if legacy:
@@ -195,6 +197,7 @@ async def auth_callback(code:str="",state:str="",error:str=""):
         r=await client.post(AUTH+"/token",data={"client_id":CLIENT,"client_secret":SECRET,"code":code,"redirect_uri":redirect_uri(),"grant_type":"authorization_code","scope":SCOPES})
     if r.status_code!=200:raise HTTPException(400,"Nepodařilo se získat přístupový token: "+r.text[:200])
     t=r.json()
+    document_delivery.invalidate()
     tokens.update(access_token=t["access_token"],refresh_token=t.get("refresh_token"),expires=time.time()+t.get("expires_in",3600))
     if not tokens.get("refresh_token"):raise HTTPException(400,"Microsoft nevrátil obnovovací token")
     persist_tokens()
@@ -230,10 +233,7 @@ async def category_visibility(request:Request,authorization:str|None=Header(defa
 
 @app.get("/api/documents")
 async def list_public():
-    folder,items=await all_items()
-    data=await manifest_data(folder)
-    hidden=set(data.get("hidden_categories",[]))
-    return {"items":public_items([x for x in items if x.get("category","Ostatní") not in hidden])}
+    return {"items":public_items(await document_delivery.visible_items())}
 @app.get("/api/admin/documents")
 async def list_admin(authorization:str|None=Header(default=None)):
     check_admin(authorization);_,items=await all_items()
@@ -319,19 +319,34 @@ async def delete(doc_id:str,authorization:str|None=Header(default=None)):
         item=next((x for x in items if x["id"]==doc_id),None)
         if not item:raise HTTPException(404,"Dokument nenalezen")
         await graph("DELETE",f"/me/drive/items/{item['file_id']}")
+        document_delivery.invalidate()
         await save_manifest(folder,[x for x in items if x["id"]!=doc_id])
     return {"ok":True}
-@app.get("/api/documents/{doc_id}/file")
-async def get_file(doc_id:str):
-    _,items=await all_items()
-    item=next((x for x in items if x["id"]==doc_id and x.get("visible",True)),None)
-    if not item:raise HTTPException(404,"Dokument nenalezen")
-    r=await graph("GET",f"/me/drive/items/{item['file_id']}/content")
-    if r.status_code in (301,302,303,307,308):
+async def load_public_manifest():
+    return await manifest_data(await ensure_folder())
+
+async def download_document(item):
+    response = await graph("GET", f"/me/drive/items/{item['file_id']}/content")
+    if response.status_code in (301,302,303,307,308):
         async with httpx.AsyncClient(timeout=45) as client:
-            r=await client.get(r.headers["location"])
-            if r.status_code!=200:raise HTTPException(502,"Nepodařilo se načíst soubor")
-    return Response(content=r.content,media_type=item["mime"],headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"})
+            response = await client.get(response.headers["location"])
+            if response.status_code != 200:
+                raise HTTPException(502,"Nepodařilo se načíst soubor")
+    return response.content
+
+document_delivery = DocumentDelivery(load_public_manifest, download_document)
+
+@app.get("/api/documents/{doc_id}/file")
+async def get_file(doc_id:str, request:Request):
+    try:
+        item, asset = await document_delivery.file(doc_id)
+    except KeyError:
+        raise HTTPException(404,"Dokument nenalezen")
+    headers = {"Cache-Control":"private, no-cache", "ETag":asset.etag, "X-Content-Type-Options":"nosniff"}
+    validators = [value.strip().removeprefix('W/') for value in request.headers.get('if-none-match', '').split(',')]
+    if asset.etag in validators or '*' in validators:
+        return Response(status_code=304, headers=headers)
+    return Response(content=asset.data, media_type=item['mime'], headers=headers)
 
 # Config files use the existing authenticated OneDrive connection, never the public catalog.
 kiosk_configurations = KioskConfigStore(graph, ensure_folder, system_folder, child_named, read_drive_json, lock)
