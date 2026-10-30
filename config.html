@@ -17,7 +17,6 @@ input[type=file]::file-selector-button{border:0;border-radius:7px;padding:5px 11
 
 /* Primary actions outside the output section use its canonical primary button palette. */
 .ev-admin .edu-admin__card #microsoft{background:var(--ev-primary);color:var(--ev-primary-text);border-color:var(--ev-primary)}
-button.danger,.btn.danger{background:#ae3951;color:#fff}
 button:disabled{opacity:.45;cursor:default}
 
 
@@ -123,9 +122,9 @@ for(const label of [...new Set([...categoryNames,item.category])]){const option=
 category.value=item.category;
 const visible=document.createElement('label');visible.className='document-visible';visible.textContent='Zobrazit ';
 const check=document.createElement('input');check.type='checkbox';check.checked=!!item.visible;visible.append(check);
-const save=document.createElement('button');save.textContent='Uložit';
+const save=document.createElement('button');save.type='button';save.className='edu-admin__button';save.textContent='Uložit';
 save.onclick=async()=>{try{await request('/api/admin/documents/'+item.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name.value,title:title.value,category:category.value,visible:check.checked})});status('Změny uloženy.','success');await load()}catch(e){status(e.message)}};
-const del=document.createElement('button');del.textContent='Smazat';del.className='danger';
+const del=document.createElement('button');del.type='button';del.className='edu-admin__button';del.textContent='Smazat';
 del.onclick=async()=>{if(!confirm('Opravdu trvale smazat '+item.name+'?'))return;try{await request('/api/admin/documents/'+item.id,{method:'DELETE'});await load()}catch(e){status(e.message)}};
 row.append(grip,name,title,category,visible,save,del);
 row.addEventListener('dragstart',event=>{dragged=row;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',String(item.id));row.classList.add('dragging')});
