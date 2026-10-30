@@ -8,6 +8,7 @@ from cryptography.fernet import Fernet, InvalidToken
 from fastapi import FastAPI, UploadFile, File, Form, Header, HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
+from kiosk_config_store import KioskConfigStore, MAX_BYTES
 
 ROOT=Path(__file__).resolve().parent
 CLIENT=os.getenv("MICROSOFT_CLIENT_ID","")
@@ -62,7 +63,7 @@ def restore_tokens():
 
 lock=asyncio.Lock()
 app=FastAPI(title="Eduvize – Dokumenty / OneDrive")
-app.add_middleware(CORSMiddleware,allow_origins=["https://pborovicka72-dotcom.github.io","https://eduvize-weather.onrender.com"],allow_methods=["GET","POST","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
+app.add_middleware(CORSMiddleware,allow_origins=["https://pborovicka72-dotcom.github.io","https://eduvize-weather.onrender.com"],allow_methods=["GET","POST","PUT","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
 
 def check_admin(auth):
     if not ADMIN:raise HTTPException(503,"Set DOCUMENTS_ADMIN_TOKEN in Render Environment")
@@ -109,13 +110,16 @@ async def system_folder(folder):
                     json={"name":"_Eduvize-system","folder":{},"@microsoft.graph.conflictBehavior":"fail"})
     return r.json()["id"]
 
-async def read_manifest_item(item):
+async def read_drive_json(item):
     response = await graph("GET", f"/me/drive/items/{item['id']}/content")
     if response.status_code in (301,302,303,307,308):
         async with httpx.AsyncClient(timeout=30) as client:
             response = await client.get(response.headers["location"])
             response.raise_for_status()
-    data = response.json()
+    return response.json()
+
+async def read_manifest_item(item):
+    data = await read_drive_json(item)
     if not isinstance(data,dict) or not isinstance(data.get("items"),list):
         raise HTTPException(502,"Neplatná struktura systémového manifestu")
     return data
@@ -328,3 +332,38 @@ async def get_file(doc_id:str):
             r=await client.get(r.headers["location"])
             if r.status_code!=200:raise HTTPException(502,"Nepodařilo se načíst soubor")
     return Response(content=r.content,media_type=item["mime"],headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"})
+
+# Config files use the existing authenticated OneDrive connection, never the public catalog.
+kiosk_configurations = KioskConfigStore(graph, ensure_folder, system_folder, child_named, read_drive_json, lock)
+
+@app.get("/api/admin/kiosk-configurations")
+async def list_kiosk_configurations(authorization: str = Header(default="")):
+    check_admin(authorization)
+    try:
+        return {"items":await kiosk_configurations.list()}
+    except ValueError as error:
+        raise HTTPException(400, str(error))
+
+@app.get("/api/admin/kiosk-configurations/{name}")
+async def load_kiosk_configuration(name: str, authorization: str = Header(default="")):
+    check_admin(authorization)
+    try:
+        data = await kiosk_configurations.load(name)
+    except ValueError as error:
+        raise HTTPException(400, str(error))
+    if data is None:
+        raise HTTPException(404, "Konfigurace nebyla na OneDrive nalezena.")
+    return data
+
+@app.put("/api/admin/kiosk-configurations/{name}")
+async def save_kiosk_configuration(name: str, request: Request, authorization: str = Header(default="")):
+    check_admin(authorization)
+    raw = bytearray()
+    async for chunk in request.stream():
+        raw.extend(chunk)
+        if len(raw) > MAX_BYTES:
+            raise HTTPException(413, "Limit konfigurace je 2 MB.")
+    try:
+        return await kiosk_configurations.save(name, bytes(raw))
+    except (ValueError, UnicodeError) as error:
+        raise HTTPException(400, str(error))
