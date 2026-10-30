@@ -1,4 +1,4 @@
-<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize – Správa dokumentů</title><style id="eduvize-admin-clean">
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize – Správa dokumentů</title><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/active-theme.js?v=4"></script><style id="eduvize-admin-clean">
 
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--ev-bg);color:var(--ev-text)}
 
@@ -175,30 +175,4 @@ $('save-settings').onclick=()=>{
  catch(e){status('Nastavení se nepodařilo uložit: '+e.message)}
 };
 $('open').onclick=()=>window.open(link(),'_blank');$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(link());status('Odkaz zkopírován.','success')}catch{status(link())}};
-</script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=1"></script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=8"></script><script id="eduvize-central-theme-loader">
-(function(){
- const endpoint='https://eduvize-design-system-api.onrender.com/api/design-system/themes';
- function validColor(s){return typeof s==='string'&&/^#[0-9a-fA-F]{6}$/.test(s)}
- function apply(t){
-  if(!t||!t.colors||!t.controls||!t.cards)throw Error('Neúplná konfigurace stylu');
-  const root=document.documentElement,colors=t.colors;
-  const mapping={background:'--ev-bg',text:'--ev-text',surface:'--ev-surface',muted:'--ev-muted',primary:'--ev-primary',primaryText:'--ev-primary-text',secondary:'--ev-secondary',secondaryText:'--ev-secondary-text',accent:'--ev-accent',border:'--ev-border'};
-  for(const [key,cssVar] of Object.entries(mapping)){if(!validColor(colors[key]))throw Error('Neplatná barva: '+key);root.style.setProperty(cssVar,colors[key])}
-  for(const [v,n] of [['--ev-control-height',t.controls.heightPx],['--ev-control-radius',t.controls.radiusPx],['--ev-card-radius',t.cards.radiusPx]])if(Number.isInteger(n)&&n>=0&&n<=80)root.style.setProperty(v,n+'px');
-  document.body.classList.add('ev-theme-ready');
- }
- async function load(){
-  try{
-   const response=await fetch(endpoint,{cache:'no-store'});
-   if(!response.ok)throw Error('HTTP '+response.status);
-   const themes=await response.json();
-   if(!Array.isArray(themes))throw Error('Neplatný seznam stylů');
-   const selected=themes.find(t=>t.active)||themes.find(t=>t.id==='standard');
-   if(selected)apply(selected.config);
-  }catch(e){console.warn('Eduvize: centrální styl není dostupný, ponechán výchozí vzhled.',e)}
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
- document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
- window.setInterval(()=>{if(!document.hidden)load()},60000);
-})();
-</script></body></html>
+</script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=1"></script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=8"></script></body></html>
