@@ -7,7 +7,7 @@ from types import SimpleNamespace
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from kiosk_config_store import KioskConfigStore, configuration_file, configuration_name, MAX_BYTES
 
-CONFIG = {'format':'eduvize-kiosk','version':1,'config':{'title':'Škola','pages':[{'id':'home','buttons':[]},{'id':'parents','buttons':[{'type':'document','target':'https://example.org/file'}],'content':{'intro':'Úvod','sections':[{'title':'Sekce','image':'https://example.org/img.png'}]}}]}}
+CONFIG = {'format':'eduvize-kiosk','version':1,'config':{'title':'Škola','pages':[{'id':'home','buttons':[]},{'id':'parents','buttons':[{'type':'document','target':'https://example.org/file'},{'type':'image','target':'https://example.org/photo'}],'content':{'intro':'Úvod','sections':[{'title':'Sekce','image':'https://example.org/img.png'}]}}]}}
 
 class StoreTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):

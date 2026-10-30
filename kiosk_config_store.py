@@ -38,7 +38,7 @@ def configuration_file(raw):
             raise ValueError('Neplatný seznam tlačítek.')
         total += len(buttons)
         for button in buttons:
-            if not isinstance(button, dict) or button.get('type') not in ('page','url','app','document') or not isinstance(button.get('target'), str):
+            if not isinstance(button, dict) or button.get('type') not in ('page','url','app','document','image') or not isinstance(button.get('target'), str):
                 raise ValueError('Neplatná akce tlačítka.')
         content = page.get('content')
         if content is not None and (not isinstance(content, dict) or not isinstance(content.get('sections'), list) or len(content['sections']) > 100):
