@@ -17,3 +17,5 @@ await context.renderPdfSheets(pdf,grid,0);assert.equal(grid.children.length,1);
 assert.ok(html.includes('Načítám dokument…'));
 assert.ok(html.includes('html.document-output #heading{display:none}'));
 console.log('PDF overview renders up to three pages, supports enlarging and protects current render.');
+
+context.pdfPage=0;context.pdfColumns=1;context.pdfTotal=1;context.pdfZoomed=false;await context.renderPdfSheets({...pdf,numPages:1},grid,1);assert.equal(typeof grid.children[0].onclick,"function");
