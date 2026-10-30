@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const source=html.match(/async function renderPdfSheets\([\s\S]*?\n\}(?=\nfunction updatePageButtons)/)[0];
+const requested=[],grid={clientWidth:500,clientHeight:400,children:[],replaceChildren(){this.children=[]},append(n){this.children.push(n)}};
+const pdf={numPages:5,async getPage(n){requested.push(n);return {getViewport:({scale})=>({width:100*scale,height:200*scale}),render:()=>({promise:Promise.resolve()})}}};
+const context={directDocument:true,pdfPage:0,pdfColumns:1,pdfRenderId:1,Math,node:()=>({style:{},dataset:{},setAttribute(){},getContext(){return {}}})};
+vm.runInNewContext(source,context);
+await context.renderPdfSheets(pdf,grid,1);
+assert.deepEqual(requested,[1]);assert.equal(grid.children.length,1);assert.ok(grid.children[0].height<=376);
+context.pdfPage=1;await context.renderPdfSheets(pdf,grid,1);assert.deepEqual(requested,[1,2]);assert.equal(grid.children.length,1);
+context.pdfPage=2;context.pdfColumns=2;await context.renderPdfSheets(pdf,grid,1);assert.equal(grid.children.length,2);
+await context.renderPdfSheets(pdf,grid,0);assert.equal(grid.children.length,0);
+console.log('Direct document viewer renders only current PDF pages and fits them to the viewport.');
