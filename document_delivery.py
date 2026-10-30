@@ -75,7 +75,7 @@ class DocumentDelivery:
     async def visible_items(self):
         data = await self.catalog()
         hidden = set(data.get('hidden_categories', []))
-        return [item for item in data['items'] if item.get('visible', True) and item.get('category', 'Ostatní') not in hidden]
+        return [item for item in data['items'] if item.get('visible', True) and (item.get('scope','documents')=='kiosk' or item.get('category', 'Ostatní') not in hidden)]
 
     async def file(self, doc_id):
         generation = self.catalog_cache.generation

@@ -142,10 +142,10 @@ async def manifest_data(folder):
 async def manifest(folder):
     return (await manifest_data(folder))["items"]
 
-async def categories(folder):
+async def categories(folder,scope="documents"):
     data=await manifest_data(folder)
-    extra=data.get("categories",[])
-    names=DEFAULT_CATEGORIES+list(extra)+[x.get("category","") for x in data["items"]]
+    extra=data.get("categories",[]) if scope=="documents" else []
+    names=DEFAULT_CATEGORIES+list(extra)+[x.get("category","") for x in data["items"] if in_document_scope(x,scope)]
     return list(dict.fromkeys(x for x in names if isinstance(x,str) and x.strip()))
 
 async def save_manifest(folder,items,category_names=None,hidden_categories=None):
@@ -165,6 +165,14 @@ async def save_manifest(folder,items,category_names=None,hidden_categories=None)
 async def all_items():
     folder=await ensure_folder()
     return folder,await manifest(folder)
+def document_scope(value):
+    if value not in ('documents','kiosk'):
+        raise HTTPException(422,"Neplatné určení dokumentu")
+    return value
+
+def in_document_scope(item,scope):
+    return item.get("scope","documents")==scope
+
 def public_items(items):
     return sorted([{k:v for k,v in item.items() if k!="file_id"} for item in items if item.get("visible",True)],key=lambda x:(x.get("position",0),x["name"]))
 @app.get("/health")
@@ -232,18 +240,20 @@ async def category_visibility(request:Request,authorization:str|None=Header(defa
     return {"ok":True}
 
 @app.get("/api/documents")
-async def list_public():
-    return {"items":public_items(await document_delivery.visible_items())}
+async def list_public(scope:str="documents"):
+    if scope!="all":document_scope(scope)
+    items=await document_delivery.visible_items()
+    return {"items":public_items(items if scope=="all" else [x for x in items if in_document_scope(x,scope)])}
 @app.get("/api/admin/documents")
-async def list_admin(authorization:str|None=Header(default=None)):
-    check_admin(authorization);_,items=await all_items()
+async def list_admin(authorization:str|None=Header(default=None),scope:str="documents"):
+    check_admin(authorization);document_scope(scope);_,items=await all_items();items=[x for x in items if in_document_scope(x,scope)]
     return {"items":sorted(items,key=lambda x:(x.get("position",0),x["name"]))}
 @app.get("/api/admin/categories")
-async def list_categories(authorization:str|None=Header(default=None)):
+async def list_categories(authorization:str|None=Header(default=None),scope:str="documents"):
     check_admin(authorization)
     folder=await ensure_folder()
     data=await manifest_data(folder)
-    return {"categories":await categories(folder),"hidden_categories":data.get("hidden_categories",[])}
+    return {"categories":await categories(folder,document_scope(scope)),"hidden_categories":data.get("hidden_categories",[])}
 
 @app.post("/api/admin/categories")
 async def create_category(request:Request,authorization:str|None=Header(default=None)):
@@ -262,8 +272,9 @@ async def create_category(request:Request,authorization:str|None=Header(default=
     return {"name":name}
 
 @app.post("/api/admin/documents")
-async def upload(file:UploadFile=File(...),category:str=Form("Ostatní"),authorization:str|None=Header(default=None)):
+async def upload(file:UploadFile=File(...),category:str=Form("Ostatní"),scope:str=Form("documents"),authorization:str|None=Header(default=None)):
     check_admin(authorization)
+    document_scope(scope)
     ext=Path(file.filename or "").suffix.lower()
     if ext not in TYPES:raise HTTPException(415,"Povoleny PDF, obrázky, MP4, WebM, DOCX a PPTX")
     data=await file.read(MAX_SIZE+1)
@@ -272,17 +283,17 @@ async def upload(file:UploadFile=File(...),category:str=Form("Ostatní"),authori
     if not checks[ext]:raise HTTPException(415,"Neplatný formát souboru")
     async with lock:
         folder,items=await all_items()
-        allowed=await categories(folder)
+        allowed=await categories(folder,scope)
         if category not in allowed:raise HTTPException(422,"Vyberte kategorii ze seznamu")
         doc_id=uuid.uuid4().hex
         name=doc_id+ext
         r=await graph("PUT",f"/me/drive/items/{folder}:/{name}:/content",content=data,headers={"Content-Type":TYPES[ext]})
-        entry={"id":doc_id,"file_id":r.json()["id"],"name":Path(file.filename or "Dokument").name[:180],"category":category.strip()[:80] or "Ostatní","mime":TYPES[ext],"position":max([x.get("position",0) for x in items],default=-1)+1,"visible":True}
+        entry={"scope":scope,"id":doc_id,"file_id":r.json()["id"],"name":Path(file.filename or "Dokument").name[:180],"category":category.strip()[:80] or "Ostatní","mime":TYPES[ext],"position":max([x.get("position",0) for x in items],default=-1)+1,"visible":True}
         items.append(entry)
         await save_manifest(folder,items)
     return {"id":doc_id,"name":entry["name"]}
 @app.post("/api/admin/documents/reorder")
-async def reorder_documents(request:Request,authorization:str|None=Header(default=None)):
+async def reorder_documents(request:Request,authorization:str|None=Header(default=None),scope:str="documents"):
     check_admin(authorization)
     body=await request.json()
     order=body.get("ids")
@@ -290,10 +301,12 @@ async def reorder_documents(request:Request,authorization:str|None=Header(defaul
         raise HTTPException(422,"Neplatné pořadí dokumentů")
     async with lock:
         folder,items=await all_items()
-        if set(order)!={x["id"] for x in items}:
+        document_scope(scope)
+        if set(order)!={x["id"] for x in items if in_document_scope(x,scope)}:
             raise HTTPException(409,"Seznam dokumentů se změnil, načtěte jej znovu")
         positions={doc_id:i for i,doc_id in enumerate(order)}
-        for item in items:item["position"]=positions[item["id"]]
+        for item in items:
+            if item["id"] in positions:item["position"]=positions[item["id"]]
         await save_manifest(folder,items)
     return {"ok":True}
 
