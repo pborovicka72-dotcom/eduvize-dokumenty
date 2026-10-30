@@ -66,3 +66,19 @@ class StoreTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(await self.store.load('main'), original)
 
 if __name__ == '__main__': unittest.main()
+
+class RouteAuthorizationTests(unittest.IsolatedAsyncioTestCase):
+    async def test_all_cloud_routes_authenticate_before_storage_or_body_reads(self):
+        import ast
+        source = ast.parse((Path(__file__).resolve().parents[1] / 'app.py').read_text())
+        route_names = {'list_kiosk_configurations','load_kiosk_configuration','save_kiosk_configuration'}
+        functions = [n for n in source.body if isinstance(n,ast.AsyncFunctionDef) and n.name in route_names]
+        def reject(auth): raise PermissionError('unauthorized')
+        scope = {'Header':lambda **kwargs:None,'Request':object,'check_admin':reject}
+        for function in functions: function.decorator_list=[]
+        exec(compile(ast.Module(body=functions,type_ignores=[]),'routes','exec'),scope)
+        for name in route_names:
+            kwargs={'authorization':'wrong'}
+            if name != 'list_kiosk_configurations': kwargs['name']='main'
+            if name == 'save_kiosk_configuration': kwargs['request']=object()
+            with self.assertRaises(PermissionError): await scope[name](**kwargs)
