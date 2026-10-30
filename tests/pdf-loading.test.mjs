@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const source=html.match(/function loadPdf\([\s\S]*?\n\}(?=\nlet pendingPreviews)/)[0];
 let requests=0,fail=false,parsed=0;
-const scope={previewCache:new Map(),document:{readyState:'complete'},window:{pdfjsLib:{GlobalWorkerOptions:{},getDocument(){parsed++;return {promise:Promise.resolve({pages:3})};}}},fileUrl:doc=>'/file/'+doc.id,fetch:async()=>{requests++;return {ok:!fail,status:fail?502:200,arrayBuffer:async()=>new ArrayBuffer(1)};}};
+const scope={pdfLibraryReady:Promise.resolve(true),previewCache:new Map(),document:{readyState:'complete'},window:{pdfjsLib:{GlobalWorkerOptions:{},getDocument(){parsed++;return {promise:Promise.resolve({pages:3})};}}},fileUrl:doc=>'/file/'+doc.id,fetch:async()=>{requests++;return {ok:!fail,status:fail?502:200,arrayBuffer:async()=>new ArrayBuffer(1)};}};
 vm.runInNewContext(source,scope);
 const first=scope.loadPdf({id:'a'}),second=scope.loadPdf({id:'a'});assert.equal(first,second);await Promise.all([first,second]);assert.equal(requests,1);assert.equal(parsed,1);
 fail=true;await assert.rejects(scope.loadPdf({id:'b'}));fail=false;await scope.loadPdf({id:'b'});assert.equal(requests,3);
