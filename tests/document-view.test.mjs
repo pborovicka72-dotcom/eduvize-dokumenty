@@ -16,7 +16,7 @@ context.pdfPage=3;await context.renderPdfSheets(pdf,grid,1);assert.equal(grid.ch
 context.pdfPage=4;context.pdfColumns=1;context.pdfZoomed=true;await context.renderPdfSheets(pdf,grid,1);assert.equal(grid.children.length,1);assert.ok(Number.parseFloat(grid.children[0].style.height)>grid.clientHeight);
 await context.renderPdfSheets(pdf,grid,0);assert.equal(grid.children.length,1);
 assert.ok(html.includes('Načítám dokument…'));
-const styles=fs.readFileSync(new URL('../../eduvize-styly/design-system/documents.css',import.meta.url),'utf8');assert.ok(styles.includes('html.document-output #heading{display:none}'));
+const styles=fs.readFileSync(new URL('../../eduvize-styly/design-system/documents.css',import.meta.url),'utf8');assert.ok(html.includes('id="documentNavigation"'));assert.ok(html.includes("$('documentNavigation').hidden=standaloneDocument"));
 console.log('PDF overview renders up to three pages, supports enlarging and protects current render.');
 
 context.pdfPage=0;context.pdfColumns=1;context.pdfTotal=1;context.pdfZoomed=false;await context.renderPdfSheets({...pdf,numPages:1},grid,1);assert.equal(typeof grid.children[0].onclick,"function");
