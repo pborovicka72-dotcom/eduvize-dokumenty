@@ -15,7 +15,13 @@ html.kiosk-output:not(.document-output) .shell>header>.eduvize-kiosk-frame{displ
 </style><style id="document-output-layout">
 html.document-output,html.document-output body{height:100%;overflow:hidden;background:var(--ev-bg,#fff)}
 html.document-output .shell{height:100dvh;max-width:none;padding:0;display:flex;flex-direction:column}
-html.document-output .shell>header,html.document-output .viewer-top{display:none}
+html.document-output .shell>header,html.document-output .viewer-top,html.document-output #heading{display:none}
+#documentLoading{display:none}
+html.document-output:not(.document-ready) #documentLoading{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:var(--ev-bg,#fff);color:var(--ev-text,#153a53);font-size:20px;text-align:center;padding:24px}
+html.document-output:not(.document-ready) .card{visibility:hidden}
+html.document-output .pdf-page[role=button]{cursor:zoom-in}
+html.document-output .pdf-page.is-zoomed{cursor:zoom-out}
+html.document-output .pdf-page:focus-visible{outline:3px solid var(--ev-accent,#087c91);outline-offset:3px}
 html.document-output .card{display:flex;flex-direction:column;flex:1;min-height:0;padding:0;border:0;border-radius:0;box-shadow:none}
 html.document-output #detail{display:flex;flex-direction:column;flex:1;min-height:0}
 html.document-output .viewer{flex:1;min-height:0;border-radius:0;background:var(--ev-surface,#fff)}
@@ -24,21 +30,22 @@ html.document-output .pdf-pages{flex:1;height:100%;min-height:0;overflow:hidden;
 html.document-output .pdf-page{justify-self:center;max-width:100%;box-shadow:none}
 html.document-output .controls{flex:none;justify-content:center;gap:10px;margin:0;padding:6px}
 html.document-output .controls .nav-button{min-height:34px;min-width:0;padding:7px 12px;font-size:13px;border-radius:var(--ev-control-radius,10px)}
-</style></head><body><main class="shell"><header><div><div class="eyebrow">EDUVIZE · DOKUMENTY</div><h1>Dokumenty školy</h1><div class="subtitle">Prohlížejte oznámení, soubory a informace školy</div></div></header><section class="card">
+</style></head><body><main class="shell"><div id="documentLoading" role="status" aria-live="polite">Načítám dokument…</div><header><div><div class="eyebrow">EDUVIZE · DOKUMENTY</div><h1>Dokumenty školy</h1><div class="subtitle">Prohlížejte oznámení, soubory a informace školy</div></div></header><section class="card">
 <div class="section-heading" id="heading"><h2 id="heading-title">Kategorie dokumentů</h2><span id="heading-count" class="pill"></span></div>
 <div id="browse"></div>
-<div id="detail" class="hidden"><div class="viewer-top"><button class="nav-button" id="back">← Zpět</button><div class="viewer-title" id="viewer-title"></div></div><div class="viewer" id="viewer"></div><div class="controls" id="controls"><button class="nav-button" id="prev">← Předchozí</button><button class="nav-button" id="next">Další →</button></div></div>
+<div id="detail" class="hidden"><div class="viewer-top"><button class="nav-button" id="back">← Zpět</button><div class="viewer-title" id="viewer-title"></div></div><div class="viewer" id="viewer"></div><div class="controls" id="controls"><button class="nav-button" id="prev">← Předchozí</button><button class="nav-button" id="next">Další →</button><button class="nav-button hidden" id="pdfOverview">Zpět na přehled</button><span id="pdfPosition" role="status" aria-live="polite"></span></div></div>
 </section></main>
 <script>
 const $=id=>document.getElementById(id),params=new URLSearchParams(location.search);
 const signage=params.get('layout')==='signage',kiosk=params.get('viewMode')==='kiosk'||params.get('output')==='kiosk';
 const directDocument=kiosk&&!!params.get('document');if(directDocument)document.documentElement.classList.add('document-output');
 if(signage)document.body.classList.add('signage');if(kiosk)document.documentElement.classList.add('kiosk-output');
-const seconds=Math.max(3,Math.min(3600,Number(params.get('seconds'))||15));const videoSound=params.get('video_sound')==='on';const pdfColumns=Math.max(1,Math.min(6,parseInt(params.get('pdf_columns')||'1',10)||1));
-let docs=[],category=null,selected=null,index=0,pdfPage=0,pdfTotal=0,pdfGrid=null,pdfFile=null,screen='folders';
+const seconds=Math.max(3,Math.min(3600,Number(params.get('seconds'))||15));const videoSound=params.get('video_sound')==='on';let pdfColumns=directDocument?3:Math.max(1,Math.min(6,parseInt(params.get('pdf_columns')||'1',10)||1));
+let docs=[],category=null,selected=null,index=0,pdfPage=0,pdfTotal=0,pdfGrid=null,pdfFile=null,pdfZoomed=false,pdfOverviewColumns=3,screen='folders';
 const categoryOf=d=>d.category||'Ostatní';const displayTitle=d=>d.title?.trim()||d.name;
 const fileUrl=d=>'/api/documents/'+encodeURIComponent(d.id)+'/file';
 const folderIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 6a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+function documentReady(){if(directDocument)document.documentElement.classList.add('document-ready');}
 function node(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
 function setHeading(title,count){$('heading-title').textContent=title;$('heading-count').textContent=count}
 function categoryDocs(){return category===null?docs:docs.filter(d=>categoryOf(d)===category)}
@@ -64,35 +71,43 @@ let pdfRenderId=0;
 async function showPdfPages(doc,viewer,renderId){
  const grid=node('div','pdf-pages');grid.style.setProperty('--pdf-columns',String(pdfColumns));grid.append(node('div','muted','Načítám stránky PDF…'));viewer.append(grid);
  try{
+  if(!window.pdfjsLib&&document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true}));
   if(!window.pdfjsLib)throw Error('Knihovna PDF.js není dostupná');
   window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const response=await fetch(fileUrl(doc));if(!response.ok)throw Error('HTTP '+response.status);
   const pdf=await window.pdfjsLib.getDocument({data:await response.arrayBuffer()}).promise;
   if(renderId!==pdfRenderId)return;
-  grid.replaceChildren();pdfTotal=pdf.numPages;pdfGrid=grid;pdfPage=0;updatePageButtons();
-  pdfFile=pdf;await renderPdfSheets(pdf,grid,renderId);
+  grid.replaceChildren();pdfTotal=pdf.numPages;pdfGrid=grid;pdfPage=0;if(directDocument){pdfOverviewColumns=Math.min(3,pdfTotal);pdfColumns=pdfOverviewColumns;pdfZoomed=false;}updatePageButtons();
+  pdfFile=pdf;await renderPdfSheets(pdf,grid,renderId);if(renderId===pdfRenderId)documentReady();
 
- }catch(e){if(renderId===pdfRenderId)grid.replaceChildren(node('div','pdf-error','Stránky PDF se nepodařilo zobrazit: '+e.message))}
+ }catch(e){if(renderId===pdfRenderId){grid.replaceChildren(node('div','pdf-error','Stránky PDF se nepodařilo zobrazit: '+e.message));documentReady();}}
 }
 async function renderPdfSheets(pdf,grid,renderId){
- if(directDocument)grid.replaceChildren();
-  const maxWidth=Math.max(120,Math.floor((grid.clientWidth-24-(pdfColumns-1)*12)/pdfColumns));
+ if(renderId!==pdfRenderId)return;
+ if(directDocument){grid.replaceChildren();grid.style.setProperty('--pdf-columns',String(pdfColumns));}
+  const maxWidth=Math.max(directDocument?1:120,Math.floor((grid.clientWidth-24-(pdfColumns-1)*12)/pdfColumns));
   for(let n=directDocument?pdfPage+1:1;n<=(directDocument?Math.min(pdf.numPages,pdfPage+pdfColumns):pdf.numPages);n++){
    if(renderId!==pdfRenderId)return;
-   const page=await pdf.getPage(n),original=page.getViewport({scale:1});
+   const page=await pdf.getPage(n),original=page.getViewport({scale:1});if(renderId!==pdfRenderId)return;
    const scale=Math.min(2,maxWidth/original.width,directDocument?Math.max(1,grid.clientHeight-24)/original.height:Infinity);
    const viewport=page.getViewport({scale});
    const canvas=node('canvas','pdf-page');if(directDocument){canvas.style.width=viewport.width+'px';canvas.style.height=viewport.height+'px';}canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
-   canvas.setAttribute('aria-label','Stránka '+n+' z '+pdf.numPages);canvas.dataset.page=String(n-1);grid.append(canvas);
+   canvas.setAttribute('aria-label','Stránka '+n+' z '+pdf.numPages);canvas.dataset.page=String(n-1);
+   if(directDocument&&pdfTotal>1){canvas.setAttribute('role','button');canvas.tabIndex=0;canvas.title=pdfZoomed?'Zpět na přehled':'Zvětšit stránku '+n;canvas.classList.toggle('is-zoomed',pdfZoomed);canvas.onclick=()=>pdfZoomed?showPdfOverview():enlargePdfPage(n-1);canvas.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();canvas.onclick();}};}
+   grid.append(canvas);
    await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
   }
 }
-function updatePageButtons(){const pdf=screen==='document'&&categoryDocs().find(d=>d.id===selected)?.mime==='application/pdf';$('prev').disabled=!pdf||pdfPage<=0;$('next').disabled=!pdf||pdfPage+pdfColumns>=pdfTotal;$('controls').classList.toggle('hidden',!pdf||(directDocument&&pdfTotal<=pdfColumns))}
-function movePages(delta){if(!pdfGrid||!pdfTotal)return;pdfPage=Math.max(0,Math.min(Math.max(0,pdfTotal-pdfColumns),pdfPage+delta*pdfColumns));if(directDocument&&pdfFile){updatePageButtons();const id=++pdfRenderId;renderPdfSheets(pdfFile,pdfGrid,id).catch(error=>pdfGrid.replaceChildren(node('div','pdf-error',error.message)));return;}const page=pdfGrid.querySelector('[data-page="'+pdfPage+'"]');if(page)pdfGrid.scrollTo({top:page.offsetTop-pdfGrid.offsetTop,behavior:'smooth'});updatePageButtons()}
-function showDocument(id){const list=categoryDocs();const position=list.findIndex(d=>d.id===id);if(position<0){if(signage){showFolders()}else if(category!==null){showCategory(category)}else{showFolders()}return}screen='document';index=position;selected=id;const doc=list[index];$('browse').classList.add('hidden');$('detail').classList.remove('hidden');$('heading').classList.add('hidden');$('viewer-title').textContent=displayTitle(doc);pdfGrid=null;pdfFile=null;pdfTotal=0;pdfPage=0;updatePageButtons();const viewer=$('viewer');viewer.replaceChildren();const renderId=++pdfRenderId;let el;if(doc.mime==='application/pdf'){showPdfPages(doc,viewer,renderId)}else if(doc.mime?.startsWith('video/')){el=node('video');el.controls=true;el.playsInline=true;el.preload='metadata';el.src=fileUrl(doc);if(signage){el.autoplay=true;el.muted=!videoSound;el.loop=true;el.play().catch(()=>{if(videoSound){el.controls=true;const notice=node('div','muted','Pro přehrávání se zvukem klepněte na video.');viewer.append(notice)}})}}else if(doc.mime?.includes('wordprocessingml')||doc.mime?.includes('presentationml')){el=node('div','office-panel');el.append(node('div','pdf-icon',doc.mime.includes('wordprocessingml')?'WORD':'POWERPOINT'));el.append(node('p','','Tento soubor nelze přímo zobrazit v prohlížeči. Otevřete jej v aplikaci Word nebo PowerPoint.'));const a=node('a','', 'Stáhnout soubor ↗');a.href=fileUrl(doc);a.download=doc.name;a.className='office-download';a.style.cssText='display:inline-block;background:#087c91;color:white;border-radius:13px;padding:17px 25px;font-size:19px;font-weight:750;text-decoration:none;margin-top:12px';el.append(a)}else{el=node('img');el.alt=doc.name;el.src=fileUrl(doc)}if(el)viewer.append(el);$('back').onclick=()=>category===null?showFolders():showCategory(category)}
+function updatePageButtons(){const pdf=screen==='document'&&categoryDocs().find(d=>d.id===selected)?.mime==='application/pdf';$('prev').disabled=!pdf||pdfPage<=0;$('next').disabled=!pdf||pdfPage+pdfColumns>=pdfTotal;$('controls').classList.toggle('hidden',!pdf||(directDocument&&!pdfZoomed&&pdfTotal<=pdfColumns));$('pdfOverview').classList.toggle('hidden',!directDocument||!pdfZoomed);$('pdfPosition').textContent=directDocument&&pdfTotal?(pdfColumns>1?String(pdfPage+1)+'–'+Math.min(pdfTotal,pdfPage+pdfColumns):String(pdfPage+1))+' / '+pdfTotal:'';}
+function redrawPdf(){updatePageButtons();const id=++pdfRenderId;renderPdfSheets(pdfFile,pdfGrid,id).then(()=>{if(id===pdfRenderId)documentReady();}).catch(error=>{if(id===pdfRenderId){pdfGrid.replaceChildren(node('div','pdf-error',error.message));documentReady();}});}
+function enlargePdfPage(index){pdfPage=index;pdfZoomed=true;pdfColumns=1;redrawPdf();}
+function showPdfOverview(){pdfZoomed=false;pdfColumns=pdfOverviewColumns;pdfPage=Math.floor(pdfPage/pdfColumns)*pdfColumns;redrawPdf();}
+function movePages(delta){if(!pdfGrid||!pdfTotal)return;const lastStart=directDocument?Math.floor((pdfTotal-1)/pdfColumns)*pdfColumns:Math.max(0,pdfTotal-pdfColumns);pdfPage=Math.max(0,Math.min(lastStart,pdfPage+delta*pdfColumns));if(directDocument&&pdfFile){redrawPdf();return;}const page=pdfGrid.querySelector('[data-page="'+pdfPage+'"]');if(page)pdfGrid.scrollTo({top:page.offsetTop-pdfGrid.offsetTop,behavior:'smooth'});updatePageButtons()}
+$('pdfOverview').onclick=showPdfOverview;
+function showDocument(id){const list=categoryDocs();const position=list.findIndex(d=>d.id===id);if(position<0){if(signage){showFolders()}else if(category!==null){showCategory(category)}else{showFolders()}return}screen='document';index=position;selected=id;const doc=list[index];$('browse').classList.add('hidden');$('detail').classList.remove('hidden');$('heading').classList.add('hidden');$('viewer-title').textContent=displayTitle(doc);pdfGrid=null;pdfFile=null;pdfZoomed=false;pdfTotal=0;pdfPage=0;if(directDocument)document.documentElement.classList.remove('document-ready');updatePageButtons();const viewer=$('viewer');viewer.replaceChildren();const renderId=++pdfRenderId;let el;if(doc.mime==='application/pdf'){showPdfPages(doc,viewer,renderId)}else if(doc.mime?.startsWith('video/')){el=node('video');el.controls=true;el.playsInline=true;el.preload='metadata';el.src=fileUrl(doc);if(signage){el.autoplay=true;el.muted=!videoSound;el.loop=true;el.play().catch(()=>{if(videoSound){el.controls=true;const notice=node('div','muted','Pro přehrávání se zvukem klepněte na video.');viewer.append(notice)}})}}else if(doc.mime?.includes('wordprocessingml')||doc.mime?.includes('presentationml')){el=node('div','office-panel');el.append(node('div','pdf-icon',doc.mime.includes('wordprocessingml')?'WORD':'POWERPOINT'));el.append(node('p','','Tento soubor nelze přímo zobrazit v prohlížeči. Otevřete jej v aplikaci Word nebo PowerPoint.'));const a=node('a','', 'Stáhnout soubor ↗');a.href=fileUrl(doc);a.download=doc.name;a.className='office-download';a.style.cssText='display:inline-block;background:#087c91;color:white;border-radius:13px;padding:17px 25px;font-size:19px;font-weight:750;text-decoration:none;margin-top:12px';el.append(a)}else{el=node('img');el.alt=doc.name;el.src=fileUrl(doc)}if(el){if(el.tagName==='IMG'||el.tagName==='VIDEO'){el.addEventListener(el.tagName==='IMG'?'load':'loadeddata',documentReady,{once:true});el.addEventListener('error',()=>{viewer.replaceChildren(node('div','pdf-error','Dokument se nepodařilo načíst.'));documentReady();},{once:true});}else documentReady();viewer.append(el);}$('back').onclick=()=>category===null?showFolders():showCategory(category)}
 $('prev').onclick=()=>movePages(-1);$('next').onclick=()=>movePages(1);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&screen==='document'&&!signage&&!directDocument)$('back').click();if(screen==='document'&&e.key==='ArrowRight')movePages(1);if(screen==='document'&&e.key==='ArrowLeft')movePages(-1)});
-async function refresh(){try{const r=await fetch('/api/documents',{cache:'no-store'});if(!r.ok){let detail='';try{detail=(await r.json()).detail||''}catch{}throw Error(detail||'HTTP '+r.status)}const data=await r.json();docs=Array.isArray(data.items)?data.items:[];if(params.get('document')){const requested=docs.find(d=>d.id===params.get('document'));if(!requested)throw Error('Dokument není dostupný nebo je skrytý');category=null;if(selected!==requested.id||screen!=='document')showDocument(requested.id)}else if(signage){category=null;if(docs.length){showDocument(docs.some(d=>d.id===selected)?selected:docs[0].id)}else showFolders()}else if(screen==='document'&&docs.some(d=>d.id===selected)){showDocument(selected)}else if(category!==null&&docs.some(d=>categoryOf(d)===category)){showCategory(category)}else showFolders()}catch(e){$('detail').classList.add('hidden');$('browse').classList.remove('hidden');$('heading').classList.add('hidden');$('browse').replaceChildren(node('div','error','Dokumenty se nepodařilo načíst: '+e.message))}}
-let pdfResize=0;window.addEventListener('resize',()=>{if(!directDocument||!pdfFile||!pdfGrid)return;cancelAnimationFrame(pdfResize);pdfResize=requestAnimationFrame(()=>{const id=++pdfRenderId;renderPdfSheets(pdfFile,pdfGrid,id).catch(error=>pdfGrid.replaceChildren(node('div','pdf-error',error.message)));});});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&directDocument&&pdfZoomed)showPdfOverview();if(e.key==='Escape'&&screen==='document'&&!signage&&!directDocument)$('back').click();if(screen==='document'&&e.key==='ArrowRight')movePages(1);if(screen==='document'&&e.key==='ArrowLeft')movePages(-1)});
+async function refresh(){try{const r=await fetch('/api/documents',{cache:'no-store'});if(!r.ok){let detail='';try{detail=(await r.json()).detail||''}catch{}throw Error(detail||'HTTP '+r.status)}const data=await r.json();docs=Array.isArray(data.items)?data.items:[];if(params.get('document')){const requested=docs.find(d=>d.id===params.get('document'));if(!requested)throw Error('Dokument není dostupný nebo je skrytý');category=null;if(selected!==requested.id||screen!=='document')showDocument(requested.id)}else if(signage){category=null;if(docs.length){showDocument(docs.some(d=>d.id===selected)?selected:docs[0].id)}else showFolders()}else if(screen==='document'&&docs.some(d=>d.id===selected)){showDocument(selected)}else if(category!==null&&docs.some(d=>categoryOf(d)===category)){showCategory(category)}else showFolders()}catch(e){$('detail').classList.add('hidden');$('browse').classList.remove('hidden');$('heading').classList.add('hidden');$('browse').replaceChildren(node('div','error','Dokumenty se nepodařilo načíst: '+e.message));documentReady()}}
+let pdfResize=0;window.addEventListener('resize',()=>{if(!directDocument||!pdfFile||!pdfGrid)return;cancelAnimationFrame(pdfResize);pdfResize=requestAnimationFrame(redrawPdf);});
 refresh();setInterval(()=>{if(signage&&screen==='document'&&pdfTotal)movePages(1)},seconds*1000);setInterval(refresh,60000);
 </script></body></html>
