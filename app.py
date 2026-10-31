@@ -211,7 +211,7 @@ async def auth_callback(code:str="",state:str="",error:str=""):
     tokens.update(access_token=t["access_token"],refresh_token=t.get("refresh_token"),expires=time.time()+t.get("expires_in",3600))
     if not tokens.get("refresh_token"):raise HTTPException(400,"Microsoft nevrátil obnovovací token")
     persist_tokens()
-    return RedirectResponse("https://pborovicka72-dotcom.github.io/eduvize-styly/aplikace.html?onedrive=connected#account")
+    return RedirectResponse("https://pborovicka72-dotcom.github.io/eduvize-styly/ucet.html?onedrive=connected#account")
 @app.get("/api/admin/status")
 async def status(authorization:str|None=Header(default=None),verify:bool=False):
     await check_admin(authorization);restore_tokens()
