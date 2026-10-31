@@ -19,7 +19,8 @@ class ScopeTests(unittest.IsolatedAsyncioTestCase):
   self.items=[{'id':'old','name':'Old'},{'id':'doc','name':'Doc','scope':'documents'},{'id':'kiosk','name':'Kiosk','scope':'kiosk'}]
   async def visible():return self.items
   async def all_items():return 'folder',self.items
-  scope.update(document_delivery=SimpleNamespace(visible_items=visible),all_items=all_items,check_admin=lambda token:None)
+  async def check_admin(token):pass
+  scope.update(document_delivery=SimpleNamespace(visible_items=visible),all_items=all_items,check_admin=check_admin)
  async def test_default_catalog_excludes_kiosk(self):
   result=await scope['list_public']();self.assertEqual({x['id'] for x in result['items']},{'old','doc'})
  async def test_kiosk_catalog_is_separate(self):
