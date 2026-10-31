@@ -144,18 +144,20 @@ async def manifest_data(folder):
 async def manifest(folder):
     return (await manifest_data(folder))["items"]
 
-async def categories(folder,scope="documents"):
-    data=await manifest_data(folder)
+def category_names(data,scope="documents"):
     extra=data.get("categories",[]) if scope=="documents" else []
     names=DEFAULT_CATEGORIES+list(extra)+[x.get("category","") for x in data["items"] if in_document_scope(x,scope)]
     return list(dict.fromkeys(x for x in names if isinstance(x,str) and x.strip()))
 
+async def categories(folder,scope="documents"):
+    return category_names(await manifest_data(folder),scope)
+
 async def save_manifest(folder,items,category_names=None,hidden_categories=None):
     system = await system_folder(folder)
-    if category_names is None:
-        category_names = (await manifest_data(folder)).get("categories",[])
-    if hidden_categories is None:
-        hidden_categories = (await manifest_data(folder)).get("hidden_categories",[])
+    if category_names is None or hidden_categories is None:
+        current = await manifest_data(folder)
+        if category_names is None:category_names = current.get("categories",[])
+        if hidden_categories is None:hidden_categories = current.get("hidden_categories",[])
     data = json.dumps({"items":items,"categories":category_names,"hidden_categories":hidden_categories},ensure_ascii=False).encode()
     await graph("PUT", f"/me/drive/items/{system}:/manifest.json:/content",
                 content=data,headers={"Content-Type":"application/json"})
@@ -245,13 +247,14 @@ async def category_visibility(request:Request,authorization:str|None=Header(defa
     if not isinstance(name,str) or not isinstance(visible,bool):
         raise HTTPException(422,"Neplatná změna viditelnosti")
     async with lock:
-        folder,items=await all_items()
-        if name not in await categories(folder):raise HTTPException(404,"Kategorie nenalezena")
+        folder=await ensure_folder()
         data=await manifest_data(folder)
+        items=data["items"]
+        if name not in category_names(data):raise HTTPException(404,"Kategorie nenalezena")
         hidden=set(data.get("hidden_categories",[]))
         if visible:hidden.discard(name)
         else:hidden.add(name)
-        await save_manifest(folder,items,hidden_categories=sorted(hidden))
+        await save_manifest(folder,items,category_names=data.get("categories",[]),hidden_categories=sorted(hidden))
     return {"ok":True}
 
 @app.get("/api/documents")
@@ -268,7 +271,7 @@ async def list_categories(authorization:str|None=Header(default=None),scope:str=
     await check_admin(authorization)
     folder=await ensure_folder()
     data=await manifest_data(folder)
-    return {"categories":await categories(folder,document_scope(scope)),"hidden_categories":data.get("hidden_categories",[])}
+    return {"categories":category_names(data,document_scope(scope)),"hidden_categories":data.get("hidden_categories",[])}
 
 @app.post("/api/admin/categories")
 async def create_category(request:Request,authorization:str|None=Header(default=None)):
@@ -325,20 +328,38 @@ async def reorder_documents(request:Request,authorization:str|None=Header(defaul
         await save_manifest(folder,items)
     return {"ok":True}
 
+async def apply_document_changes(changes):
+    if not isinstance(changes,list) or not 1<=len(changes)<=100:
+        raise HTTPException(422,"Neplatný počet změn dokumentů")
+    async with lock:
+        folder=await ensure_folder()
+        data=await manifest_data(folder)
+        items=data["items"]
+        by_id={item["id"]:item for item in items}
+        allowed=category_names(data)
+        for change in changes:
+            if not isinstance(change,dict):raise HTTPException(422,"Neplatná změna dokumentu")
+            item=by_id.get(change.get("id"))
+            if not item:raise HTTPException(404,"Dokument nenalezen")
+            for key in ("name","category","title"):
+                if key in change:item[key]=str(change[key]).strip()[:180 if key in ("name","title") else 80] or ("" if key=="title" else "Ostatní")
+            if "category" in change and item["category"] not in allowed:raise HTTPException(422,"Neznámá kategorie")
+            if "position" in change:item["position"]=int(change["position"])
+            if "visible" in change:item["visible"]=bool(change["visible"])
+        await save_manifest(folder,items,category_names=data.get("categories",[]),hidden_categories=data.get("hidden_categories",[]))
+    return {"ok":True}
+
+@app.patch("/api/admin/documents/batch")
+async def edit_batch(request:Request,authorization:str|None=Header(default=None)):
+    await check_admin(authorization)
+    body=await request.json()
+    return await apply_document_changes(body.get("changes") if isinstance(body,dict) else None)
+
 @app.patch("/api/admin/documents/{doc_id}")
 async def edit(doc_id:str,request:Request,authorization:str|None=Header(default=None)):
-    await check_admin(authorization);body=await request.json()
-    async with lock:
-        folder,items=await all_items()
-        item=next((x for x in items if x["id"]==doc_id),None)
-        if not item:raise HTTPException(404,"Dokument nenalezen")
-        for key in ("name","category","title"):
-            if key in body:item[key]=str(body[key]).strip()[:180 if key in ("name","title") else 80] or ("" if key=="title" else "Ostatní")
-        if "category" in body and item["category"] not in await categories(folder):raise HTTPException(422,"Neznámá kategorie")
-        if "position" in body:item["position"]=int(body["position"])
-        if "visible" in body:item["visible"]=bool(body["visible"])
-        await save_manifest(folder,items)
-    return {"ok":True}
+    await check_admin(authorization)
+    body=await request.json()
+    return await apply_document_changes([{**body,"id":doc_id}])
 @app.delete("/api/admin/documents/{doc_id}")
 async def delete(doc_id:str,authorization:str|None=Header(default=None)):
     await check_admin(authorization)
