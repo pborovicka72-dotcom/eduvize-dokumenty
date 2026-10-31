@@ -189,8 +189,6 @@ def config():return FileResponse(ROOT/"config.html")
 def design_system_redirect():
     return RedirectResponse("https://eduvize-design-system-api.onrender.com/",status_code=307)
 
-@app.get("/segments.js")
-def segments_script():return FileResponse(ROOT/"segments.js",media_type="application/javascript")
 @app.post("/api/admin/microsoft/start")
 def auth_start(authorization:str|None=Header(default=None)):
     check_admin(authorization);require_config()
