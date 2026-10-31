@@ -8,6 +8,7 @@ from cryptography.fernet import Fernet, InvalidToken
 from fastapi import FastAPI, UploadFile, File, Form, Header, HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
+from central_admin import central_admin
 from kiosk_config_store import KioskConfigStore, MAX_BYTES
 from document_delivery import DocumentDelivery
 
@@ -66,7 +67,8 @@ lock=asyncio.Lock()
 app=FastAPI(title="Eduvize – Dokumenty / OneDrive")
 app.add_middleware(CORSMiddleware,allow_origins=["https://pborovicka72-dotcom.github.io","https://eduvize-weather.onrender.com"],allow_methods=["GET","POST","PUT","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
 
-def check_admin(auth):
+async def check_admin(auth):
+    if await central_admin(auth):return
     if not ADMIN:raise HTTPException(503,"Set DOCUMENTS_ADMIN_TOKEN in Render Environment")
     if not auth or not secrets.compare_digest(auth,"Bearer "+ADMIN):raise HTTPException(401,"Neplatný administrační klíč")
 def require_config():
@@ -176,7 +178,7 @@ def in_document_scope(item,scope):
 def public_items(items):
     return sorted([{k:v for k,v in item.items() if k!="file_id"} for item in items if item.get("visible",True)],key=lambda x:(x.get("position",0),x["name"]))
 @app.get("/health")
-def health():return {"status":"ok","onedrive_configured":bool(CLIENT and SECRET and BASE),"token_storage_configured":bool(DATABASE_URL and TOKEN_ENCRYPTION_KEY),"onedrive_connected_in_memory":bool(tokens.get("refresh_token")),"admin_configured":bool(ADMIN)}
+def health():return {"status":"ok","central_admin_sessions":True,"onedrive_configured":bool(CLIENT and SECRET and BASE),"token_storage_configured":bool(DATABASE_URL and TOKEN_ENCRYPTION_KEY),"onedrive_connected_in_memory":bool(tokens.get("refresh_token")),"admin_configured":bool(ADMIN)}
 @app.get("/")
 @app.get("/display")
 def display():return FileResponse(ROOT/"index.html")
@@ -190,8 +192,8 @@ def design_system_redirect():
     return RedirectResponse("https://eduvize-design-system-api.onrender.com/",status_code=307)
 
 @app.post("/api/admin/microsoft/start")
-def auth_start(authorization:str|None=Header(default=None)):
-    check_admin(authorization);require_config()
+async def auth_start(authorization:str|None=Header(default=None)):
+    await check_admin(authorization);require_config()
     state=secrets.token_urlsafe(32);pending[state]=time.time()+600
     params={"client_id":CLIENT,"response_type":"code","redirect_uri":redirect_uri(),"response_mode":"query","scope":SCOPES,"state":state}
     return {"url":AUTH+"/authorize?"+urlencode(params)}
@@ -207,10 +209,25 @@ async def auth_callback(code:str="",state:str="",error:str=""):
     tokens.update(access_token=t["access_token"],refresh_token=t.get("refresh_token"),expires=time.time()+t.get("expires_in",3600))
     if not tokens.get("refresh_token"):raise HTTPException(400,"Microsoft nevrátil obnovovací token")
     persist_tokens()
-    return RedirectResponse("/config?connected=1")
+    return RedirectResponse("https://pborovicka72-dotcom.github.io/eduvize-styly/aplikace.html?onedrive=connected#account")
 @app.get("/api/admin/status")
-def status(authorization:str|None=Header(default=None)):
-    check_admin(authorization);restore_tokens();return {"connected":bool(tokens.get("refresh_token"))}
+async def status(authorization:str|None=Header(default=None),verify:bool=False):
+    await check_admin(authorization);restore_tokens()
+    if not tokens.get("refresh_token"):return {"connected":False}
+    if not verify:return {"connected":True}
+    try:
+        token=await access_token()
+        async with httpx.AsyncClient(timeout=20,follow_redirects=False) as client:
+            response=await client.get(GRAPH+"/me",params={"$select":"displayName,userPrincipalName"},headers={"Authorization":"Bearer "+token})
+    except HTTPException as error:
+        if error.status_code==503:return {"connected":False,"needsReconnect":True}
+        raise
+    except httpx.HTTPError:raise HTTPException(503,"OneDrive nyní nelze ověřit. Zkuste to znovu.")
+    if response.status_code in (401,403):return {"connected":False,"needsReconnect":True}
+    if not response.is_success:raise HTTPException(503,"OneDrive nyní nelze ověřit. Zkuste to znovu.")
+    account=response.json()
+    return {"connected":True,"account":{"displayName":account.get("displayName",""),"userPrincipalName":account.get("userPrincipalName","")}}
+
 @app.get("/api/document-categories")
 async def public_categories():
     folder,items=await all_items()
@@ -221,7 +238,7 @@ async def public_categories():
 
 @app.patch("/api/admin/categories/visibility")
 async def category_visibility(request:Request,authorization:str|None=Header(default=None)):
-    check_admin(authorization)
+    await check_admin(authorization)
     body=await request.json()
     name=body.get("name")
     visible=body.get("visible")
@@ -244,18 +261,18 @@ async def list_public(scope:str="documents"):
     return {"items":public_items(items if scope=="all" else [x for x in items if in_document_scope(x,scope)])}
 @app.get("/api/admin/documents")
 async def list_admin(authorization:str|None=Header(default=None),scope:str="documents"):
-    check_admin(authorization);document_scope(scope);_,items=await all_items();items=[x for x in items if in_document_scope(x,scope)]
+    await check_admin(authorization);document_scope(scope);_,items=await all_items();items=[x for x in items if in_document_scope(x,scope)]
     return {"items":sorted(items,key=lambda x:(x.get("position",0),x["name"]))}
 @app.get("/api/admin/categories")
 async def list_categories(authorization:str|None=Header(default=None),scope:str="documents"):
-    check_admin(authorization)
+    await check_admin(authorization)
     folder=await ensure_folder()
     data=await manifest_data(folder)
     return {"categories":await categories(folder,document_scope(scope)),"hidden_categories":data.get("hidden_categories",[])}
 
 @app.post("/api/admin/categories")
 async def create_category(request:Request,authorization:str|None=Header(default=None)):
-    check_admin(authorization)
+    await check_admin(authorization)
     payload=await request.json()
     name=str(payload.get("name","")).strip()
     if not name or len(name)>80 or any(ord(c)<32 for c in name):
@@ -271,7 +288,7 @@ async def create_category(request:Request,authorization:str|None=Header(default=
 
 @app.post("/api/admin/documents")
 async def upload(file:UploadFile=File(...),category:str=Form("Ostatní"),scope:str=Form("documents"),authorization:str|None=Header(default=None)):
-    check_admin(authorization)
+    await check_admin(authorization)
     document_scope(scope)
     ext=Path(file.filename or "").suffix.lower()
     if ext not in TYPES:raise HTTPException(415,"Povoleny PDF, obrázky, MP4, WebM, DOCX a PPTX")
@@ -292,7 +309,7 @@ async def upload(file:UploadFile=File(...),category:str=Form("Ostatní"),scope:s
     return {"id":doc_id,"name":entry["name"]}
 @app.post("/api/admin/documents/reorder")
 async def reorder_documents(request:Request,authorization:str|None=Header(default=None),scope:str="documents"):
-    check_admin(authorization)
+    await check_admin(authorization)
     body=await request.json()
     order=body.get("ids")
     if not isinstance(order,list) or not all(isinstance(x,str) for x in order) or len(order)!=len(set(order)):
@@ -310,7 +327,7 @@ async def reorder_documents(request:Request,authorization:str|None=Header(defaul
 
 @app.patch("/api/admin/documents/{doc_id}")
 async def edit(doc_id:str,request:Request,authorization:str|None=Header(default=None)):
-    check_admin(authorization);body=await request.json()
+    await check_admin(authorization);body=await request.json()
     async with lock:
         folder,items=await all_items()
         item=next((x for x in items if x["id"]==doc_id),None)
@@ -324,7 +341,7 @@ async def edit(doc_id:str,request:Request,authorization:str|None=Header(default=
     return {"ok":True}
 @app.delete("/api/admin/documents/{doc_id}")
 async def delete(doc_id:str,authorization:str|None=Header(default=None)):
-    check_admin(authorization)
+    await check_admin(authorization)
     async with lock:
         folder,items=await all_items()
         item=next((x for x in items if x["id"]==doc_id),None)
@@ -364,7 +381,7 @@ kiosk_configurations = KioskConfigStore(graph, ensure_folder, system_folder, chi
 
 @app.get("/api/admin/kiosk-configurations")
 async def list_kiosk_configurations(authorization: str = Header(default="")):
-    check_admin(authorization)
+    await check_admin(authorization)
     try:
         return {"items":await kiosk_configurations.list()}
     except ValueError as error:
@@ -372,7 +389,7 @@ async def list_kiosk_configurations(authorization: str = Header(default="")):
 
 @app.get("/api/admin/kiosk-configurations/{name}")
 async def load_kiosk_configuration(name: str, authorization: str = Header(default="")):
-    check_admin(authorization)
+    await check_admin(authorization)
     try:
         data = await kiosk_configurations.load(name)
     except ValueError as error:
@@ -383,7 +400,7 @@ async def load_kiosk_configuration(name: str, authorization: str = Header(defaul
 
 @app.put("/api/admin/kiosk-configurations/{name}")
 async def save_kiosk_configuration(name: str, request: Request, authorization: str = Header(default="")):
-    check_admin(authorization)
+    await check_admin(authorization)
     raw = bytearray()
     async for chunk in request.stream():
         raw.extend(chunk)
