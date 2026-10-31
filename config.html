@@ -65,7 +65,7 @@ save.onclick=async()=>{try{await request('/api/admin/documents/'+item.id,{method
 const del=document.createElement('button');del.type='button';del.className='edu-admin__button';del.textContent='Smazat';
 del.onclick=async()=>{if(!confirm('Opravdu trvale smazat '+item.name+'?'))return;del.disabled=true;save.disabled=true;row.setAttribute('aria-busy','true');del.textContent='Mažu…';status('Mažu soubor z OneDrive…','success');try{await request('/api/admin/documents/'+item.id,{method:'DELETE'});status('Soubor byl smazán.','success');await load()}catch(e){status(e.message)}finally{del.disabled=false;save.disabled=false;del.textContent='Smazat';row.removeAttribute('aria-busy')}};
 const summary=document.createElement('summary');summary.className='edu-item-editor__summary';
-const icon=document.createElement('span');icon.className='app-icon ev-editor-app-icon';icon.setAttribute('data-edu-app-icon','documents');
+const icon=document.createElement('span');icon.className='app-icon ev-editor-app-icon';icon.setAttribute('data-edu-app-icon','documents');window.EduvizeAppIcons?.mount(icon,'documents');
 const heading=document.createElement('span');heading.className='edu-item-editor__heading';
 const itemName=document.createElement('strong');itemName.textContent=item.title||item.name;
 const meta=document.createElement('small');meta.textContent=item.visible?'Zobrazený':'Skrytý';heading.append(itemName,meta);summary.append(grip,icon,heading);
