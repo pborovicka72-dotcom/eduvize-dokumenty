@@ -65,7 +65,7 @@ def restore_tokens():
 
 lock=asyncio.Lock()
 app=FastAPI(title="Eduvize – Dokumenty / OneDrive")
-app.add_middleware(CORSMiddleware,allow_origins=["https://pborovicka72-dotcom.github.io","https://eduvize-weather.onrender.com"],allow_methods=["GET","POST","PUT","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
+app.add_middleware(CORSMiddleware,allow_origins=["https://pborovicka72-dotcom.github.io","https://eduvize-weather.onrender.com","https://eduvize-aktuality.onrender.com","https://eduvize-design-system-api.onrender.com","http://127.0.0.1:8789"],allow_methods=["GET","POST","PUT","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
 
 async def check_admin(auth):
     if await central_admin(auth):return
@@ -431,3 +431,30 @@ async def save_kiosk_configuration(name: str, request: Request, authorization: s
         return await kiosk_configurations.save(name, bytes(raw))
     except (ValueError, UnicodeError) as error:
         raise HTTPException(400, str(error))
+
+
+# Shared configuration profiles use the existing private OneDrive connection.
+from contextlib import asynccontextmanager
+import hashlib
+from configuration_profiles import ProfileStore, profile_router
+
+@asynccontextmanager
+async def profile_write_lock(key):
+    if not DATABASE_URL:
+        raise HTTPException(503, "Pro ukládání profilů je nutná DATABASE_URL.")
+    number = int.from_bytes(hashlib.sha256(('eduvize-profile:' + key).encode()).digest()[:8], 'big', signed=True)
+    try:
+        async with await psycopg.AsyncConnection.connect(DATABASE_URL, connect_timeout=10) as connection:
+            async with connection.transaction():
+                await connection.execute('SELECT pg_advisory_xact_lock(%s)', (number,))
+                yield
+    except psycopg.Error:
+        raise HTTPException(503, "Zámek konfigurace nyní není dostupný. Zkuste uložení znovu.") from None
+
+async def check_profile_admin(authorization):
+    if await central_admin(authorization, 'configurations'):
+        return
+    await check_admin(authorization)
+
+configuration_profiles = ProfileStore(graph, ensure_folder, system_folder, read_drive_json, profile_write_lock)
+app.include_router(profile_router(configuration_profiles, check_profile_admin))
