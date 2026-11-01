@@ -213,8 +213,11 @@ async def auth_callback(code:str="",state:str="",error:str=""):
     persist_tokens()
     return RedirectResponse("https://pborovicka72-dotcom.github.io/eduvize-styly/ucet.html?onedrive=connected#account")
 @app.get("/api/admin/status")
-async def status(authorization:str|None=Header(default=None),verify:bool=False):
-    await check_admin(authorization);restore_tokens()
+async def status(authorization:str|None=Header(default=None),verify:bool=False,authOnly:bool=False):
+    await check_admin(authorization)
+    # Signing in validates the admin key independently of stored Microsoft tokens.
+    if authOnly:return {"authenticated":True}
+    restore_tokens()
     if not tokens.get("refresh_token"):return {"connected":False}
     if not verify:return {"connected":True}
     try:
