@@ -11,7 +11,7 @@ from urllib.parse import parse_qsl, urlsplit
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 
-APPS = {'kiosk', 'documents', 'weather', 'holidays', 'transport', 'wisdom', 'news', 'styles', 'school-systems'}
+APPS = {'kiosk', 'documents', 'weather', 'holidays', 'transport', 'wisdom', 'news', 'styles', 'school-systems', 'generated-links'}
 MAX_BYTES = 2 * 1024 * 1024
 FORBIDDEN = {'password', 'passwd', 'secret', 'clientsecret', 'token', 'accesstoken', 'refreshtoken', 'idtoken', 'authorization', 'adminkey', 'adminsecret', 'username', 'bakusername', 'bakpassword', 'microsoft', '__proto__', 'prototype', 'constructor'}
 
@@ -66,6 +66,9 @@ def safe_config(value, app=None):
     if not isinstance(value, dict) or type(value.get('schemaVersion')) is not int or value.get('schemaVersion') != 1:
         raise HTTPException(422, 'Nepodporovaný formát nastavení aplikace.')
     visit(value)
+    if app == 'generated-links' and not value.get('empty'):
+        from generated_links import validate_library
+        validate_library(value)
     if app == 'styles' and not value.get('empty'):
         data = value.get('data')
         theme = data.get('theme') if isinstance(data, dict) else None
@@ -284,4 +287,7 @@ def profile_router(store, authorize):
     async def restore_profile(profile_id: str, request: Request):
         body = decode(await request.body())
         return await store.restore(profile_id, body.get('revision'), body.get('expectedRevision'))
+    from generated_links import add_routes
+    add_routes(router, store)
     return router
+
