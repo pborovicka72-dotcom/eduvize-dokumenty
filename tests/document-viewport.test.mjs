@@ -8,12 +8,10 @@ const host=element(),target=element();target.requestFullscreen=async()=>{documen
 const scope={window:{},document,WeakSet,Math};
 vm.runInNewContext(fs.readFileSync(new URL('../../eduvize-styly/design-system/document-viewport.js',import.meta.url),'utf8'),scope);
 scope.window.EduvizeDocumentViewport.mount(host,{fullscreenTarget:target});
-const button=buttons.find(b=>b.attributes['aria-label']==='Celá obrazovka');
-assert.ok(button);assert.equal(button.attributes['aria-pressed'],'false');
-await button.onclick();assert.equal(button.attributes['aria-pressed'],'true');assert.match(button.textContent,/Ukončit/);
-await button.onclick();assert.equal(button.attributes['aria-pressed'],'false');assert.match(button.textContent,/Celá obrazovka/);
-await button.onclick();document.fullscreenElement=null;listeners.fullscreenchange();assert.equal(button.attributes['aria-label'],'Celá obrazovka');assert.equal(button.attributes['aria-pressed'],'false');
-console.log('Fullscreen labels and pressed state follow entry, exit and external Escape.');
+assert.ok(!buttons.some(b=>/Celá obrazovka|fullscreen/i.test(b.attributes['aria-label']||b.textContent||'')));
+assert.ok(buttons.some(b=>b.attributes['aria-label']==='Zvětšit dokument'));
+assert.ok(buttons.some(b=>b.attributes['aria-label']==='Zmenšit dokument'));
+console.log('Document controls retain zoom without fullscreen options.');
 
 const pages=Array(3).fill({width:595,height:842}),overview=scope.window.EduvizeDocumentViewport.overview;
 assert.equal(overview(pages,400,700).columns,1);
