@@ -21,3 +21,20 @@ class GeneratedLinkTests(unittest.TestCase):
   items,item=upsert([],'https://eduvize-jidelnicek.onrender.com/index.html?viewMode=web');self.assertIs(validate_library({'items':items})['items'],items);items[0]['id']='forged'
   with self.assertRaises(HTTPException):validate_library({'items':items})
 if __name__=='__main__':unittest.main()
+
+class OutputInteractionTests(unittest.TestCase):
+ def test_interaction_is_derived_from_url(self):
+  for mode in ['web','nsp']:
+   for interaction in ['interactive','display']:
+    item=describe_url('https://eduvize-weather.onrender.com/display?viewMode='+mode+'&interaction='+interaction)
+    self.assertEqual(item['interaction'],interaction);self.assertEqual(item['interactive'],interaction=='interactive')
+  for url in ['https://eduvize-weather.onrender.com/display?viewMode=kiosk&interaction=display','https://pborovicka72-dotcom.github.io/eduvize-kiosek/index.html?viewMode=web&interaction=display']:
+   self.assertTrue(describe_url(url)['interactive'])
+ def test_both_interaction_variants_survive_for_same_segment(self):
+  base='https://eduvize-weather.onrender.com/display?viewMode=nsp&segment_style=2&segment_block=1&interaction='
+  items,_=upsert([],base+'interactive');items,_=upsert(items,base+'display')
+  self.assertEqual(len(items),2);self.assertEqual({x['interaction'] for x in items},{'interactive','display'})
+ def test_old_links_have_stable_identity_and_explicit_metadata(self):
+  url='https://eduvize-weather.onrender.com/display?viewMode=nsp&segment_style=2&segment_block=1'
+  items,old=upsert([],url);old.pop('interaction');old.pop('interactive');items,new=upsert(items,url)
+  self.assertEqual(new['id'],old['id']);self.assertEqual(new['interaction'],'display')

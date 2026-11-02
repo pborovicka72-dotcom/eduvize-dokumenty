@@ -6,9 +6,9 @@ from datetime import datetime, timezone
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 from fastapi import HTTPException, Request
 
-APP_NAMES={'kiosk':'Kiosek','documents':'Dokumenty školy','weather':'Počasí','holidays':'Svátky a jmeniny','transport':'Jízdní řády','wisdom':'Moudrost dne','news':'Aktuality školy','school-systems':'Školní informační systémy','menu':'Jídelníček'}
-HOSTS={'eduvize-kiosek.onrender.com':'kiosk','eduvize-dokumenty-api.onrender.com':'documents','eduvize-weather.onrender.com':'weather','eduvize-aktuality.onrender.com':'news','eduvize-skolni-systemy.onrender.com':'school-systems','eduvize-jidelnicek.onrender.com':'menu'}
-REPOS={'eduvize-kiosek':'kiosk','eduvize-dokumenty':'documents','eduvize-pocasi':'weather','eduvize-aktuality':'news','eduvize-svatky':'holidays','eduvize-jizdni-rady':'transport','eduvize-moudrost-dne':'wisdom','eduvize-skolni-systemy':'school-systems','eduvize-jidelnicek':'menu'}
+APP_NAMES={'day-progress':'Průběh dne','kiosk':'Kiosek','documents':'Dokumenty školy','weather':'Počasí','holidays':'Svátky a jmeniny','transport':'Jízdní řády','wisdom':'Moudrost dne','news':'Aktuality školy','school-systems':'Školní informační systémy','menu':'Jídelníček'}
+HOSTS={'eduvize-prubeh-dne.onrender.com':'day-progress','eduvize-kiosek.onrender.com':'kiosk','eduvize-dokumenty-api.onrender.com':'documents','eduvize-weather.onrender.com':'weather','eduvize-aktuality.onrender.com':'news','eduvize-skolni-systemy.onrender.com':'school-systems','eduvize-jidelnicek.onrender.com':'menu'}
+REPOS={'eduvize-prubeh-dne':'day-progress','eduvize-kiosek':'kiosk','eduvize-dokumenty':'documents','eduvize-pocasi':'weather','eduvize-aktuality':'news','eduvize-svatky':'holidays','eduvize-jizdni-rady':'transport','eduvize-moudrost-dne':'wisdom','eduvize-skolni-systemy':'school-systems','eduvize-jidelnicek':'menu'}
 NOISE={'v','preview','ev_inner','eduvize_ui_version','build'}
 FORBIDDEN={'token','access_token','refresh_token','password','secret','key','admin_key','edu-auth-code','authorization'}
 
@@ -25,6 +25,7 @@ def describe_url(value):
     if u.hostname in ('localhost','127.0.0.1') and port in (8765,8789,8790):app={8765:'kiosk',8789:'school-systems',8790:'menu'}[port]
     if not app or re.search(r'/(?:config(?:\.html)?|editor\.html|ucet\.html)(?:/|$)',u.path) or '/api/' in u.path:raise HTTPException(422,'Vyberte výstup aplikace Eduvize, nikoli administraci.')
     mode='web' if query.get('viewMode')=='web' or query.get('output')=='web' else 'kiosk' if query.get('viewMode')=='kiosk' or query.get('output')=='kiosk' else 'nsp' if query.get('viewMode')=='nsp' or query.get('layout')=='signage' or 'segment_style' in query or ('orientation' in query and 'style' in query) or u.path.endswith('/signage.html') else 'kiosk' if app=='kiosk' else 'web'
+    interaction='interactive' if app=='kiosk' or mode=='kiosk' else query.get('interaction') if query.get('interaction') in ('interactive','display') else 'interactive' if mode=='web' else 'display'
     def number(key,fallback):
         raw=query.get('segment_'+key,query.get(key,str(fallback)))
         try:n=int(raw)
@@ -38,7 +39,7 @@ def describe_url(value):
     if app=='menu':details.append('Denní nabídka' if query.get('presentation')=='day' or query.get('days')=='1' else 'Přehled '+query.get('days','5')+' dnů');details.append('Jídelna '+query.get('canteen','11592'))
     for key,label in [('name','Název'),('misto','Lokalita'),('place','Lokalita'),('category','Kategorie')]:
         if query.get(key):details.append(label+': '+query[key][:120])
-    return {'id':hashlib.sha256(canonical.encode()).hexdigest(),'url':clean,'app':app,'appName':APP_NAMES[app],'output':mode,'orientation':orientation if mode=='nsp' else 'responsive' if mode=='web' else 'screen','style':number('style',1)if mode=='nsp' else None,'segment':number('block',1)if mode=='nsp' else None,'details':' · '.join(details)[:400]}
+    return {'id':hashlib.sha256(canonical.encode()).hexdigest(),'url':clean,'app':app,'appName':APP_NAMES[app],'output':mode,'interaction':interaction,'interactive':interaction=='interactive','orientation':orientation if mode=='nsp' else 'responsive' if mode=='web' else 'screen','style':number('style',1)if mode=='nsp' else None,'segment':number('block',1)if mode=='nsp' else None,'details':' · '.join(details)[:400]}
 
 def validate_library(config):
     items=config.get('items',[])
@@ -52,12 +53,12 @@ def validate_library(config):
 
 def segment_key(item):
     info=describe_url(item['url'])
-    return (info['app'],info['output'],info['orientation'],info['style'],info['segment']) if info['output']=='nsp' else (info['id'],)
+    return (info['app'],info['output'],info['orientation'],info['style'],info['segment'],info['interaction']) if info['output']=='nsp' else (info['id'],)
 
 def latest_segments(items):
     newest={}
     for item in sorted(items,key=lambda x:x.get('copiedAt',''),reverse=True):
-        newest.setdefault(segment_key(item),item)
+        newest.setdefault(segment_key(item),{**item,**describe_url(item['url'])})
     return list(newest.values())
 
 def upsert(items,url,label='',now=None,capture_id=None):
