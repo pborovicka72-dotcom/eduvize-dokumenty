@@ -48,6 +48,17 @@ class Drive:
 class Profiles(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.drive=Drive();self.store=self.drive.store();self.profile=await self.store.create('Škola · hlavní obrazovka');self.id=self.profile['id']
+    async def test_school_identity_roundtrip_and_revision_conflict(self):
+        config={'schemaVersion':1,'data':{'name':'ZŠ Pod Žvahovem','red_izo':'691013063','izo':'181103338','ico':'06919448','district':'Praha 5'}}
+        saved=await self.store.save_app(self.id,'school-identity',config,0)
+        self.assertEqual(saved['revision'],1)
+        self.assertEqual((await self.store.read(self.id))['apps']['school-identity']['config'],config)
+        with self.assertRaises(HTTPException) as e:
+            await self.store.save_app(self.id,'school-identity',config,0)
+        self.assertEqual(e.exception.status_code,409)
+        invalid={'schemaVersion':1,'data':{'name':'ZŠ','ico':'bad'}}
+        with self.assertRaises(HTTPException):safe_config(invalid,'school-identity')
+
     async def test_save_copy_and_private_storage(self):
         await self.store.save_app(self.id,'weather',{'schemaVersion':1,'values':{'place':'Praha'}},0)
         copied=await self.store.create('Škola · druhá obrazovka',self.id)

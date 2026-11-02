@@ -11,7 +11,7 @@ from urllib.parse import parse_qsl, urlsplit
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 
-APPS = {'day-progress', 'kiosk', 'documents', 'weather', 'holidays', 'transport', 'wisdom', 'news', 'styles', 'school-systems', 'generated-links', 'menu'}
+APPS = {'school-identity', 'day-progress', 'kiosk', 'documents', 'weather', 'holidays', 'transport', 'wisdom', 'news', 'styles', 'school-systems', 'generated-links', 'menu'}
 MAX_BYTES = 2 * 1024 * 1024
 FORBIDDEN = {'password', 'passwd', 'secret', 'clientsecret', 'token', 'accesstoken', 'refreshtoken', 'idtoken', 'authorization', 'adminkey', 'adminsecret', 'username', 'bakusername', 'bakpassword', 'microsoft', '__proto__', 'prototype', 'constructor'}
 
@@ -66,6 +66,14 @@ def safe_config(value, app=None):
     if not isinstance(value, dict) or type(value.get('schemaVersion')) is not int or value.get('schemaVersion') != 1:
         raise HTTPException(422, 'Nepodporovaný formát nastavení aplikace.')
     visit(value)
+    if app == 'school-identity' and not value.get('empty'):
+        data = value.get('data')
+        if not isinstance(data, dict) or not isinstance(data.get('name'), str) or not data['name'].strip():
+            raise HTTPException(422, 'Vyplňte název školy.')
+        for field, length in [('red_izo', 9), ('izo', 9), ('ico', 8)]:
+            text = data.get(field, '')
+            if not isinstance(text, str) or (text and not re.fullmatch(r'[0-9]{'+str(length)+'}', text)):
+                raise HTTPException(422, 'Neplatný identifikátor školy: '+field)
     if app == 'generated-links' and not value.get('empty'):
         from generated_links import validate_library
         validate_library(value)
