@@ -23,6 +23,7 @@ ADMIN=os.getenv("DOCUMENTS_ADMIN_TOKEN","")
 BASE=os.getenv("PUBLIC_BASE_URL","").rstrip("/")
 SCOPES="offline_access User.Read Files.ReadWrite"
 AUTH=f"https://login.microsoftonline.com/{TENANT}/oauth2/v2.0"
+SCHOOL_AUTH="https://login.microsoftonline.com/common/oauth2/v2.0"
 GRAPH="https://graph.microsoft.com/v1.0"
 FOLDER="Eduvize-Dokumenty"
 DEFAULT_CATEGORIES=["Oznámení","Akce a události","Výuka a vzdělávání","Úspěchy školy","Kroužky a aktivity","Jídelna","Dokumenty a formuláře","Ostatní"]
@@ -92,12 +93,15 @@ def redirect_uri():return BASE+"/auth/microsoft/callback"
 def connected():
     restore_tokens()
     if not current_tokens().get("refresh_token"):raise HTTPException(503,"OneDrive není připojen. Přihlaste se v administraci.")
+def token_authority():
+    school=school_context.get()
+    return SCHOOL_AUTH if school and not school['legacy'] else AUTH
 async def access_token():
     connected()
     value=current_tokens()
     if value.get("access_token") and time.time()<value.get("expires",0)-90:return value["access_token"]
     async with httpx.AsyncClient(timeout=25) as client:
-        r=await client.post(AUTH+"/token",data={"client_id":CLIENT,"client_secret":SECRET,"grant_type":"refresh_token","refresh_token":value["refresh_token"],"scope":SCOPES})
+        r=await client.post(token_authority()+"/token",data={"client_id":CLIENT,"client_secret":SECRET,"grant_type":"refresh_token","refresh_token":value["refresh_token"],"scope":SCOPES})
     if r.status_code!=200:raise HTTPException(503,"OneDrive připojení vypršelo, přihlaste se znovu")
     t=r.json();value.update(access_token=t["access_token"],refresh_token=t.get("refresh_token",value["refresh_token"]),expires=time.time()+t.get("expires_in",3600))
     persist_tokens()
@@ -196,7 +200,7 @@ def in_document_scope(item,scope):
 def public_items(items):
     return sorted([{k:v for k,v in item.items() if k!="file_id"} for item in items if item.get("visible",True)],key=lambda x:(x.get("position",0),x["name"]))
 @app.get("/health")
-def health():return {"status":"ok","central_admin_sessions":True,"school_accounts":True,"onedrive_configured":bool(CLIENT and SECRET and BASE),"token_storage_configured":bool(DATABASE_URL and TOKEN_ENCRYPTION_KEY),"onedrive_connected_in_memory":bool(tokens.get("refresh_token")),"admin_configured":bool(ADMIN)}
+def health():return {"status":"ok","central_admin_sessions":True,"school_accounts":True,"microsoft_multitenant":True,"onedrive_configured":bool(CLIENT and SECRET and BASE),"token_storage_configured":bool(DATABASE_URL and TOKEN_ENCRYPTION_KEY),"onedrive_connected_in_memory":bool(tokens.get("refresh_token")),"admin_configured":bool(ADMIN)}
 @app.get("/")
 @app.get("/display")
 def display():return FileResponse(ROOT/"index.html")
@@ -239,7 +243,7 @@ async def isolate_school_request(request:Request,call_next):
         return JSONResponse({'detail':error.detail},status_code=error.status_code)
     finally:school_context.reset(reset)
 
-microsoft_login=MicrosoftLogin(LoginStore(microsoft_login_db),CLIENT,SECRET,AUTH,redirect_uri,require_config,legacy_graph,school_accounts,save_school_connection)
+microsoft_login=MicrosoftLogin(LoginStore(microsoft_login_db),CLIENT,SECRET,SCHOOL_AUTH,redirect_uri,require_config,legacy_graph,school_accounts,save_school_connection)
 app.include_router(login_router(microsoft_login))
 
 @app.post("/api/admin/microsoft/start")

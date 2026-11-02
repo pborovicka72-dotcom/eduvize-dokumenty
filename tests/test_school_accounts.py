@@ -98,6 +98,17 @@ class ProfileIsolationTests(unittest.TestCase):
   self.assertEqual(self.client.get('/api/admin/configuration-profiles').status_code,401)
 
 class RuntimeIsolationTests(unittest.IsolatedAsyncioTestCase):
+ async def test_school_login_and_new_school_refresh_use_common_authority(self):
+  self.assertEqual(documents.microsoft_login.authority,'https://login.microsoftonline.com/common/oauth2/v2.0')
+  reset=school_context.set(None)
+  try:
+   with patch.object(documents,'AUTH','https://login.microsoftonline.com/original-tenant/oauth2/v2.0'):
+    self.assertIn('original-tenant',documents.token_authority())
+    school_context.set({'id':'a'*32,'legacy':False})
+    self.assertIn('/common/',documents.token_authority())
+    school_context.set({'id':'b'*32,'legacy':True})
+    self.assertIn('original-tenant',documents.token_authority())
+  finally:school_context.reset(reset)
  async def test_parallel_requests_never_share_oauth_tokens(self):
   async def request(school_id):
    token=school_context.set({'id':school_id,'legacy':False})

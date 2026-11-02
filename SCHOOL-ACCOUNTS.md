@@ -49,9 +49,12 @@ by school, including concurrent requests.
 ## External Microsoft configuration
 
 The Entra application must allow accounts from other school tenants (and personal
-accounts only if desired), and MICROSOFT_TENANT_ID must permit that audience, e.g.
-`common` or `organizations`. Tenant policies may require their administrator's consent.
-This release reuses the existing registration and does not alter tenant security policy.
+accounts only if desired), The school login/storage flows use the Microsoft `common` authority; new school
+refreshes use it too. MICROSOFT_TENANT_ID is retained only for the original connection
+so the existing deployment can migrate without environment changes. Tenant policies may require their administrator's consent.
+The existing registration was verified in Entra on 2026-11-02 as allowing any Entra
+tenant plus personal Microsoft accounts. No registration permission or tenant policy
+was changed.
 
 ## Validation
 
