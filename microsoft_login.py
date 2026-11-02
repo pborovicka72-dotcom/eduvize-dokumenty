@@ -1,4 +1,4 @@
-"""Microsoft sign-in for the existing OneDrive owner; never replaces drive tokens."""
+"""Microsoft sign-in and separately authorized school storage connections."""
 import base64
 import hashlib
 import json
@@ -32,40 +32,63 @@ class LoginStore:
         return row[0]
 
 class MicrosoftLogin:
-    def __init__(self,store,client_id,client_secret,authority,redirect_uri,require_config,graph):
+    def __init__(self,store,client_id,client_secret,authority,redirect_uri,require_config,graph,accounts=None,save_connection=None):
         self.store,self.client_id,self.client_secret,self.authority,self.redirect_uri,self.require_config,self.graph=store,client_id,client_secret,authority,redirect_uri,require_config,graph
+        self.accounts,self.save_connection=accounts,save_connection
     async def start(self,proof,remember):
         self.require_config()
         if not re.fullmatch(r'[A-Za-z0-9_-]{43}',proof):raise HTTPException(422,'Neplatné zahájení přihlášení.')
-        # A fresh server-to-server Graph read pins the identity before starting OAuth.
-        owner=(await self.graph('GET','/me',params={'$select':'id'})).json().get('id')
-        if not owner:raise HTTPException(503,'Nejprve připojte OneDrive správy Eduvize.')
         state=secrets.token_urlsafe(32);pkce=secrets.token_urlsafe(48)
-        self.store.put('state',state,{'proof':proof,'remember':remember,'pkce':pkce,'owner':owner},600)
+        self.store.put('state',state,{'proof':proof,'remember':remember,'pkce':pkce,'mode':'login'},600)
         params={'client_id':self.client_id,'response_type':'code','redirect_uri':self.redirect_uri(),'response_mode':'query','scope':SCOPES,'state':state,'code_challenge':challenge(pkce),'code_challenge_method':'S256','prompt':'select_account'}
         response=RedirectResponse(self.authority+'/authorize?'+urlencode(params),status_code=303)
         response.set_cookie(COOKIE,state,max_age=600,secure=True,httponly=True,samesite='lax',path='/')
         response.headers['Cache-Control']='no-store';response.headers['Referrer-Policy']='no-referrer'
         return response
+    async def connect_drive(self,school):
+        self.require_config()
+        subject=self.accounts.identity(school['id'],'microsoft')
+        if not subject:raise HTTPException(403,'Pro OneDrive nejprve připojte ověřenou Microsoft identitu ke škole.')
+        state=secrets.token_urlsafe(32);pkce=secrets.token_urlsafe(48)
+        self.store.put('state',state,{'mode':'drive','schoolId':school['id'],'subject':subject,'pkce':pkce},600)
+        scopes='offline_access User.Read Files.ReadWrite'
+        params={'client_id':self.client_id,'response_type':'code','redirect_uri':self.redirect_uri(),'response_mode':'query','scope':scopes,'state':state,'code_challenge':challenge(pkce),'code_challenge_method':'S256','prompt':'select_account'}
+        return self.authority+'/authorize?'+urlencode(params),state
     async def callback(self,request,code,state,error):
         cookie=request.cookies.get(COOKIE,'')
         if not cookie or not state or not secrets.compare_digest(cookie,state):raise HTTPException(401,'Přihlášení nebylo zahájeno v tomto prohlížeči.')
         pending=self.store.take('state',state)
         if error or not code:raise HTTPException(400,'Přihlášení Microsoftem bylo zrušeno. Vraťte se do účtu Eduvize.')
+        scopes='offline_access User.Read Files.ReadWrite' if pending.get('mode')=='drive' else SCOPES
         async with httpx.AsyncClient(timeout=30,follow_redirects=False) as client:
-            r=await client.post(self.authority+'/token',data={'client_id':self.client_id,'client_secret':self.client_secret,'code':code,'redirect_uri':self.redirect_uri(),'grant_type':'authorization_code','scope':SCOPES,'code_verifier':pending['pkce']})
+            r=await client.post(self.authority+'/token',data={'client_id':self.client_id,'client_secret':self.client_secret,'code':code,'redirect_uri':self.redirect_uri(),'grant_type':'authorization_code','scope':scopes,'code_verifier':pending['pkce']})
             if not r.is_success:raise HTTPException(401,'Microsoft přihlášení se nepodařilo ověřit. Zkuste to znovu.')
-            access=r.json().get('access_token')
+            token_data=r.json();access=token_data.get('access_token')
             if not access:raise HTTPException(401,'Microsoft nevrátil ověřovací token.')
             me=await client.get('https://graph.microsoft.com/v1.0/me',params={'$select':'id,displayName'},headers={'Authorization':'Bearer '+access})
             if not me.is_success:raise HTTPException(401,'Identitu Microsoft účtu se nepodařilo ověřit.')
             user=me.json()
-        # Match immutable Microsoft identity, never a user-supplied email/name.
-        if not isinstance(user.get('id'),str) or not secrets.compare_digest(user['id'],pending['owner']):raise HTTPException(403,'Tento Microsoft účet není vlastníkem připojeného OneDrivu Eduvize.')
-        current=(await self.graph('GET','/me',params={'$select':'id'})).json().get('id')
-        if current!=pending['owner']:raise HTTPException(409,'Připojený účet se mezitím změnil. Přihlášení zopakujte.')
+        subject=user.get('id')
+        if not isinstance(subject,str) or not subject:raise HTTPException(401,'Microsoft nevrátil identitu účtu.')
+        if pending.get('mode')=='drive':
+            if not secrets.compare_digest(subject,pending['subject']):raise HTTPException(403,'OneDrive musí patřit stejnému Microsoft účtu, kterým se přihlašujete ke škole.')
+            if not token_data.get('refresh_token'):raise HTTPException(400,'Microsoft nevrátil trvalé připojení. Zopakujte souhlas s OneDrive.')
+            school=self.accounts.get(pending['schoolId'])
+            self.save_connection(school,token_data)
+            response=RedirectResponse(ACCOUNT+'?onedrive=connected&edu-profile='+school['profileId']+'#account',status_code=303)
+            response.delete_cookie(COOKIE,path='/',secure=True,httponly=True,samesite='lax')
+            response.headers['Cache-Control']='no-store';response.headers['Referrer-Policy']='no-referrer'
+            return response
+        owner=self.accounts.legacy_subject()
+        if owner is None:
+            # Pin the pre-migration owner once; fail closed while this first migration cannot be verified.
+            owner=(await self.graph('GET','/me',params={'$select':'id'})).json().get('id')
+            if not isinstance(owner,str) or not owner:raise HTTPException(503,'Původní účet školy nyní nelze ověřit. Zkuste přihlášení znovu.')
+            owner=self.accounts.remember_legacy_subject(owner)
+        legacy=secrets.compare_digest(subject,owner)
+        school=self.accounts.resolve('microsoft',subject,legacy=legacy)
         ticket=secrets.token_urlsafe(32)
-        self.store.put('ticket',ticket,{'proof':pending['proof'],'remember':pending['remember'],'accountId':user['id']},120)
+        self.store.put('ticket',ticket,{'proof':pending['proof'],'remember':pending['remember'],'accountId':subject,'schoolId':school['id'],'profileId':school['profileId']},120)
         response=RedirectResponse(ACCOUNT+'?edu-login-return='+secrets.token_urlsafe(12)+'#'+urlencode({'edu-ms-ticket':ticket}),status_code=303)
         response.delete_cookie(COOKIE,path='/',secure=True,httponly=True,samesite='lax')
         response.headers['Cache-Control']='no-store';response.headers['Referrer-Policy']='no-referrer'
@@ -74,7 +97,7 @@ class MicrosoftLogin:
         if not isinstance(ticket,str) or not re.fullmatch(r'[A-Za-z0-9_-]{43}',ticket) or not isinstance(verifier,str) or not re.fullmatch(r'[A-Za-z0-9_-]{43,128}',verifier):raise HTTPException(401,'Neplatné předání přihlášení.')
         data=self.store.take('ticket',ticket)
         if not secrets.compare_digest(challenge(verifier),data['proof']):raise HTTPException(401,'Přihlášení patří jinému prohlížeči. Zkuste to znovu.')
-        return {'authenticated':True,'accountId':data['accountId'],'remember':data['remember']}
+        return {'authenticated':True,'accountId':data['accountId'],'remember':data['remember'],'schoolId':data['schoolId'],'profileId':data['profileId']}
 
 def login_router(login):
     router=APIRouter()

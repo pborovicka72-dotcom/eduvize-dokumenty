@@ -69,7 +69,7 @@ class DeliveryTests(unittest.IsolatedAsyncioTestCase):
             def __init__(self,content=None,media_type=None,status_code=200,headers=None):self.content,self.status_code,self.headers=content,status_code,headers
         class HTTPException(Exception):
             def __init__(self,status_code,detail):self.status_code=status_code
-        namespace={'Request':object,'Response':Response,'HTTPException':HTTPException,'document_delivery':self.delivery}
+        namespace={'Request':object,'Response':Response,'HTTPException':HTTPException,'current_delivery':lambda:self.delivery,'document_delivery':self.delivery}
         exec(compile(ast.Module(body=[method],type_ignores=[]),'route','exec'),namespace)
         route=namespace['get_file']
         first=await route('one',SimpleNamespace(headers={}))

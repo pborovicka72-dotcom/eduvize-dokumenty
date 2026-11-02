@@ -13,4 +13,4 @@ async def central_admin(authorization,scope='documents'):
  try:data=response.json()
  except ValueError:raise HTTPException(503,'Centrum přihlášení vrátilo neplatnou odpověď.')
  if data.get('valid') is not True or data.get('scope')!=scope:raise HTTPException(401,'Neplatné přihlášení.')
- return True
+ return data
