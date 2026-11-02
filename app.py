@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from central_admin import central_admin
 from kiosk_config_store import KioskConfigStore, MAX_BYTES
 from document_delivery import DocumentDelivery
+from microsoft_login import LoginStore, MicrosoftLogin, login_router, COOKIE, ACCOUNT
 
 ROOT=Path(__file__).resolve().parent
 CLIENT=os.getenv("MICROSOFT_CLIENT_ID","")
@@ -193,6 +194,13 @@ def config():return FileResponse(ROOT/"config.html")
 def design_system_redirect():
     return RedirectResponse("https://eduvize-design-system-api.onrender.com/",status_code=307)
 
+def microsoft_login_db():
+    if not DATABASE_URL:raise HTTPException(503,"Databáze přihlášení není nastavená.")
+    return psycopg.connect(DATABASE_URL,connect_timeout=10)
+
+microsoft_login=MicrosoftLogin(LoginStore(microsoft_login_db),CLIENT,SECRET,AUTH,redirect_uri,require_config,graph)
+app.include_router(login_router(microsoft_login))
+
 @app.post("/api/admin/microsoft/start")
 async def auth_start(authorization:str|None=Header(default=None)):
     await check_admin(authorization);require_config()
@@ -200,7 +208,15 @@ async def auth_start(authorization:str|None=Header(default=None)):
     params={"client_id":CLIENT,"response_type":"code","redirect_uri":redirect_uri(),"response_mode":"query","scope":SCOPES,"state":state}
     return {"url":AUTH+"/authorize?"+urlencode(params)}
 @app.get("/auth/microsoft/callback")
-async def auth_callback(code:str="",state:str="",error:str=""):
+async def auth_callback(request:Request,code:str="",state:str="",error:str=""):
+    if request.cookies.get(COOKIE)==state and state:
+        try:return await microsoft_login.callback(request,code,state,error)
+        except HTTPException as failure:
+            response=RedirectResponse(ACCOUNT+"#"+urlencode({"edu-ms-error":str(failure.detail)}),status_code=303)
+            response.delete_cookie(COOKIE,path="/",secure=True,httponly=True,samesite="lax")
+            response.headers["Cache-Control"]="no-store"
+            response.headers["Referrer-Policy"]="no-referrer"
+            return response
     expiry=pending.pop(state,None)
     if error or not code or not expiry or expiry<time.time():raise HTTPException(400,"Přihlášení bylo zrušeno nebo vypršelo")
     async with httpx.AsyncClient(timeout=25) as client:
