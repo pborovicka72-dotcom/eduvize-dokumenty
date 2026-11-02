@@ -66,7 +66,7 @@ class MicrosoftLogin:
         if current!=pending['owner']:raise HTTPException(409,'Připojený účet se mezitím změnil. Přihlášení zopakujte.')
         ticket=secrets.token_urlsafe(32)
         self.store.put('ticket',ticket,{'proof':pending['proof'],'remember':pending['remember'],'accountId':user['id']},120)
-        response=RedirectResponse(ACCOUNT+'#'+urlencode({'edu-ms-ticket':ticket}),status_code=303)
+        response=RedirectResponse(ACCOUNT+'?edu-login-return='+secrets.token_urlsafe(12)+'#'+urlencode({'edu-ms-ticket':ticket}),status_code=303)
         response.delete_cookie(COOKIE,path='/',secure=True,httponly=True,samesite='lax')
         response.headers['Cache-Control']='no-store';response.headers['Referrer-Policy']='no-referrer'
         return response
