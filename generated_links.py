@@ -50,12 +50,22 @@ def validate_library(config):
         if not isinstance(item.get('label',''),str) or len(item.get('label',''))>120:raise HTTPException(422,'Název odkazu může mít nejvýše 120 znaků.')
     return config
 
+def segment_key(item):
+    info=describe_url(item['url'])
+    return (info['app'],info['output'],info['orientation'],info['style'],info['segment']) if info['output']=='nsp' else (info['id'],)
+
+def latest_segments(items):
+    newest={}
+    for item in sorted(items,key=lambda x:x.get('copiedAt',''),reverse=True):
+        newest.setdefault(segment_key(item),item)
+    return list(newest.values())
+
 def upsert(items,url,label='',now=None,capture_id=None):
-    info=describe_url(url);now=now or stamp();old=next((x for x in items if x['id']==info['id']),None)
+    info=describe_url(url);now=now or stamp();old=next((x for x in latest_segments(items) if segment_key(x)==segment_key(info)),None)
     if capture_id and old and old.get('captureId')==capture_id:return items,old
     record={**info,'label':old.get('label','') if old else str(label or '')[:120],'createdAt':old['createdAt']if old else now,'copiedAt':now,'copies':int(old.get('copies',0))+1 if old else 1}
     if capture_id:record['captureId']=str(capture_id)[:80]
-    result=[record]+[x for x in items if x['id']!=record['id']]
+    result=[record]+[x for x in latest_segments(items) if segment_key(x)!=segment_key(record)]
     validate_library({'items':result})
     return result,record
 
@@ -63,7 +73,7 @@ def add_routes(router,store):
     async def read(profile_id):
         profile=await store.read(profile_id);entry=profile['apps'].get('generated-links',{})
         config=entry.get('config',{});items=[] if config.get('empty') else config.get('items',[])
-        return profile,entry,items
+        return profile,entry,latest_segments(items)
     async def change(profile_id,operation):
         for attempt in range(4):
             profile,entry,items=await read(profile_id);items,result=operation(items)
