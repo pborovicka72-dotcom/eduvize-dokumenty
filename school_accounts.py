@@ -86,12 +86,14 @@ class SchoolProfileStore:
     async def list(self):
         school=school_context.get()
         if not school:return await self.store.list()
-        await self.materialize()
         from configuration_profiles import metadata
-        return [metadata(await self.store.read(school['profileId']))]
+        return [metadata(await self.read(school['profileId']))]
     async def read(self, profile_id):
         self.own(profile_id)
-        if school_context.get():await self.materialize()
+        try:return await self.store.read(profile_id)
+        except HTTPException as error:
+            if error.status_code!=404 or not school_context.get():raise
+        await self.materialize()
         return await self.store.read(profile_id)
     async def create(self,*args):
         raise HTTPException(409,'Každá škola má jeden automaticky vytvořený profil.')

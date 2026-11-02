@@ -118,4 +118,16 @@ class RuntimeIsolationTests(unittest.IsolatedAsyncioTestCase):
    school_context.set({'id':'a'*32,'legacy':True});self.assertIs(documents.current_delivery(),legacy)
   finally:school_context.reset(reset)
 
+class SharedCacheTests(unittest.IsolatedAsyncioTestCase):
+ async def test_identical_remote_file_ids_in_different_drives_do_not_share_bytes(self):
+  from document_delivery import DocumentDelivery,AsyncCache
+  cache=AsyncCache(60,100,weight=lambda asset:len(asset.data))
+  async def manifest():return {'items':[{'id':'document','file_id':'same-remote-id','visible':True}]}
+  async def one(item):return b'school-one'
+  async def two(item):return b'school-two'
+  first=DocumentDelivery(manifest,one,file_cache=cache,namespace='one')
+  second=DocumentDelivery(manifest,two,file_cache=cache,namespace='two')
+  self.assertEqual((await first.file('document'))[1].data,b'school-one')
+  self.assertEqual((await second.file('document'))[1].data,b'school-two')
+  self.assertEqual(cache.used,20)
 if __name__=='__main__':unittest.main()

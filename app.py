@@ -11,7 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from central_admin import central_admin
 from school_accounts import SchoolAccounts, SchoolProfileStore, school_context, storage_key
 from kiosk_config_store import KioskConfigStore, MAX_BYTES
-from document_delivery import DocumentDelivery
+from document_delivery import DocumentDelivery, AsyncCache
+from collections import OrderedDict
 from microsoft_login import LoginStore, MicrosoftLogin, login_router, COOKIE, ACCOUNT
 
 ROOT=Path(__file__).resolve().parent
@@ -445,12 +446,16 @@ async def download_document(item):
                 raise HTTPException(502,"Nepodařilo se načíst soubor")
     return response.content
 
-document_delivery = DocumentDelivery(load_public_manifest, download_document)
-deliveries={}
+school_file_cache=AsyncCache(60,64*1024*1024,weight=lambda asset:len(asset.data))
+document_delivery = DocumentDelivery(load_public_manifest, download_document,file_cache=school_file_cache,namespace='legacy')
+deliveries=OrderedDict()
 def current_delivery():
     school=school_context.get()
     if not school or school['legacy']:return document_delivery
-    if school['id'] not in deliveries:deliveries[school['id']]=DocumentDelivery(load_public_manifest,download_document)
+    if school['id'] not in deliveries:
+        while len(deliveries)>=64:deliveries.popitem(last=False)
+        deliveries[school['id']]=DocumentDelivery(load_public_manifest,download_document,file_cache=school_file_cache,namespace=school['id'])
+    deliveries.move_to_end(school['id'])
     return deliveries[school['id']]
 
 @app.get("/api/documents/{doc_id}/file")

@@ -60,10 +60,11 @@ class Asset:
     etag: str
 
 class DocumentDelivery:
-    def __init__(self, manifest, download, clock=time.monotonic):
+    def __init__(self, manifest, download, clock=time.monotonic, file_cache=None, namespace=""):
+        self.namespace=namespace
         self.manifest, self.download = manifest, download
         self.catalog_cache = AsyncCache(15, 1, clock=clock)
-        self.file_cache = AsyncCache(60, 64 * 1024 * 1024, weight=lambda asset: len(asset.data), clock=clock)
+        self.file_cache = file_cache if file_cache is not None else AsyncCache(60, 64 * 1024 * 1024, weight=lambda asset: len(asset.data), clock=clock)
 
     def invalidate(self):
         self.catalog_cache.clear()
@@ -85,7 +86,7 @@ class DocumentDelivery:
         async def load():
             data = await self.download(item)
             return Asset(data, '"' + hashlib.sha256(data).hexdigest() + '"')
-        asset = await self.file_cache.get(item['file_id'], load)
+        asset = await self.file_cache.get((self.namespace,item['file_id']) if self.namespace else item['file_id'], load)
         if generation != self.catalog_cache.generation:
             return await self.file(doc_id)
         return item, asset
