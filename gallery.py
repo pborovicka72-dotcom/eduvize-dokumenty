@@ -1,4 +1,7 @@
 """School-isolated photo albums, private OneDrive storage and capability display links."""
+import asyncio
+import time
+from collections import OrderedDict
 import base64
 import json
 import re
@@ -20,6 +23,7 @@ def settings(value):
         try: return max(low, min(high, int(value.get(key, default))))
         except (TypeError, ValueError): return default
     return {'count':integer('count',4,1,6),'seconds':integer('seconds',8,3,120),
+            'sort':value.get('sort') if value.get('sort') in ('date','name') else 'date',
             'viewMode':value.get('viewMode') if value.get('viewMode') in ('nsp','kiosk','web') else 'nsp',
             'segment':value.get('segment') if isinstance(value.get('segment'),dict) else {'orientation':'landscape','style':1,'block':1},
             'crop':integer('crop',10,0,15),'volume':integer('volume',30,0,100),
@@ -78,8 +82,18 @@ def gallery_router(graph, folder, child, read, check_admin, write_lock, namespac
     store=Albums(graph,folder,child,read)
     def lock(): return write_lock('gallery:'+namespace())
 
+    public_cache=OrderedDict()
+    read_locks=[asyncio.Lock() for _ in range(16)]
+    def invalidate(album_id):public_cache.pop((namespace(),album_id),None)
     async def public(album_id, token):
-        _,_,a=await store.album(album_id)
+        key=(namespace(),album_id)
+        async with read_locks[hash(key)%len(read_locks)]:
+            cached=public_cache.get(key)
+            if cached and time.monotonic()-cached[0]<3:a=cached[1]
+            else:
+                _,_,a=await store.album(album_id)
+                if len(public_cache)>=128:public_cache.popitem(last=False)
+                public_cache[key]=(time.monotonic(),a)
         if not token or not secrets.compare_digest(str(token),a['token']):
             raise HTTPException(404,'Album nebylo nalezeno.')
         return a
@@ -102,7 +116,7 @@ def gallery_router(graph, folder, child, read, check_admin, write_lock, namespac
                     'mime':i['mime'],'width':max(1,min(50000,int(i.get('width',1)))),
                     'height':max(1,min(50000,int(i.get('height',1)))),'date':str(i.get('date',''))[:40]})
             if len(a['items'])>1000:raise HTTPException(422,'Album může mít nejvýše 1000 souborů.')
-            await store.save(parent,data)
+            await store.save(parent,data);invalidate(a['id'])
         return a
 
     async def download_url(item):
@@ -138,7 +152,7 @@ def gallery_router(graph, folder, child, read, check_admin, write_lock, namespac
                 'name':album_id,'folder':{},'@microsoft.graph.conflictBehavior':'fail'})).json()
             a={'id':album_id,'name':name,'token':secrets.token_urlsafe(32),'folder':target['id'],
                'created':datetime.now(timezone.utc).isoformat(),'items':[],'settings':settings({})}
-            data['albums'].append(a);await store.save(parent,data)
+            data['albums'].append(a);await store.save(parent,data);invalidate(a['id'])
         return a
 
     @router.put('/api/admin/gallery/{album_id}')
@@ -156,7 +170,7 @@ def gallery_router(graph, folder, child, read, check_admin, write_lock, namespac
                 if not isinstance(order,list) or len(order)!=len(a['items']) or set(order)!={x['id'] for x in a['items']}:
                     raise HTTPException(409,'Seznam souborů se změnil. Obnovte album.')
                 a['items'].sort(key=lambda x:order.index(x['id']))
-            await store.save(folder,data)
+            await store.save(folder,data);invalidate(a['id'])
         return a
 
     @router.post('/api/admin/gallery/{album_id}/files')
@@ -182,7 +196,7 @@ def gallery_router(graph, folder, child, read, check_admin, write_lock, namespac
             item={'id':item_id,'file':uploaded['id'],'name':Path(file.filename).name[:180],
                   'mime':MEDIA[ext],'width':dim('width'),'height':dim('height'),
                   'date':str(meta.get('date',''))[:40],'size':len(content)}
-            a['items'].append(item);await store.save(parent,data)
+            a['items'].append(item);await store.save(parent,data);invalidate(a['id'])
         return item
 
     @router.post('/api/admin/gallery/{album_id}/import')
@@ -214,7 +228,7 @@ def gallery_router(graph, folder, child, read, check_admin, write_lock, namespac
                 a['items'].append({'id':uuid.uuid4().hex,'file':f['id'],'drive':drive,'name':f['name'],
                     'mime':mime,'width':image.get('width',1),'height':image.get('height',1),
                     'date':f.get('photo',{}).get('takenDateTime') or f.get('createdDateTime',''),'size':f.get('size',0)})
-            await store.save(parent,data)
+            await store.save(parent,data);invalidate(a['id'])
         return a
 
     @router.get('/api/gallery/{album_id}')
