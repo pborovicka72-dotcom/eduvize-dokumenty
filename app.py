@@ -542,3 +542,8 @@ app.include_router(profile_router(SchoolProfileStore(configuration_profiles,prof
 # Shared, durable timing preferences. No source credentials are public.
 from update_plans import UpdatePlans, update_plan_router
 app.include_router(update_plan_router(UpdatePlans(microsoft_login_db), check_profile_admin, school_accounts))
+
+# Photo gallery reuses school authentication and the private OneDrive connection.
+from gallery import gallery_router
+app.include_router(gallery_router(graph, ensure_folder, child_named, read_drive_json,
+                                 check_admin, profile_write_lock, storage_key))
