@@ -1,146 +1,26 @@
-"""Eduvize Dokumenty: Microsoft OneDrive-backed test deployment."""
+"""Document content service. Shared administration is owned by eduvize-admin."""
 import os, json, time, uuid, secrets, asyncio
 from pathlib import Path
-from urllib.parse import urlencode, quote
+from collections import OrderedDict
 import httpx
-import psycopg
-from cryptography.fernet import Fernet, InvalidToken
 from fastapi import FastAPI, UploadFile, File, Form, Header, HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
-from central_admin import central_admin
-from school_accounts import SchoolAccounts, SchoolProfileStore, school_context, storage_key
-from kiosk_config_store import KioskConfigStore, MAX_BYTES
 from document_delivery import DocumentDelivery, AsyncCache
-from collections import OrderedDict
-from microsoft_login import LoginStore, MicrosoftLogin, login_router, COOKIE, ACCOUNT
-
+from eduvize_admin import runtime as administration
+from eduvize_admin.runtime import (check_admin, graph, ensure_folder, child_named, system_folder,
+    read_drive_json, profile_write_lock, microsoft_login_db, school_accounts, microsoft_login,
+    check_profile_admin, load_tokens, persist_tokens, current_tokens, token_cipher, connected,
+    access_token, restore_tokens, save_school_connection, legacy_graph, storage_key, school_context)
 ROOT=Path(__file__).resolve().parent
-CLIENT=os.getenv("MICROSOFT_CLIENT_ID","")
-SECRET=os.getenv("MICROSOFT_CLIENT_SECRET","")
-TENANT=os.getenv("MICROSOFT_TENANT_ID","common")
-ADMIN=os.getenv("DOCUMENTS_ADMIN_TOKEN","")
-BASE=os.getenv("PUBLIC_BASE_URL","").rstrip("/")
-SCOPES="offline_access User.Read Files.ReadWrite"
-AUTH=f"https://login.microsoftonline.com/{TENANT}/oauth2/v2.0"
-SCHOOL_AUTH="https://login.microsoftonline.com/common/oauth2/v2.0"
-GRAPH="https://graph.microsoft.com/v1.0"
-FOLDER="Eduvize-Dokumenty"
 DEFAULT_CATEGORIES=["Oznámení","Akce a události","Výuka a vzdělávání","Úspěchy školy","Kroužky a aktivity","Jídelna","Dokumenty a formuláře","Ostatní"]
 MAX_SIZE=100*1024*1024
 TYPES={".pdf":"application/pdf",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp",".mp4":"video/mp4",".webm":"video/webm"}
-pending={}
-tokens={}
-DATABASE_URL=os.getenv("DATABASE_URL","")
-TOKEN_ENCRYPTION_KEY=os.getenv("TOKEN_ENCRYPTION_KEY","")
-
-def token_cipher():
-    if not DATABASE_URL or not TOKEN_ENCRYPTION_KEY:
-        raise HTTPException(503,"Nastavte DATABASE_URL a TOKEN_ENCRYPTION_KEY v Render Environment")
-    try:return Fernet(TOKEN_ENCRYPTION_KEY.encode())
-    except (ValueError,TypeError):raise HTTPException(503,"Neplatný TOKEN_ENCRYPTION_KEY")
-
-def load_tokens(key="microsoft"):
-    cipher=token_cipher()
-    try:
-        with psycopg.connect(DATABASE_URL,connect_timeout=10) as conn:
-            with conn.cursor() as cur:
-                cur.execute("CREATE TABLE IF NOT EXISTS eduvize_oauth_tokens (key TEXT PRIMARY KEY, encrypted_value BYTEA NOT NULL)")
-                cur.execute("SELECT encrypted_value FROM eduvize_oauth_tokens WHERE key=%s",(key,))
-                row=cur.fetchone()
-        return json.loads(cipher.decrypt(bytes(row[0]))) if row else None
-    except InvalidToken:raise HTTPException(503,"Nelze dešifrovat uložené připojení OneDrive")
-    except psycopg.Error:raise HTTPException(503,"Databáze pro připojení OneDrive není dostupná")
-
-def persist_tokens(value=None,key=None):
-    value=current_tokens() if value is None else value
-    key=storage_key() if key is None else key
-    cipher=token_cipher()
-    encrypted=cipher.encrypt(json.dumps(value).encode())
-    try:
-        with psycopg.connect(DATABASE_URL,connect_timeout=10) as conn:
-            with conn.cursor() as cur:
-                cur.execute("CREATE TABLE IF NOT EXISTS eduvize_oauth_tokens (key TEXT PRIMARY KEY, encrypted_value BYTEA NOT NULL)")
-                cur.execute("INSERT INTO eduvize_oauth_tokens (key,encrypted_value) VALUES (%s,%s) ON CONFLICT (key) DO UPDATE SET encrypted_value=EXCLUDED.encrypted_value",(key,encrypted))
-    except psycopg.Error:raise HTTPException(503,"Nepodařilo se bezpečně uložit připojení OneDrive")
-
-def current_tokens():
-    school=school_context.get()
-    if not school or school['legacy']:return tokens
-    if '_tokens' not in school:school['_tokens']=load_tokens(storage_key(school)) or {}
-    return school['_tokens']
-
-def restore_tokens():
-    value=current_tokens()
-    if not value.get("refresh_token"):
-        stored=load_tokens(storage_key())
-        if stored:value.update(stored)
-
+app=FastAPI(title="Eduvize – Dokumenty")
+app.add_middleware(CORSMiddleware,allow_origins=['https://pborovicka72-dotcom.github.io'],
+    allow_methods=['GET','POST','PUT','PATCH','DELETE'],allow_headers=['Authorization','Content-Type'])
+administration.install_admin(app)
 lock=asyncio.Lock()
-app=FastAPI(title="Eduvize – Dokumenty / OneDrive")
-app.add_middleware(CORSMiddleware,allow_origins=["https://eduvize-prubeh-dne.onrender.com","https://pborovicka72-dotcom.github.io","https://eduvize-weather.onrender.com","https://eduvize-aktuality.onrender.com","https://eduvize-design-system-api.onrender.com","https://eduvize-skolni-systemy.onrender.com","http://127.0.0.1:8789","https://eduvize-jidelnicek.onrender.com","http://127.0.0.1:8790"],allow_methods=["GET","POST","PUT","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
-
-async def check_admin(auth):
-    identity=await central_admin(auth)
-    if identity:
-        if identity.get("schoolId"):school_context.set(school_accounts.get(identity["schoolId"]))
-        return
-    if not ADMIN:raise HTTPException(503,"Set DOCUMENTS_ADMIN_TOKEN in Render Environment")
-    if not auth or not secrets.compare_digest(auth,"Bearer "+ADMIN):raise HTTPException(401,"Neplatný administrační klíč")
-def require_config():
-    if not (CLIENT and SECRET and BASE):raise HTTPException(503,"Set MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET and PUBLIC_BASE_URL")
-def redirect_uri():return BASE+"/auth/microsoft/callback"
-def connected():
-    restore_tokens()
-    if not current_tokens().get("refresh_token"):raise HTTPException(503,"OneDrive není připojen. Přihlaste se v administraci.")
-def token_authority():
-    school=school_context.get()
-    return SCHOOL_AUTH if school and not school['legacy'] else AUTH
-async def access_token():
-    connected()
-    value=current_tokens()
-    if value.get("access_token") and time.time()<value.get("expires",0)-90:return value["access_token"]
-    async with httpx.AsyncClient(timeout=25) as client:
-        r=await client.post(token_authority()+"/token",data={"client_id":CLIENT,"client_secret":SECRET,"grant_type":"refresh_token","refresh_token":value["refresh_token"],"scope":SCOPES})
-    if r.status_code!=200:raise HTTPException(503,"OneDrive připojení vypršelo, přihlaste se znovu")
-    t=r.json();value.update(access_token=t["access_token"],refresh_token=t.get("refresh_token",value["refresh_token"]),expires=time.time()+t.get("expires_in",3600))
-    persist_tokens()
-    return value["access_token"]
-async def graph(method,path,**kwargs):
-    token=await access_token()
-    async with httpx.AsyncClient(timeout=45,follow_redirects=False) as client:
-        r=await client.request(method,GRAPH+path,headers={"Authorization":"Bearer "+token,**kwargs.pop("headers",{})},**kwargs)
-    if r.status_code>=400:raise HTTPException(502,"Microsoft Graph error ("+str(r.status_code)+"): "+r.text[:220])
-    return r
-async def ensure_folder():
-    r=await graph("GET","/me/drive/root/children",params={"$select":"id,name,folder","$top":200})
-    for item in r.json().get("value",[]):
-        if item["name"]==FOLDER and "folder" in item:return item["id"]
-    r=await graph("POST","/me/drive/root/children",json={"name":FOLDER,"folder":{},"@microsoft.graph.conflictBehavior":"fail"})
-    return r.json()["id"]
-async def child_named(parent, name):
-    # Read folder children; do not silently replace metadata if the lookup fails.
-    r = await graph("GET", f"/me/drive/items/{parent}/children", params={"$select":"id,name,folder", "$top":200})
-    return next((x for x in r.json().get("value", []) if x["name"] == name), None)
-
-async def system_folder(folder):
-    item = await child_named(folder, "_Eduvize-system")
-    if item:
-        if "folder" not in item:
-            raise HTTPException(409, "Systémový adresář koliduje se souborem")
-        return item["id"]
-    r = await graph("POST", f"/me/drive/items/{folder}/children",
-                    json={"name":"_Eduvize-system","folder":{},"@microsoft.graph.conflictBehavior":"fail"})
-    return r.json()["id"]
-
-async def read_drive_json(item):
-    response = await graph("GET", f"/me/drive/items/{item['id']}/content")
-    if response.status_code in (301,302,303,307,308):
-        async with httpx.AsyncClient(timeout=30) as client:
-            response = await client.get(response.headers["location"])
-            response.raise_for_status()
-    return response.json()
-
 async def read_manifest_item(item):
     data = await read_drive_json(item)
     if not isinstance(data,dict) or not isinstance(data.get("items"),list):
@@ -200,7 +80,7 @@ def in_document_scope(item,scope):
 def public_items(items):
     return sorted([{k:v for k,v in item.items() if k!="file_id"} for item in items if item.get("visible",True)],key=lambda x:(x.get("position",0),x["name"]))
 @app.get("/health")
-def health():return {"status":"ok","central_admin_sessions":True,"school_accounts":True,"microsoft_multitenant":True,"onedrive_configured":bool(CLIENT and SECRET and BASE),"token_storage_configured":bool(DATABASE_URL and TOKEN_ENCRYPTION_KEY),"onedrive_connected_in_memory":bool(tokens.get("refresh_token")),"admin_configured":bool(ADMIN)}
+def health():return {"status":"ok","central_admin_sessions":True,"school_accounts":True,"microsoft_multitenant":True,"onedrive_configured":bool(administration.CLIENT and administration.SECRET and administration.BASE),"token_storage_configured":bool(administration.DATABASE_URL and administration.TOKEN_ENCRYPTION_KEY),"onedrive_connected_in_memory":bool(administration.tokens.get("refresh_token")),"admin_configured":bool(administration.ADMIN)}
 @app.get("/")
 @app.get("/display")
 def display():return FileResponse(ROOT/"index.html")
@@ -212,89 +92,6 @@ def config():return FileResponse(ROOT/"config.html")
 @app.get("/design-system/")
 def design_system_redirect():
     return RedirectResponse("https://eduvize-design-system-api.onrender.com/",status_code=307)
-
-def microsoft_login_db():
-    if not DATABASE_URL:raise HTTPException(503,"Databáze přihlášení není nastavená.")
-    return psycopg.connect(DATABASE_URL,connect_timeout=10)
-
-async def legacy_graph(*args,**kwargs):
-    reset=school_context.set(None)
-    try:return await graph(*args,**kwargs)
-    finally:school_context.reset(reset)
-
-school_accounts=SchoolAccounts(microsoft_login_db)
-
-def save_school_connection(school,data):
-    value={'access_token':data['access_token'],'refresh_token':data['refresh_token'],'expires':time.time()+data.get('expires_in',3600)}
-    persist_tokens(value,storage_key(school))
-    if school['legacy']:tokens.clear();tokens.update(value);document_delivery.invalidate()
-    deliveries.pop(school['id'],None)
-
-@app.middleware("http")
-async def isolate_school_request(request:Request,call_next):
-    reset=school_context.set(None)
-    try:
-        if request.url.path.startswith('/api/') and not request.url.path.startswith('/api/admin/'):
-            profile_id=request.query_params.get('edu-profile')
-            if profile_id:school_context.set(school_accounts.public_profile(profile_id))
-        return await call_next(request)
-    except HTTPException as error:
-        from fastapi.responses import JSONResponse
-        return JSONResponse({'detail':error.detail},status_code=error.status_code)
-    finally:school_context.reset(reset)
-
-microsoft_login=MicrosoftLogin(LoginStore(microsoft_login_db),CLIENT,SECRET,SCHOOL_AUTH,redirect_uri,require_config,legacy_graph,school_accounts,save_school_connection)
-app.include_router(login_router(microsoft_login))
-
-@app.post("/api/admin/microsoft/start")
-async def auth_start(authorization:str|None=Header(default=None)):
-    await check_admin(authorization);require_config()
-    school=school_context.get()
-    if not school:raise HTTPException(403,'Pro připojení úložiště se nejprve přihlaste účtem Microsoft své školy.')
-    url,state=await microsoft_login.connect_drive(school)
-    launch=secrets.token_urlsafe(32)
-    microsoft_login.store.put('drive-launch',launch,{'url':url,'state':state},60)
-    return {'url':BASE+'/auth/microsoft/storage/start?'+urlencode({'launch':launch})}
-@app.get('/auth/microsoft/storage/start')
-async def storage_start(launch:str=''):
-    if len(launch)!=43:raise HTTPException(401,'Připojení úložiště vypršelo.')
-    data=microsoft_login.store.take('drive-launch',launch)
-    response=RedirectResponse(data['url'],status_code=303)
-    response.set_cookie(COOKIE,data['state'],max_age=600,secure=True,httponly=True,samesite='lax',path='/')
-    response.headers['Cache-Control']='no-store';response.headers['Referrer-Policy']='no-referrer'
-    return response
-@app.get("/auth/microsoft/callback")
-async def auth_callback(request:Request,code:str="",state:str="",error:str=""):
-    if request.cookies.get(COOKIE)==state and state:
-        try:return await microsoft_login.callback(request,code,state,error)
-        except HTTPException as failure:
-            response=RedirectResponse(ACCOUNT+"#"+urlencode({"edu-ms-error":str(failure.detail)}),status_code=303)
-            response.delete_cookie(COOKIE,path="/",secure=True,httponly=True,samesite="lax")
-            response.headers["Cache-Control"]="no-store"
-            response.headers["Referrer-Policy"]="no-referrer"
-            return response
-    raise HTTPException(400,'Přihlášení bylo zrušeno nebo vypršelo. Spusťte je znovu z účtu Eduvize.')
-@app.get("/api/admin/status")
-async def status(authorization:str|None=Header(default=None),verify:bool=False,authOnly:bool=False):
-    await check_admin(authorization)
-    # Signing in validates the admin key independently of stored Microsoft tokens.
-    if authOnly:return {"authenticated":True}
-    restore_tokens()
-    value=current_tokens()
-    if not value.get("refresh_token"):return {"connected":False}
-    if not verify:return {"connected":True}
-    try:
-        token=await access_token()
-        async with httpx.AsyncClient(timeout=20,follow_redirects=False) as client:
-            response=await client.get(GRAPH+"/me",params={"$select":"displayName,userPrincipalName"},headers={"Authorization":"Bearer "+token})
-    except HTTPException as error:
-        if error.status_code==503:return {"connected":False,"needsReconnect":True}
-        raise
-    except httpx.HTTPError:raise HTTPException(503,"OneDrive nyní nelze ověřit. Zkuste to znovu.")
-    if response.status_code in (401,403):return {"connected":False,"needsReconnect":True}
-    if not response.is_success:raise HTTPException(503,"OneDrive nyní nelze ověřit. Zkuste to znovu.")
-    account=response.json()
-    return {"connected":True,"account":{"displayName":account.get("displayName",""),"userPrincipalName":account.get("userPrincipalName","")}}
 
 @app.get("/api/document-categories")
 async def public_categories():
@@ -474,76 +271,12 @@ async def get_file(doc_id:str, request:Request):
         return Response(status_code=304, headers=headers)
     return Response(content=asset.data, media_type=item['mime'], headers=headers)
 
-# Config files use the existing authenticated OneDrive connection, never the public catalog.
-kiosk_configurations = KioskConfigStore(graph, ensure_folder, system_folder, child_named, read_drive_json, lock)
 
-@app.get("/api/admin/kiosk-configurations")
-async def list_kiosk_configurations(authorization: str = Header(default="")):
-    await check_admin(authorization)
-    try:
-        return {"items":await kiosk_configurations.list()}
-    except ValueError as error:
-        raise HTTPException(400, str(error))
-
-@app.get("/api/admin/kiosk-configurations/{name}")
-async def load_kiosk_configuration(name: str, authorization: str = Header(default="")):
-    await check_admin(authorization)
-    try:
-        data = await kiosk_configurations.load(name)
-    except ValueError as error:
-        raise HTTPException(400, str(error))
-    if data is None:
-        raise HTTPException(404, "Konfigurace nebyla na OneDrive nalezena.")
-    return data
-
-@app.put("/api/admin/kiosk-configurations/{name}")
-async def save_kiosk_configuration(name: str, request: Request, authorization: str = Header(default="")):
-    await check_admin(authorization)
-    raw = bytearray()
-    async for chunk in request.stream():
-        raw.extend(chunk)
-        if len(raw) > MAX_BYTES:
-            raise HTTPException(413, "Limit konfigurace je 2 MB.")
-    try:
-        return await kiosk_configurations.save(name, bytes(raw))
-    except (ValueError, UnicodeError) as error:
-        raise HTTPException(400, str(error))
-
-
-# Shared configuration profiles use the existing private OneDrive connection.
-from contextlib import asynccontextmanager
-import hashlib
-from configuration_profiles import ProfileStore, profile_router
-
-@asynccontextmanager
-async def profile_write_lock(key):
-    if not DATABASE_URL:
-        raise HTTPException(503, "Pro ukládání profilů je nutná DATABASE_URL.")
-    number = int.from_bytes(hashlib.sha256(('eduvize-profile:' + (school_context.get() or {}).get('id','legacy') + ':' + key).encode()).digest()[:8], 'big', signed=True)
-    try:
-        async with await psycopg.AsyncConnection.connect(DATABASE_URL, connect_timeout=10) as connection:
-            async with connection.transaction():
-                await connection.execute('SELECT pg_advisory_xact_lock(%s)', (number,))
-                yield
-    except psycopg.Error:
-        raise HTTPException(503, "Zámek konfigurace nyní není dostupný. Zkuste uložení znovu.") from None
-
-async def check_profile_admin(authorization):
-    identity=await central_admin(authorization, 'configurations')
-    if identity:
-        if identity.get('schoolId'):school_context.set(school_accounts.get(identity['schoolId']))
-        return
-    await check_admin(authorization)
-
-configuration_profiles = ProfileStore(graph, ensure_folder, system_folder, read_drive_json, profile_write_lock)
-app.include_router(profile_router(SchoolProfileStore(configuration_profiles,profile_write_lock), check_profile_admin))
-
-
-# Shared, durable timing preferences. No source credentials are public.
-from update_plans import UpdatePlans, update_plan_router
-app.include_router(update_plan_router(UpdatePlans(microsoft_login_db), check_profile_admin, school_accounts))
-
-# Photo gallery reuses school authentication and the private OneDrive connection.
-from gallery import gallery_router
+# Old gallery API URLs delegate to the separate photo gallery package.
+from eduvize_gallery.gallery import gallery_router
 app.include_router(gallery_router(graph, ensure_folder, child_named, read_drive_json,
                                  check_admin, profile_write_lock, storage_key))
+def storage_changed(school):
+    if school['legacy']:document_delivery.invalidate()
+    deliveries.pop(school['id'],None)
+administration.storage_change_handlers.append(storage_changed)

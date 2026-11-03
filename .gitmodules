@@ -1,0 +1,6 @@
+[submodule "vendor/eduvize-admin"]
+	path = vendor/eduvize-admin
+	url = https://github.com/pborovicka72-dotcom/eduvize-admin.git
+[submodule "vendor/eduvize-fotogalerie"]
+	path = vendor/eduvize-fotogalerie
+	url = https://github.com/pborovicka72-dotcom/eduvize-fotogalerie.git

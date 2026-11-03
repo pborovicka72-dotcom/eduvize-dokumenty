@@ -12,8 +12,8 @@ import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from fastapi import FastAPI,HTTPException
 from fastapi.testclient import TestClient
-from school_accounts import SchoolAccounts,SchoolProfileStore,school_context,storage_key,LEGACY_PROFILE
-from configuration_profiles import profile_router
+from eduvize_admin.school_accounts import SchoolAccounts,SchoolProfileStore,school_context,storage_key,LEGACY_PROFILE
+from eduvize_admin.configuration_profiles import profile_router
 import app as documents
 
 class Connection:
@@ -102,12 +102,12 @@ class RuntimeIsolationTests(unittest.IsolatedAsyncioTestCase):
   self.assertEqual(documents.microsoft_login.authority,'https://login.microsoftonline.com/common/oauth2/v2.0')
   reset=school_context.set(None)
   try:
-   with patch.object(documents,'AUTH','https://login.microsoftonline.com/original-tenant/oauth2/v2.0'):
-    self.assertIn('original-tenant',documents.token_authority())
+   with patch.object(documents.administration,'AUTH','https://login.microsoftonline.com/original-tenant/oauth2/v2.0'):
+    self.assertIn('original-tenant',documents.administration.token_authority())
     school_context.set({'id':'a'*32,'legacy':False})
-    self.assertIn('/common/',documents.token_authority())
+    self.assertIn('/common/',documents.administration.token_authority())
     school_context.set({'id':'b'*32,'legacy':True})
-    self.assertIn('original-tenant',documents.token_authority())
+    self.assertIn('original-tenant',documents.administration.token_authority())
   finally:school_context.reset(reset)
  async def test_parallel_requests_never_share_oauth_tokens(self):
   async def request(school_id):
@@ -116,7 +116,7 @@ class RuntimeIsolationTests(unittest.IsolatedAsyncioTestCase):
     first=documents.current_tokens();await asyncio.sleep(0)
     return first['access_token'],documents.current_tokens()['access_token']
    finally:school_context.reset(token)
-  with patch.object(documents,'load_tokens',side_effect=lambda key:{'access_token':key}):
+  with patch.object(documents.administration,'load_tokens',side_effect=lambda key:{'access_token':key}):
    results=await asyncio.gather(request('a'*32),request('b'*32))
   self.assertEqual(results[0][0],results[0][1]);self.assertEqual(results[1][0],results[1][1]);self.assertNotEqual(results[0][0],results[1][0])
  async def test_document_caches_are_per_school_and_legacy_is_preserved(self):
