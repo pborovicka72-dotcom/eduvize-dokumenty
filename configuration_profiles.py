@@ -11,7 +11,7 @@ from urllib.parse import parse_qsl, urlsplit
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 
-APPS = {'school-identity', 'day-progress', 'kiosk', 'documents', 'weather', 'holidays', 'transport', 'wisdom', 'news', 'styles', 'school-systems', 'generated-links', 'menu'}
+APPS = {'school-calendar', 'school-identity', 'day-progress', 'kiosk', 'documents', 'weather', 'holidays', 'transport', 'wisdom', 'news', 'styles', 'school-systems', 'generated-links', 'menu'}
 MAX_BYTES = 2 * 1024 * 1024
 FORBIDDEN = {'password', 'passwd', 'secret', 'clientsecret', 'token', 'accesstoken', 'refreshtoken', 'idtoken', 'authorization', 'adminkey', 'adminsecret', 'username', 'bakusername', 'bakpassword', 'microsoft', '__proto__', 'prototype', 'constructor'}
 
@@ -298,4 +298,5 @@ def profile_router(store, authorize):
     from generated_links import add_routes
     add_routes(router, store)
     return router
+
 
