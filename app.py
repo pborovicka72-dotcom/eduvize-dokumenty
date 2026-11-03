@@ -280,3 +280,7 @@ def storage_changed(school):
     if school['legacy']:document_delivery.invalidate()
     deliveries.pop(school['id'],None)
 administration.storage_change_handlers.append(storage_changed)
+
+# Capability-scoped kiosk mobile control; no administration access.
+from kiosk_remote import remote_router
+app.include_router(remote_router(administration.DATABASE_URL))
