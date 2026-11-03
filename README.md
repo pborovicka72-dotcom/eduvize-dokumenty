@@ -1,18 +1,16 @@
 # Eduvize – Dokumenty
 
-Samostatný modul pro správu a zobrazování školních dokumentů. Dokumenty se ukládají na OneDrive prostřednictvím Microsoft Graph; manifest určuje kategorie, pořadí a viditelnost.
+Správa a zobrazování školních dokumentů. Tento repozitář vlastní dokumentový
+katalog, soubory, kategorie a jejich prezentaci.
 
-## Stránky a API
-- Administrace: https://eduvize-dokumenty-api.onrender.com/config
-- Zobrazení: https://eduvize-dokumenty-api.onrender.com/display
-- Veřejné dokumenty: `/api/documents`
+Společná administrace je připnutá závislost `vendor/eduvize-admin`.
+Fotogalerie je připnutá závislost `vendor/eduvize-fotogalerie` pouze pro zachování
+historických API adres. Vlastní vývoj galerie probíhá výhradně v jejím repozitáři.
 
-## Nasazení
-Render spouští FastAPI. Konfigurace prostředí: `MICROSOFT_CLIENT_ID`, `MICROSOFT_TENANT_ID`, `MICROSOFT_CLIENT_SECRET`, `PUBLIC_BASE_URL`, `DOCUMENTS_ADMIN_TOKEN`, `DATABASE_URL` a `TOKEN_ENCRYPTION_KEY`. Přesměrování Microsoft Entra musí odpovídat `PUBLIC_BASE_URL/auth/microsoft/callback`.
+Stávající adresy `/config`, `/display`, `/api/documents`, OAuth callbacky a profily
+škol se nemění. Data zůstávají na stejném OneDrive a ve stejné databázi.
 
-OAuth tokeny se při správném nastavení databáze a šifrovacího klíče ukládají šifrovaně do PostgreSQL. Nezveřejňovat přístupové klíče ani soukromé dokumenty.
-
-## Architektura
-Tento repozitář vlastní správu dokumentů, OneDrive integraci a vlastní administraci. Společné barvy, komponenty administrace a Newline šablony načítá z `eduvize-styly`. Neudržovat zde další kopii centrálního editoru nebo geometrie segmentů.
-
-Změny CSS administrace testovat odděleně od zobrazovací stránky a ověřovat také vodorovné a svislé šablony Newline.
+Build: `sh build.sh`; spuštění: `uvicorn app:app`.
+Render musí mít přístup k oběma soukromým submodulům. Přesun nesmí být nasazen
+před úspěšným checkoutem závislostí a integračními testy. Zálohy původního commitu
+umožní návrat bez databázové migrace.
