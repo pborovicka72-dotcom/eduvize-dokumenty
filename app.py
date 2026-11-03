@@ -17,7 +17,7 @@ DEFAULT_CATEGORIES=["Oznámení","Akce a události","Výuka a vzdělávání","�
 MAX_SIZE=100*1024*1024
 TYPES={".pdf":"application/pdf",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp",".mp4":"video/mp4",".webm":"video/webm"}
 app=FastAPI(title="Eduvize – Dokumenty")
-app.add_middleware(CORSMiddleware,allow_origins=['https://pborovicka72-dotcom.github.io'],
+app.add_middleware(CORSMiddleware,allow_origins=["https://eduvize-prubeh-dne.onrender.com","https://pborovicka72-dotcom.github.io","https://eduvize-weather.onrender.com","https://eduvize-aktuality.onrender.com","https://eduvize-design-system-api.onrender.com","https://eduvize-skolni-systemy.onrender.com","http://127.0.0.1:8789","https://eduvize-jidelnicek.onrender.com","http://127.0.0.1:8790"],
     allow_methods=['GET','POST','PUT','PATCH','DELETE'],allow_headers=['Authorization','Content-Type'])
 administration.install_admin(app)
 lock=asyncio.Lock()
