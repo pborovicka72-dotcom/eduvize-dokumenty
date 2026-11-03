@@ -538,3 +538,7 @@ async def check_profile_admin(authorization):
 configuration_profiles = ProfileStore(graph, ensure_folder, system_folder, read_drive_json, profile_write_lock)
 app.include_router(profile_router(SchoolProfileStore(configuration_profiles,profile_write_lock), check_profile_admin))
 
+
+# Shared, durable timing preferences. No source credentials are public.
+from update_plans import UpdatePlans, update_plan_router
+app.include_router(update_plan_router(UpdatePlans(microsoft_login_db), check_profile_admin, school_accounts))
