@@ -32,6 +32,9 @@ class Snapshot(BaseModel):
     revision: str = Field(max_length=64)
     items: list[Item] = Field(default_factory=list, max_length=100)
 
+class PairCode(BaseModel):
+    code: str = Field(pattern=r'^[0-9]{8}$')
+
 class Heartbeat(BaseModel):
     snapshot: Snapshot
     ack: int = Field(default=0, ge=0)
@@ -59,6 +62,25 @@ class RemoteStore:
         except psycopg.Error:
             raise HTTPException(503, 'Mobilní ovládání je dočasně nedostupné.') from None
 
+    def pair_code(self, db, now):
+        # Unique among live, unconsumed codes; short lifetime and throttled redemption.
+        db.execute("SELECT pg_advisory_xact_lock(68713426)")
+        for _ in range(20):
+            code = f'{secrets.randbelow(100000000):08d}'
+            if not db.execute("SELECT id FROM eduvize_kiosk_remote WHERE data->>'pairCode'=%s AND expires>%s AND (data->>'pairUntil')::double precision>%s", (code,now,now)).fetchone():
+                return code
+        raise HTTPException(503, 'Párovací kód se nepodařilo vytvořit. Zkuste to znovu.')
+
+    def join_code(self, code):
+        now = time.time()
+        with self.transaction() as db:
+            row = db.execute("SELECT id,data FROM eduvize_kiosk_remote WHERE data->>'pairCode'=%s AND expires>%s AND (data->>'pairUntil')::double precision>%s", (code,now,now)).fetchone()
+            if not row or now-row[1]['seen'] > LIVE or not row[1].get('pairToken'):
+                raise HTTPException(410, 'Párovací kód není platný. Zadejte aktuální kód z obrazovky.')
+            sid, pair = row[0], row[1]['pairToken']
+        # update locks the row and consumes both QR and manual capability atomically.
+        return dict(session=sid, **self.update(sid,'pair','Bearer '+pair,'join'))
+
     def create(self, snapshot):
         now = time.time()
         sid, owner, pair = secrets.token_urlsafe(24), secrets.token_urlsafe(32), secrets.token_urlsafe(32)
@@ -70,6 +92,7 @@ class RemoteStore:
             db.execute("SELECT pg_advisory_xact_lock(68713425)")
             if db.execute('SELECT count(*) FROM eduvize_kiosk_remote').fetchone()[0] >= 2000:
                 raise HTTPException(429, 'Služba je vytížená. Zkuste to později.')
+            data['pairCode'] = self.pair_code(db, now)
             db.execute('INSERT INTO eduvize_kiosk_remote VALUES (%s,%s,%s::jsonb)', (sid, now+60, json.dumps(data)))
         return dict(id=sid, owner=owner)
 
@@ -95,7 +118,7 @@ class RemoteStore:
                 if d['controller'] and d['controllerUntil'] > now:
                     raise HTTPException(409, 'Kiosek právě ovládá jiný telefon.')
                 credential = secrets.token_urlsafe(32)
-                d.update(controller=digest(credential), controllerUntil=now+LEASE, pair='', pairToken='', commands=[], requests=[])
+                d.update(controller=digest(credential), controllerUntil=now+LEASE, pair='', pairToken='', pairCode='', commands=[], requests=[])
                 result = dict(controller=credential, snapshot=d['snapshot'], expiresIn=LEASE)
             elif action == 'heartbeat':
                 d.update(seen=now, snapshot=payload['snapshot'])
@@ -103,8 +126,10 @@ class RemoteStore:
                 connected = bool(d['controller'] and d['controllerUntil'] > now)
                 if not connected and (not d['pairToken'] or d['pairUntil'] < now):
                     pair = secrets.token_urlsafe(32)
-                    d.update(pair=digest(pair), pairToken=pair, pairUntil=now+PAIR, controller=None, commands=[])
-                result = dict(connected=connected, commands=d['commands'], pairToken=None if connected else d['pairToken'], pairUntil=d['pairUntil'])
+                    d.update(pair=digest(pair), pairToken=pair, pairCode=self.pair_code(db,now), pairUntil=now+PAIR, controller=None, commands=[])
+                if not connected and not d.get('pairCode'):
+                    d['pairCode'] = self.pair_code(db,now)
+                result = dict(connected=connected, commands=d['commands'], pairToken=None if connected else d['pairToken'], pairUntil=d['pairUntil'], pairCode=None if connected else d['pairCode'])
             elif action == 'state':
                 result = dict(snapshot=d['snapshot'], expiresIn=max(0,int(d['controllerUntil']-now)))
             elif action == 'command':
@@ -119,7 +144,7 @@ class RemoteStore:
                 d.update(controllerUntil=now+LEASE, lastCommand=now, requests=(d['requests']+[payload['requestId']])[-32:])
                 result = dict(accepted=True)
             elif action in ('leave', 'disconnect'):
-                d.update(controller=None, controllerUntil=0, commands=[], pairUntil=0, pairToken='')
+                d.update(controller=None, controllerUntil=0, commands=[], pairUntil=0, pairToken='', pairCode='')
                 result = dict(disconnected=True)
             db.execute('UPDATE eduvize_kiosk_remote SET data=%s::jsonb,expires=%s WHERE id=%s', (json.dumps(d),now+60,sid))
             return result
@@ -161,6 +186,19 @@ def remote_router(database_url):
             raise HTTPException(429, 'Příliš mnoho připojení. Zkuste to za minutu.')
         limits[identity] = (start,count+1)
         return store.create(body.model_dump())
+    code_limits = {}
+    @router.post('/join-code')
+    def join_code(body: PairCode, request: Request):
+        now = time.monotonic()
+        identity = request.client.host if request.client else 'unknown'
+        for key in list(code_limits):
+            if code_limits[key][0] < now-60:
+                del code_limits[key]
+        start, count = code_limits.get(identity, (now,0))
+        if count >= 5 or len(code_limits) >= 10000:
+            raise HTTPException(429, 'Příliš mnoho pokusů. Zkuste nový kód za minutu.')
+        code_limits[identity] = (start,count+1)
+        return store.join_code(body.code)
     @router.post('/sessions/{sid}/heartbeat')
     def heartbeat(sid: str, body: Heartbeat, authorization: str | None = Header(None)):
         return store.update(sid,'owner',authorization,'heartbeat',body.model_dump())
@@ -183,3 +221,4 @@ def remote_router(database_url):
     def disconnect(sid: str, authorization: str | None = Header(None)):
         return store.update(sid,'owner',authorization,'disconnect')
     return router
+
