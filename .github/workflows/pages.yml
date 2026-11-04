@@ -1,0 +1,48 @@
+name: Publish public Documents website
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+          persist-credentials: false
+      - uses: actions/configure-pages@v5
+      - name: Package public frontend only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil
+          root=Path('.')
+          target=Path('_site')
+          target.mkdir()
+          for name in ('index.html','config.html'):
+              shutil.copyfile(root/name,target/name)
+          for pattern in ('*.js','*.css','*.svg'):
+              for source in root.glob(pattern):
+                  shutil.copyfile(source,target/source.name)
+          (target/'.nojekyll').touch()
+          assert not (target/'vendor').exists()
+          assert not (target/'app.py').exists()
+          assert not (target/'.gitmodules').exists()
+          PY
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
