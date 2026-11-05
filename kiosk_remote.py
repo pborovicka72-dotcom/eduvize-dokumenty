@@ -165,10 +165,10 @@ class RemoteStore:
         return output.getvalue()
 
 class CapabilityResponse(JSONResponse):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, content=None, status_code=200, **kwargs):
         headers = dict(kwargs.pop('headers',None) or {})
         headers['Cache-Control'] = 'no-store'
-        super().__init__(*args, headers=headers, **kwargs)
+        super().__init__(content, status_code=status_code, headers=headers, **kwargs)
 
 def remote_router(database_url):
     limits = {}

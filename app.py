@@ -269,7 +269,8 @@ async def get_file(doc_id:str, request:Request):
     validators = [value.strip().removeprefix('W/') for value in request.headers.get('if-none-match', '').split(',')]
     if asset.etag in validators or '*' in validators:
         return Response(status_code=304, headers=headers)
-    return Response(content=asset.data, media_type=item['mime'], headers=headers)
+    from eduvize_admin.cloud_storage import binary_response
+    return binary_response(asset.data,item['mime'],request,headers)
 
 
 # Old gallery API URLs delegate to the separate photo gallery package.
@@ -284,3 +285,34 @@ administration.storage_change_handlers.append(storage_changed)
 # Capability-scoped kiosk mobile control; no administration access.
 from kiosk_remote import remote_router
 app.include_router(remote_router(administration.DATABASE_URL))
+
+@app.post('/api/admin/documents/import')
+async def import_documents(request:Request,authorization:str=Header(default='')):
+    """Copy imports; playback never depends on OneDrive."""
+    import base64
+    import io
+    from urllib.parse import urlparse
+    from eduvize_admin.cloud_storage import download,drive_children
+    await check_admin(authorization)
+    body=await request.json();link=body.get('url','');category=body.get('category','Ostatní');scope=document_scope(body.get('scope','documents'))
+    if not isinstance(link,str) or len(link)>4000:raise HTTPException(422,'Neplatný odkaz.')
+    parsed=urlparse(link);host=(parsed.hostname or '').lower()
+    if parsed.scheme!='https' or parsed.username or parsed.password or not (host in ('1drv.ms','onedrive.live.com') or host.endswith('.sharepoint.com')):
+        raise HTTPException(422,'Vložte odkaz na soubor nebo složku OneDrive / SharePoint.')
+    share='u!'+base64.urlsafe_b64encode(link.encode()).decode().rstrip('=')
+    source=(await administration.onedrive_graph('GET',f'/shares/{share}/driveItem')).json()
+    drive=source.get('parentReference',{}).get('driveId')
+    if not drive:raise HTTPException(422,'Nelze určit zdrojové úložiště.')
+    items=await drive_children(administration.onedrive_graph,f"/drives/{drive}/items/{source['id']}/children") if 'folder' in source else [source]
+    if len(items)>100:raise HTTPException(422,'Vyberte složku s nejvýše 100 položkami.')
+    results=[]
+    for item in items:
+        if 'file' not in item:continue
+        try:
+            if Path(item.get('name','')).suffix.lower() not in TYPES:raise HTTPException(415,'Nepodporovaný typ souboru.')
+            content=await download(administration.onedrive_graph,f"/drives/{drive}/items/{item['id']}/content")
+            result=await upload(UploadFile(io.BytesIO(content),filename=item['name']),category,scope,authorization)
+            results.append({'name':item['name'],'uploaded':True,**result})
+        except HTTPException as error:
+            results.append({'name':item.get('name','Soubor'),'uploaded':False,'error':str(error.detail)})
+    return {'items':results,'uploaded':sum(x['uploaded'] for x in results)}
