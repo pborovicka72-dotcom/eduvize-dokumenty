@@ -1,0 +1,40 @@
+name: Eduvize – nasadit do testu
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: eduvize-test-${{ github.repository }}
+  cancel-in-progress: false
+jobs:
+  test-deployment:
+    if: github.repository_owner == 'pborovicka72-dotcom' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # verified v4
+        with:
+          persist-credentials: false
+      - name: Package tracked source without private credentials
+        run: git archive --format=tar.gz HEAD -o "$RUNNER_TEMP/source.tar.gz"
+      - name: Authenticate using short-lived GitHub identity and deploy test
+        shell: python
+        run: |
+          import json, os, time, urllib.request
+          base='https://test.skola.eduvize.cz/_deploy'
+          request=urllib.request.Request(os.environ['ACTIONS_ID_TOKEN_REQUEST_URL']+'&audience='+base,headers={'Authorization':'Bearer '+os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']})
+          with urllib.request.urlopen(request,timeout=30) as r:token=json.load(r)['value']
+          payload=open(os.environ['RUNNER_TEMP']+'/source.tar.gz','rb').read()
+          request=urllib.request.Request(base+'/stage',data=payload,method='POST',headers={'Authorization':'Bearer '+token,'Content-Type':'application/octet-stream'})
+          with urllib.request.urlopen(request,timeout=90) as r:job=json.load(r)['job']
+          for attempt in range(130):
+              with urllib.request.urlopen(base+'/status/'+job,timeout=30) as r:result=json.load(r)
+              if result['status']=='failed':raise SystemExit(result['error'])
+              if result['status'] in ('passed','published'):
+                  with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:f.write('## Eduvize\n\nVydání: `'+result['release']+'`\n\nStav: '+result['status']+'\n\n[Otevřít prostředí]('+result['url']+')\n')
+                  print('Release:',result['release'],'Status:',result['status']);break
+              time.sleep(20)
+          else:raise SystemExit('Deployment timed out; inspect VPS journal before trying again.')
