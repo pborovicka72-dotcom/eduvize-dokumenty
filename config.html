@@ -31,7 +31,7 @@ async function sendDocumentBatch(){
 const documentEditors=new Map();
 window.addEventListener('beforeunload',event=>{if([...documentEditors.values()].some(editor=>editor.dirty())){event.preventDefault();event.returnValue='';}});
 async function flushDocumentEdits(){await Promise.all([...documentEditors.values()].map(editor=>editor.flush()));}
-async function request(path,options={}){const r=await window.EduvizeAdminAuth.fetch(new URL(path,base).href,options,'documents');const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(typeof d.detail==='string'?d.detail:'Chyba serveru '+r.status);return d}
+async function request(path,options={}){const r=await window.EduvizeAdminAuth.fetch(new URL(path,base).href,options,'documents');const d=await r.json().catch(()=>({}));if(!r.ok){const error=Error(typeof d.detail==='string'?d.detail:d.detail?.message||'Chyba serveru '+r.status);error.detail=d.detail;throw error;}return d}
 
 let categoryNames=[];
 async function loadCategories(){
@@ -101,7 +101,24 @@ const save=document.createElement('button');save.type='button';save.className='e
 const rowStatus=document.createElement('span');rowStatus.className='edu-admin__hint';rowStatus.setAttribute('role','status');rowStatus.setAttribute('aria-live','polite');
 save.textContent='Uložit nyní';save.onclick=()=>editor.flush().catch(()=>{});
 const del=document.createElement('button');del.type='button';del.className='edu-admin__button';del.textContent='Smazat';
-del.onclick=async()=>{if(!confirm('Opravdu trvale smazat '+item.name+'?'))return;try{await editor.flush();}catch{return;}del.disabled=true;save.disabled=true;row.setAttribute('aria-busy','true');del.textContent='Mažu…';status('Mažu soubor z Eduvize…','success');try{await request('/api/admin/documents/'+item.id,{method:'DELETE'});documentEditors.delete(item.id);status('Soubor byl smazán.','success');await load()}catch(e){status(e.message)}finally{del.disabled=false;save.disabled=false;del.textContent='Smazat';row.removeAttribute('aria-busy')}};
+const usagePanel=document.createElement('div');usagePanel.setAttribute('role','status');usagePanel.setAttribute('aria-live','polite');
+function showUsage(items,message){usagePanel.replaceChildren();const heading=document.createElement('p');heading.textContent=message;usagePanel.append(heading);if(items?.length){const list=document.createElement('ul');for(const use of items){const entry=document.createElement('li');entry.textContent=[use.app,use.name,use.profileId?'Profil '+use.profileId:'',use.state,use.outputId?'Výstup '+use.outputId:'',use.location].filter(Boolean).join(' · ');list.append(entry);}usagePanel.append(list);}}
+del.onclick=async()=>{
+ del.disabled=true;save.disabled=true;row.setAttribute('aria-busy','true');
+ try{
+  await editor.flush();
+  showUsage([],'Ověřuji použití souboru…');
+  const usage=await request('/api/admin/documents/'+encodeURIComponent(item.id)+'/usage');
+  if(!usage.complete)throw Error('Použití souboru se nepodařilo úplně ověřit. Soubor nebyl smazán.');
+  if(!usage.canDelete){showUsage(usage.items,'Soubor se používá a nelze jej smazat. Nejprve jej v uvedených místech odeberte nebo nahraďte.');return;}
+  showUsage([],usage.coverage);
+  if(!confirm('Smazat soubor „'+usage.name+'“ ze školní knihovny?\nV uložených konfiguracích a registrovaných výstupech nebylo nalezeno použití. Externí odkazy mimo Eduvizi nelze ověřit.'))return;
+  del.textContent='Mažu…';
+  await request('/api/admin/documents/'+encodeURIComponent(item.id),{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirm:item.id,expectedRevision:usage.revision})});
+  documentEditors.delete(item.id);status('Soubor byl smazán.','success');await load();
+ }catch(e){if(e.detail?.code==='material_in_use')showUsage(e.detail.items,e.message);else showUsage([],e.message);status(e.message);}
+ finally{del.disabled=false;save.disabled=false;del.textContent='Smazat';row.removeAttribute('aria-busy');}
+};
 const summary=document.createElement('summary');summary.className='edu-item-editor__summary';
 const icon=document.createElement('span');icon.className='app-icon ev-editor-app-icon';icon.setAttribute('data-edu-app-icon','documents');window.EduvizeAppIcons?.mount(icon,'documents');
 const heading=document.createElement('span');heading.className='edu-item-editor__heading';
@@ -111,7 +128,7 @@ const body=document.createElement('div');body.className='edu-item-editor__body';
 const fields=document.createElement('div');fields.className='edu-item-editor__fields';
 for(const [label,control] of [['Název souboru',name],['Titulek pro zobrazení',title],['Kategorie',category]]){const field=document.createElement('label');field.className='edu-admin__field';field.append(document.createTextNode(label),control);fields.append(field);}
 const actions=document.createElement('div');actions.className='edu-admin__actions edu-item-editor__actions';actions.append(visible,save,del,rowStatus);
-body.append(fields,actions);row.append(summary,body);
+body.append(fields,actions,usagePanel);row.append(summary,body);
 editor.listen((text,kind)=>{rowStatus.textContent=text;rowStatus.dataset.state=kind;save.disabled=kind==='pending'&&text==='Ukládám…';});
 function editDocument(){itemName.textContent=title.value||name.value;meta.textContent=check.checked?'Zobrazený':'Skrytý';editor.update({name:name.value,title:title.value,category:category.value,visible:check.checked});}
 name.oninput=title.oninput=editDocument;category.onchange=check.onchange=editDocument;
@@ -144,7 +161,7 @@ status('Kategorie „'+name+'“ byla přidána a vybrána pro nahrávání.','s
 }catch(error){status('Kategorii se nepodařilo přidat: '+error.message,'error','category-status');}finally{button.disabled=false;}
 };window.EduvizeDocumentUpload.bind({form:$('upload'),file:$('file'),category:$('category'),button:$('upload-button'),progress:$('upload-progress'),bar:$('upload-bar'),message:$('upload-text'),getToken:()=>window.EduvizeAdminAuth.getToken('documents'),endpoint:window.EduvizeAdminAuth.DOCS+'/api/admin/documents',onSuccess:async()=>{status('Dokument nahrán.','success','upload-text');await load()},onError:message=>status(message,'error','upload-text')});
 
-function link(){const u=new URL('/display',base);const profile=window.EduvizeAdminAuth.status().profileId;if(profile)u.searchParams.set('edu-profile',profile);u.searchParams.set('v','20261101-catalog-2');if($('layout').value==='signage')u.searchParams.set('layout','signage');if(window.EduvizeSegmentSelection&&$('layout').value==='signage'){const seg=window.EduvizeSegmentSelection.params();u.searchParams.set('segment_orientation',seg.orientation);u.searchParams.set('segment_style',seg.style);u.searchParams.set('segment_block',seg.block)}u.searchParams.set('video_sound',$('video-sound').checked?'on':'off');return window.EduvizeOutputModes.url(u,$('layout').value==='kiosk'?'kiosk':$('layout').value==='normal'?'web':'nsp').href}
+function link(){const u=new URL('/display',base);const profile=window.EduvizeAdminAuth.status().profileId||new URL(location.href).searchParams.get('edu-profile');if(profile)u.searchParams.set('edu-profile',profile);u.searchParams.set('v','20261101-catalog-2');if($('layout').value==='signage')u.searchParams.set('layout','signage');if(window.EduvizeSegmentSelection&&$('layout').value==='signage'){const seg=window.EduvizeSegmentSelection.params();u.searchParams.set('segment_orientation',seg.orientation);u.searchParams.set('segment_style',seg.style);u.searchParams.set('segment_block',seg.block)}u.searchParams.set('video_sound',$('video-sound').checked?'on':'off');return window.EduvizeOutputModes.url(u,$('layout').value==='kiosk'?'kiosk':$('layout').value==='normal'?'web':'nsp').href}
 const SETTINGS_KEY='eduvize-documents-display-settings-v1';
 function restoreDisplaySettings(){
  try{
@@ -163,12 +180,18 @@ $('save-settings').onclick=()=>{
 };
 $('open').onclick=()=>window.EduvizeAdminNavigation.openOutput(link());$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(link());status('Odkaz zkopírován.','success')}catch{status(link())}};
 
+// The segment picker can mount before session validation finishes. Refresh
+// its URL when school context becomes available, without moving any controls.
+function refreshDocumentPreview(){const picker=window.EduvizeSegmentSelection;if(picker)picker.set(picker.params());}
+window.addEventListener('eduvize-admin-auth-change',refreshDocumentPreview);
+window.addEventListener('eduvize-profile-selected',refreshDocumentPreview);
 window.EduvizeAdminAuth.ready.then(async()=>{
  try{
   if(await window.EduvizeAdminAuth.ensureConnection('documents'))await load();
+  refreshDocumentPreview();
  }catch(error){status(error.message);}
 });
-</script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=20261104-design-audit-1"></script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261104-design-audit-1"></script><div class="edu-document-version">Dokumenty · administrace v2026.11.02.01</div>
+</script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=20261104-design-audit-1"></script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261104-design-audit-1"></script><div class="edu-document-version">Dokumenty · administrace v2026.11.06.01</div>
 <script id="eduvize-profile-adapter">
 window.EduvizeProfileAdapter={app:"documents",read:()=>({schemaVersion:1,values:window.EduvizeProfiles.fields(["layout", "video-sound"]).read(),segment:window.EduvizeProfiles.segment()}),
 apply:async config=>{window.EduvizeProfiles.fields(["layout", "video-sound"]).apply(config.values);window.EduvizeProfiles.applySegment(config.segment);}};

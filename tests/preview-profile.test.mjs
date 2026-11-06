@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const html=fs.readFileSync(new URL('../config.html',import.meta.url),'utf8');
+const source=html.split('\n').find(line=>line.startsWith('function link(){'));
+const queryProfile='a'.repeat(32),verifiedProfile='b'.repeat(32);
+const state={};const context={URL,base:'https://test.skola.eduvize.cz',location:{href:'https://test.skola.eduvize.cz/config?edu-profile='+queryProfile},window:{EduvizeAdminAuth:{status:()=>state},EduvizeOutputModes:{url:u=>u}},$:id=>({value:id==='layout'?'normal':'',checked:false})};
+vm.runInNewContext(source,context);
+assert.equal(new URL(context.link()).searchParams.get('edu-profile'),queryProfile,'Preview needs explicit school context before async auth validation');
+state.profileId=verifiedProfile;
+assert.equal(new URL(context.link()).searchParams.get('edu-profile'),verifiedProfile,'Verified selection takes precedence');
+console.log('Document preview keeps profile during asynchronous session validation.');

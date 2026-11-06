@@ -1,0 +1,151 @@
+{
+  "result": "passed",
+  "current": [
+    {
+      "selector": "#connect",
+      "text": "Načíst dokumenty",
+      "x": 49.671875,
+      "y": 438.953125,
+      "width": 145.578125,
+      "height": 40
+    },
+    {
+      "selector": "#file",
+      "text": "",
+      "x": 49.671875,
+      "y": 1134.265625,
+      "width": 1038.65625,
+      "height": 57
+    },
+    {
+      "selector": "#category",
+      "text": "OznámeníAkce a událostiVýuka a vzděláváníÚspěchy školyKroužky a aktivityJídelnaDokumenty a formulářeOstatní",
+      "x": 1110.328125,
+      "y": 1134.265625,
+      "width": 280,
+      "height": 40
+    },
+    {
+      "selector": "#add-category",
+      "text": "Přidat kategorii",
+      "x": 1262.609375,
+      "y": 1242.265625,
+      "width": 127.71875,
+      "height": 40
+    },
+    {
+      "selector": "#video-sound",
+      "text": "",
+      "x": 49.671875,
+      "y": 1822.859375,
+      "width": 17,
+      "height": 17
+    },
+    {
+      "selector": "#layout",
+      "text": "Newline Signage ProBěžná stránkaKiosek",
+      "x": 49.671875,
+      "y": 2002.65625,
+      "width": 340,
+      "height": 40
+    },
+    {
+      "selector": "#open",
+      "text": "Otevřít výstup",
+      "x": 493.640625,
+      "y": 3432.75,
+      "width": 120.203125,
+      "height": 40
+    },
+    {
+      "selector": "#copy",
+      "text": "Kopírovat odkaz",
+      "x": 351.765625,
+      "y": 3432.75,
+      "width": 131.875,
+      "height": 40
+    },
+    {
+      "selector": "#save-settings",
+      "text": "Uložit v prohlížeči",
+      "x": 198.71875,
+      "y": 3432.75,
+      "width": 143.046875,
+      "height": 40
+    }
+  ],
+  "baseline": [
+    {
+      "selector": "#connect",
+      "text": "Načíst dokumenty",
+      "x": 49.671875,
+      "y": 438.953125,
+      "width": 145.578125,
+      "height": 40
+    },
+    {
+      "selector": "#file",
+      "text": "",
+      "x": 49.671875,
+      "y": 1134.265625,
+      "width": 1038.65625,
+      "height": 57
+    },
+    {
+      "selector": "#category",
+      "text": "OznámeníAkce a událostiVýuka a vzděláváníÚspěchy školyKroužky a aktivityJídelnaDokumenty a formulářeOstatní",
+      "x": 1110.328125,
+      "y": 1134.265625,
+      "width": 280,
+      "height": 40
+    },
+    {
+      "selector": "#add-category",
+      "text": "Přidat kategorii",
+      "x": 1262.609375,
+      "y": 1242.265625,
+      "width": 127.71875,
+      "height": 40
+    },
+    {
+      "selector": "#video-sound",
+      "text": "",
+      "x": 49.671875,
+      "y": 1822.859375,
+      "width": 17,
+      "height": 17
+    },
+    {
+      "selector": "#layout",
+      "text": "Newline Signage ProBěžná stránkaKiosek",
+      "x": 49.671875,
+      "y": 2002.65625,
+      "width": 340,
+      "height": 40
+    },
+    {
+      "selector": "#open",
+      "text": "Otevřít výstup",
+      "x": 493.640625,
+      "y": 3432.75,
+      "width": 120.203125,
+      "height": 40
+    },
+    {
+      "selector": "#copy",
+      "text": "Kopírovat odkaz",
+      "x": 351.765625,
+      "y": 3432.75,
+      "width": 131.875,
+      "height": 40
+    },
+    {
+      "selector": "#save-settings",
+      "text": "Uložit v prohlížeči",
+      "x": 198.71875,
+      "y": 3432.75,
+      "width": 143.046875,
+      "height": 40
+    }
+  ]
+}

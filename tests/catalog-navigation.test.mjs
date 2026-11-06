@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const source=html.slice(html.indexOf('async function refresh(){'),html.indexOf('let pdfResize='));
 const calls=[];const items=[{id:'one',category:'A',mime:'application/pdf'}];
-const context={params:new URLSearchParams(),standaloneDocument:false,signage:true,docs:[],screen:'folders',category:null,selected:null,fetch:async()=>({ok:true,json:async()=>({items})}),categoryOf:d=>d.category,showFolders:()=>calls.push('folders'),showCategory:()=>calls.push('category'),showDocument:()=>calls.push('document')};
+const context={schoolQuery:()=>'',window:{EduvizeOutputModes:{isInteractive:()=>true}},params:new URLSearchParams(),standaloneDocument:false,signage:true,docs:[],screen:'folders',category:null,selected:null,fetch:async()=>({ok:true,json:async()=>({items})}),categoryOf:d=>d.category,showFolders:()=>calls.push('folders'),showCategory:()=>calls.push('category'),showDocument:()=>calls.push('document')};
 vm.runInNewContext(source,context);
 await context.refresh();assert.deepEqual(calls,['folders']);
 calls.length=0;context.screen='document';context.selected='one';await context.refresh();assert.deepEqual(calls,[]);

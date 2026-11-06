@@ -1,0 +1,3170 @@
+{
+  "result": "passed",
+  "environment": "isolated TEST container via SSH loopback tunnel",
+  "checks": [
+    "upload_synthetic_image_and_two_page_pdf_documents",
+    "anonymous_kiosk_open_document_and_return_home",
+    "pdf_canvas_render_zoom_and_return_to_overview",
+    "existing_controls_keep_positions_order_and_dimensions",
+    "administration_preview_uses_verified_school_and_active_license",
+    "used_material_blocked_with_kiosk_page_and_button_locations",
+    "cancel_confirmation_preserves_unused_material",
+    "confirmed_unused_material_deleted_and_public_bytes_unavailable",
+    "cross_school_usage_denied",
+    "published_kiosk_survives_unrelated_delete",
+    "kiosk_landscape_and_portrait"
+  ],
+  "network": [
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/index.html",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/kiosk-environment.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-components.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-tokens.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/page-content.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/school.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/paged-panel.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-layout.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/status-panel.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/remote.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-output.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/content-surface.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-modes.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/content-surface.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-geometry.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-profile.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/status-panel.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/paged-panel.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/page-content.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-controls.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/tile-navigation.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/school.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/remote-client.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/kiosk-apps.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/kiosk-remote.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/kiosk-output-link.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-reading.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-output.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-runtime.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/_environment.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/active-theme.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/kiosk-outputs/6767a30e380e4df1b751fb5bbb64378d",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/branding.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/fit-panel.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/assets/eduvize-logo-compact-animated.svg",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/themes",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/display",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/branding",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/kiosk-remote/sessions",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/update-plans/kiosk",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-tokens.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-modes.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/documents.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/kiosk-remote/sessions/BlIskNRhVR0CSvCZ1wGtw70m7HEA4q5a/heartbeat",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-viewport.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-viewport.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-output.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-profile.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-geometry.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-controls.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "cdnjs.cloudflare.com",
+      "path": "/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/kiosk-remote/sessions/BlIskNRhVR0CSvCZ1wGtw70m7HEA4q5a/qr",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-reading.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/active-theme.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-runtime.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/themes",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/documents/b349e74550594c898ff79bf786dd0334/file",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/branding.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/fit-panel.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/assets/eduvize-favicon.svg",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/branding",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/update-plans/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/update-plans/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/assets/eduvize-logo-compact-animated.svg",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/display",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-modes.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-viewport.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/documents.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-viewport.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-tokens.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-output.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-profile.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-controls.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-geometry.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-reading.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "cdnjs.cloudflare.com",
+      "path": "/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/active-theme.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-runtime.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/themes",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/documents/c2ccb8c6500848ea86cd96b0517a2256/file",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/fit-panel.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/branding.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/update-plans/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/branding",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "cdnjs.cloudflare.com",
+      "path": "/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/update-plans/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/kiosk-remote/sessions/BlIskNRhVR0CSvCZ1wGtw70m7HEA4q5a/heartbeat",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/assets/eduvize-logo-compact-animated.svg",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/config",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/documents-admin.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-segments.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-account.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-modes.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-navigation.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-auth.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-components.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-tokens.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-shell.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-upload.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/preview-viewport.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-controls.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/item-editor.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-autosave.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/preview-viewport.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-upload.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-geometry.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-segments.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-runtime.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/active-theme.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-navigation.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-header.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/cloud-storage.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/generated-links.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin-session",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/configuration-profiles.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/form-fields.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/fit-panel.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/form-fields.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/assets/eduvize-symbol-white.svg",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/branding.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/themes",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/configuration-profiles.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/generated-links.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/categories",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/display",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/link-contract.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-settings.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin-session",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/branding",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-settings.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/kiosk-remote/sessions/BlIskNRhVR0CSvCZ1wGtw70m7HEA4q5a/heartbeat",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/display",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/link-compatibility.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-tokens.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-modes.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin-session",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/update-plans/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/configuration-profiles",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/documents.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-viewport.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/configuration-profiles",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/config",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/link-releases.json",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/display",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/themes",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/themes",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/configuration-profiles/b39e0e1f399b4859bf3436c967d511f5",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-navigation.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-segments.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-tokens.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-shell.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-account.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/documents-admin.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/preview-viewport.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/item-editor.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-upload.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-components.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-tokens.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/documents.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-viewport.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin-session",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-output.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-modes.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/assets/eduvize-favicon.svg",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/preview-viewport.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-autosave.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-auth.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-upload.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-controls.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-geometry.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-segments.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-viewport.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-modes.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-profile.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-geometry.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-controls.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/active-theme.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "cdnjs.cloudflare.com",
+      "path": "/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-runtime.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-navigation.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-header.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-reading.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/form-fields.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/notices/link-contract-2026-11-03",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/kiosk-remote/sessions/BlIskNRhVR0CSvCZ1wGtw70m7HEA4q5a/heartbeat",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/configuration-profiles.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/cloud-storage.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin-session",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/display",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/assets/eduvize-symbol-white.svg",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/themes",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/categories",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/generated-links.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/active-theme.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-tokens.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/documents.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-viewport.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-output.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/generated-links.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-profile.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-modes.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin-session",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-viewport.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/documents",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-controls.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-geometry.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "cdnjs.cloudflare.com",
+      "path": "/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/themes",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/documents/06841b6ec71e40938c14bad5bf14ed74/file",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-reading.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/fit-panel.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-runtime.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/branding.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/configuration-profiles.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/active-theme.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/form-fields.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/fit-panel.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/branding.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/documents",
+      "status": 402,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/update-plans/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/update-plans/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.css",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/branding",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/branding",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/configuration-profiles",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/configuration-profiles",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/link-contract.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-settings.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-runtime.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/kiosk-remote/sessions/BlIskNRhVR0CSvCZ1wGtw70m7HEA4q5a/heartbeat",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/branding.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/themes",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/fit-panel.js",
+      "status": 200,
+      "baseline": true
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/documents/b349e74550594c898ff79bf786dd0334/usage",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/documents/d3cb47f0ee8a4b449f258da4a33eea32/usage",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/kiosk-remote/sessions/BlIskNRhVR0CSvCZ1wGtw70m7HEA4q5a/heartbeat",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/documents/d3cb47f0ee8a4b449f258da4a33eea32/usage",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "DELETE",
+      "host": "127.0.0.1",
+      "path": "/api/admin/documents/d3cb47f0ee8a4b449f258da4a33eea32",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/categories",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/admin/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/index.html",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/kiosk-environment.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-tokens.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/school.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-components.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/page-content.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-layout.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-modes.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/paged-panel.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/status-panel.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-output.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/content-surface.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-controls.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/remote.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-profile.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/content-surface.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-geometry.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/paged-panel.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/school.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/page-content.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/tile-navigation.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/kiosk-apps.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/status-panel.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-reading.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/remote-client.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/kiosk-remote.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-kiosek/kiosk-output-link.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/_environment.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/active-theme.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-output.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/kiosk-outputs/6767a30e380e4df1b751fb5bbb64378d",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/branding.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-runtime.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/branding",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/themes",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/fit-panel.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/assets/eduvize-logo-compact-animated.svg",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/kiosk-remote/sessions",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/assets/eduvize-favicon.svg",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/update-plans/kiosk",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/kiosk-remote/sessions/2uT2IsSI59DsyhRWiRJ4YiAlcsVFCrgD/heartbeat",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/display",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/admin-tokens.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-viewport.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/documents.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-modes.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/document-viewport.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/kiosk-remote/sessions/2uT2IsSI59DsyhRWiRJ4YiAlcsVFCrgD/qr",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-output.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-profile.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-header.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-controls.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/navigation.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/nsp-geometry.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/kiosk-reading.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/active-theme.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "cdnjs.cloudflare.com",
+      "path": "/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/segment-display.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/web-brand.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/app-icons.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/output-integrity.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/update-runtime.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/card-layout.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.css",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/themes",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/documents/b349e74550594c898ff79bf786dd0334/file",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/typography.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/branding.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/fit-panel.js",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/public/broadcast-status",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/update-plans/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/design-system/branding",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/api/update-plans/documents",
+      "status": 200,
+      "baseline": false
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/eduvize-styly/design-system/assets/eduvize-logo-compact-animated.svg",
+      "status": 200,
+      "baseline": false
+    }
+  ],
+  "pageErrors": [],
+  "blockedRenderAttempts": [],
+  "productionChanged": false,
+  "limitations": [
+    "Central session validation uses the same store with a local transport hop; this does not validate a real Microsoft callback.",
+    "Gallery pilot and canonical test.skola.eduvize.cz deployment were not replaced."
+  ],
+  "date": "2026-11-06",
+  "postgres": "PostgreSQL 18.6",
+  "testImage": "sha256:082c675d33db79d14b9b79d86fd5ca83c840d67adb9147d54ed7956fc72615e7",
+  "canonicalTestDeploymentChanged": false,
+  "layoutBaseline": "HEAD:config.html under the same /config path, same test session, data and shared assets",
+  "testedFiles": {
+    "eduvize-dokumenty/config.html": "00e86e6ad859249ddc8c0c038b0a4ba3ba866345147f046f7f8a2f4bf2bdead1",
+    "eduvize-dokumenty/app.py": "08bce0c691b6caa726ab45c3c677081e10e7bd68a38a569dc4ffbf43aa1c8f71",
+    "eduvize-admin/eduvize_admin/material_usage.py": "e6ff1117b76a8b813b3ae0cbc765a07ce8a4dcdeface2ed3c2784b50dfd6f4b1",
+    "eduvize-admin/eduvize_admin/cloud_storage.py": "fb75635917bd02afa459a7a6c110f53a80aab371b37720efa4fba6a225b6c620",
+    "eduvize-dokumenty/tools/verify_material_kiosk_browser.py": "4977e2ca93b1e4ed94c64aa56c67532e71ddf493829c741d495772a583d8607e"
+  },
+  "cleanup": {
+    "ownedSchools": 2,
+    "ownedProfiles": 2,
+    "ownedKioskSnapshots": 3,
+    "cloudRecords": 15,
+    "foreignOwners": false,
+    "temporarySchemaRemoved": true,
+    "testContainerStopped": true,
+    "sshTunnelClosed": true
+  }
+}
