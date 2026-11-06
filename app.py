@@ -224,17 +224,25 @@ async def edit(doc_id:str,request:Request,authorization:str|None=Header(default=
     await check_admin(authorization)
     body=await request.json()
     return await apply_document_changes([{**body,"id":doc_id}])
-@app.delete("/api/admin/documents/{doc_id}")
-async def delete(doc_id:str,authorization:str|None=Header(default=None)):
+@app.get("/api/admin/documents/{doc_id}/usage")
+async def document_usage(doc_id:str,authorization:str|None=Header(default=None)):
     await check_admin(authorization)
-    async with lock:
-        folder,items=await all_items()
-        item=next((x for x in items if x["id"]==doc_id),None)
-        if not item:raise HTTPException(404,"Dokument nenalezen")
-        await graph("DELETE",f"/me/drive/items/{item['file_id']}")
-        current_delivery().invalidate()
-        await save_manifest(folder,[x for x in items if x["id"]!=doc_id])
-    return {"ok":True}
+    storage,key=administration.ensure_cloud()
+    storage.ready(key)  # No destructive legacy/OneDrive fallback.
+    return storage.document_usage(key,await ensure_folder(),doc_id)
+
+@app.delete("/api/admin/documents/{doc_id}")
+async def delete(doc_id:str,request:Request,authorization:str|None=Header(default=None)):
+    await check_admin(authorization)
+    from eduvize_admin.configuration_profiles import decode
+    body=decode(await request.body())
+    storage,key=administration.ensure_cloud()
+    result=storage.delete_document(key,await ensure_folder(),doc_id,
+        body.get('confirm'),body.get('expectedRevision'),
+        (school_context.get() or {}).get('id','operator'))
+    current_delivery().invalidate()
+    return result
+
 async def load_public_manifest():
     return await manifest_data(await ensure_folder())
 
@@ -265,6 +273,9 @@ async def get_file(doc_id:str, request:Request):
         item, asset = await current_delivery().file(doc_id)
     except KeyError:
         raise HTTPException(404,"Dokument nenalezen")
+    storage,key=administration.ensure_cloud()
+    if storage.is_ready(key):
+        storage.request(key,'GET',f"/me/drive/items/{item['file_id']}")
     headers = {"Cache-Control":"private, no-cache", "ETag":asset.etag, "X-Content-Type-Options":"nosniff"}
     validators = [value.strip().removeprefix('W/') for value in request.headers.get('if-none-match', '').split(',')]
     if asset.etag in validators or '*' in validators:

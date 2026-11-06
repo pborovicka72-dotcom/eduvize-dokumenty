@@ -1,0 +1,1454 @@
+{
+  "date": "2026-11-06",
+  "scope": "Tracked source candidates in Documents, shared Admin and Styles; excludes private uninitialized submodules and live configuration. Not proof of runtime egress.",
+  "revisions": {
+    "eduvize-dokumenty": "303344fd4ecebe295e3660d8a677caeb219d1bfb",
+    "eduvize-admin": "1eb82fe08badf57d4bf0283eae525a57a91682df",
+    "eduvize-styly": "9fd97dcc906d288068c98a13cc8254b9c80bb056"
+  },
+  "findings": [
+    {
+      "path": "eduvize-dokumenty/ADMINISTRATION.md",
+      "line": 17,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-dokumenty/AGENTS.md",
+      "line": 9,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-dokumenty/README.md",
+      "line": 11,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-dokumenty/SCHOOL-ACCOUNTS.md",
+      "line": 25,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-dokumenty/app.py",
+      "line": 20,
+      "hosts": [
+        "eduvize-aktuality.onrender.com",
+        "eduvize-design-system-api.onrender.com",
+        "eduvize-jidelnicek.onrender.com",
+        "eduvize-prubeh-dne.onrender.com",
+        "eduvize-skolni-systemy.onrender.com",
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-dokumenty/app.py",
+      "line": 94,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-dokumenty/config.html",
+      "line": 19,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-dokumenty/index.html",
+      "line": 22,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-dokumenty/tests/test_cross_application_cors.py",
+      "line": 14,
+      "hosts": [
+        "eduvize-prubeh-dne.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-dokumenty/tests/test_cross_application_cors.py",
+      "line": 16,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-dokumenty/tests/test_cross_application_cors.py",
+      "line": 17,
+      "hosts": [
+        "eduvize-aktuality.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-dokumenty/tests/test_cross_application_cors.py",
+      "line": 18,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-dokumenty/tests/test_cross_application_cors.py",
+      "line": 19,
+      "hosts": [
+        "eduvize-skolni-systemy.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-dokumenty/tests/test_cross_application_cors.py",
+      "line": 21,
+      "hosts": [
+        "eduvize-jidelnicek.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-dokumenty/tests/test_cross_application_cors.py",
+      "line": 38,
+      "hosts": [
+        "eduvize-skolni-systemy.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/.github/workflows/license-notices.yml",
+      "line": 19,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/.github/workflows/license-notices.yml",
+      "line": 27,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/.github/workflows/license-notices.yml",
+      "line": 32,
+      "hosts": [
+        "2Feduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/AGENTS.md",
+      "line": 9,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-admin/LICENSE_LIFECYCLE.md",
+      "line": 3,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-admin/MIGRATION.md",
+      "line": 28,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-admin/MIGRATION.md",
+      "line": 47,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-admin/MIGRATION.md",
+      "line": 49,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-admin/MIGRATION.md",
+      "line": 53,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-admin/deployment/README.md",
+      "line": 36,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-admin/deployment/README.md",
+      "line": 42,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-admin/deployment/single-host.py",
+      "line": 11,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "build-or-deployment"
+    },
+    {
+      "path": "eduvize-admin/deployment/single-host.py",
+      "line": 12,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "build-or-deployment"
+    },
+    {
+      "path": "eduvize-admin/deployment/single-host.py",
+      "line": 13,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "build-or-deployment"
+    },
+    {
+      "path": "eduvize-admin/deployment/single-host.py",
+      "line": 14,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "build-or-deployment"
+    },
+    {
+      "path": "eduvize-admin/deployment/single-host.py",
+      "line": 15,
+      "hosts": [
+        "eduvize-aktuality.onrender.com"
+      ],
+      "classification": "build-or-deployment"
+    },
+    {
+      "path": "eduvize-admin/deployment/single-host.py",
+      "line": 16,
+      "hosts": [
+        "eduvize-skolni-systemy.onrender.com"
+      ],
+      "classification": "build-or-deployment"
+    },
+    {
+      "path": "eduvize-admin/deployment/single-host.py",
+      "line": 17,
+      "hosts": [
+        "eduvize-prubeh-dne.onrender.com"
+      ],
+      "classification": "build-or-deployment"
+    },
+    {
+      "path": "eduvize-admin/deployment/single-host.py",
+      "line": 18,
+      "hosts": [
+        "eduvize-jidelnicek.onrender.com"
+      ],
+      "classification": "build-or-deployment"
+    },
+    {
+      "path": "eduvize-admin/deployment/single-host.py",
+      "line": 19,
+      "hosts": [
+        "eduvize-pid-realtime.onrender.com"
+      ],
+      "classification": "build-or-deployment"
+    },
+    {
+      "path": "eduvize-admin/deployment/single-host.py",
+      "line": 22,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "build-or-deployment"
+    },
+    {
+      "path": "eduvize-admin/deployment/single-host.py",
+      "line": 48,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "build-or-deployment"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/admin_sessions.py",
+      "line": 13,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/admin_sessions.py",
+      "line": 21,
+      "hosts": [
+        "eduvize-prubeh-dne.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/admin_sessions.py",
+      "line": 22,
+      "hosts": [
+        "eduvize-jidelnicek.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/admin_sessions.py",
+      "line": 24,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/admin_sessions.py",
+      "line": 25,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/admin_sessions.py",
+      "line": 26,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/admin_sessions.py",
+      "line": 28,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/admin_sessions.py",
+      "line": 29,
+      "hosts": [
+        "eduvize-aktuality.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/admin_sessions.py",
+      "line": 30,
+      "hosts": [
+        "eduvize-skolni-systemy.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/admin_sessions.py",
+      "line": 112,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/admin_sessions.py",
+      "line": 149,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/central_admin.py",
+      "line": 4,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/generated_links.py",
+      "line": 10,
+      "hosts": [
+        "eduvize-aktuality.onrender.com",
+        "eduvize-dokumenty-api.onrender.com",
+        "eduvize-jidelnicek.onrender.com",
+        "eduvize-kiosek.onrender.com",
+        "eduvize-prubeh-dne.onrender.com",
+        "eduvize-skolni-systemy.onrender.com",
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/license_cron.py",
+      "line": 9,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/runtime.py",
+      "line": 38,
+      "hosts": [],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/runtime.py",
+      "line": 90,
+      "hosts": [],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/runtime.py",
+      "line": 212,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/eduvize_admin/styles_api.py",
+      "line": 14,
+      "hosts": [
+        "eduvize-aktuality.onrender.com",
+        "eduvize-dokumenty-api.onrender.com",
+        "eduvize-jidelnicek.onrender.com",
+        "eduvize-prubeh-dne.onrender.com",
+        "eduvize-skolni-systemy.onrender.com",
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/tests/test_admin_sessions.py",
+      "line": 68,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_admin_sessions.py",
+      "line": 86,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_admin_sessions.py",
+      "line": 104,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_admin_sessions.py",
+      "line": 120,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_admin_sessions.py",
+      "line": 124,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_admin_sessions.py",
+      "line": 126,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_admin_sessions.py",
+      "line": 134,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_admin_sessions.py",
+      "line": 139,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_admin_sessions.py",
+      "line": 209,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_generated_links.py",
+      "line": 10,
+      "hosts": [
+        "eduvize-jidelnicek.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_generated_links.py",
+      "line": 13,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_generated_links.py",
+      "line": 18,
+      "hosts": [
+        "eduvize-aktuality.onrender.com",
+        "eduvize-jidelnicek.onrender.com",
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_generated_links.py",
+      "line": 21,
+      "hosts": [
+        "eduvize-jidelnicek.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_generated_links.py",
+      "line": 29,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_generated_links.py",
+      "line": 31,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_generated_links.py",
+      "line": 34,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_generated_links.py",
+      "line": 38,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_generated_school_views.py",
+      "line": 9,
+      "hosts": [
+        "eduvize-skolni-systemy.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_generated_school_views.py",
+      "line": 18,
+      "hosts": [
+        "eduvize-skolni-systemy.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_generated_school_views.py",
+      "line": 24,
+      "hosts": [
+        "eduvize-skolni-systemy.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_hosted_output_links.py",
+      "line": 36,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_menu_link_domains.py",
+      "line": 5,
+      "hosts": [
+        "eduvize-jidelnicek.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_school_profiles_cloud.py",
+      "line": 43,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/tests/test_school_profiles_cloud.py",
+      "line": 44,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/web/aplikace.html",
+      "line": 46,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/aplikace.html",
+      "line": 50,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/aplikace.html",
+      "line": 53,
+      "hosts": [
+        "eduvize-aktuality.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/aplikace.html",
+      "line": 54,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/aplikace.html",
+      "line": 56,
+      "hosts": [
+        "eduvize-jidelnicek.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/aplikace.html",
+      "line": 59,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/aplikace.html",
+      "line": 60,
+      "hosts": [
+        "eduvize-prubeh-dne.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/aplikace.html",
+      "line": 62,
+      "hosts": [
+        "eduvize-skolni-systemy.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/active-theme.js",
+      "line": 38,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/admin-auth.js",
+      "line": 8,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com",
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/admin-auth.js",
+      "line": 104,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/admin-launcher.js",
+      "line": 18,
+      "hosts": [
+        "eduvize-aktuality.onrender.com",
+        "eduvize-jidelnicek.onrender.com",
+        "eduvize-prubeh-dne.onrender.com",
+        "eduvize-skolni-systemy.onrender.com",
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/branding-admin.js",
+      "line": 3,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/branding.js",
+      "line": 4,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/configuration-profiles.js",
+      "line": 6,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/configuration-profiles.js",
+      "line": 13,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/configuration-profiles.js",
+      "line": 15,
+      "hosts": [
+        "eduvize-jidelnicek.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/configuration-profiles.js",
+      "line": 18,
+      "hosts": [
+        "eduvize-aktuality.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/configuration-profiles.js",
+      "line": 19,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/configuration-profiles.js",
+      "line": 20,
+      "hosts": [
+        "eduvize-prubeh-dne.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/configuration-profiles.js",
+      "line": 21,
+      "hosts": [
+        "eduvize-skolni-systemy.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/generated-links.js",
+      "line": 4,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/generated-links.js",
+      "line": 7,
+      "hosts": [
+        "eduvize-aktuality.onrender.com",
+        "eduvize-dokumenty-api.onrender.com",
+        "eduvize-jidelnicek.onrender.com",
+        "eduvize-kiosek.onrender.com",
+        "eduvize-prubeh-dne.onrender.com",
+        "eduvize-skolni-systemy.onrender.com",
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/licensing-client.js",
+      "line": 4,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/operator-page.js",
+      "line": 14,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/tests/connection.test.mjs",
+      "line": 10,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/tests/connection.test.mjs",
+      "line": 11,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/tests/connection.test.mjs",
+      "line": 18,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/tests/connection.test.mjs",
+      "line": 29,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com",
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-admin/web/design-system/update-settings.js",
+      "line": 3,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/editor.html",
+      "line": 22,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/editor.html",
+      "line": 83,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/editor.html",
+      "line": 150,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/private/editor.html",
+      "line": 22,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/private/editor.html",
+      "line": 83,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/private/editor.html",
+      "line": 150,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/private/licence.html",
+      "line": 35,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-admin/web/ucet.html",
+      "line": 35,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/AGENTS.md",
+      "line": 19,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-styly/AGENTS.md",
+      "line": 32,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-styly/LINK_COMPATIBILITY.md",
+      "line": 22,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-styly/LINK_COMPATIBILITY.md",
+      "line": 24,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-styly/README.md",
+      "line": 8,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-styly/README.md",
+      "line": 9,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-styly/README.md",
+      "line": 39,
+      "hosts": [],
+      "classification": "documentation"
+    },
+    {
+      "path": "eduvize-styly/aplikace.html",
+      "line": 46,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/aplikace.html",
+      "line": 50,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/aplikace.html",
+      "line": 53,
+      "hosts": [
+        "eduvize-aktuality.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/aplikace.html",
+      "line": 54,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/aplikace.html",
+      "line": 56,
+      "hosts": [
+        "eduvize-jidelnicek.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/aplikace.html",
+      "line": 59,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/aplikace.html",
+      "line": 60,
+      "hosts": [
+        "eduvize-prubeh-dne.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/aplikace.html",
+      "line": 62,
+      "hosts": [
+        "eduvize-skolni-systemy.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/active-theme.js",
+      "line": 38,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/admin-auth.js",
+      "line": 8,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com",
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/admin-auth.js",
+      "line": 104,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/admin-launcher.js",
+      "line": 18,
+      "hosts": [
+        "eduvize-aktuality.onrender.com",
+        "eduvize-jidelnicek.onrender.com",
+        "eduvize-prubeh-dne.onrender.com",
+        "eduvize-skolni-systemy.onrender.com",
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/branding-admin.js",
+      "line": 3,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/branding.js",
+      "line": 4,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/broadcast-license.js",
+      "line": 27,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/configuration-profiles.js",
+      "line": 6,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/configuration-profiles.js",
+      "line": 13,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/configuration-profiles.js",
+      "line": 15,
+      "hosts": [
+        "eduvize-jidelnicek.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/configuration-profiles.js",
+      "line": 18,
+      "hosts": [
+        "eduvize-aktuality.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/configuration-profiles.js",
+      "line": 19,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/configuration-profiles.js",
+      "line": 20,
+      "hosts": [
+        "eduvize-prubeh-dne.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/configuration-profiles.js",
+      "line": 21,
+      "hosts": [
+        "eduvize-skolni-systemy.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/generated-links.js",
+      "line": 4,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/generated-links.js",
+      "line": 7,
+      "hosts": [
+        "eduvize-aktuality.onrender.com",
+        "eduvize-dokumenty-api.onrender.com",
+        "eduvize-jidelnicek.onrender.com",
+        "eduvize-kiosek.onrender.com",
+        "eduvize-prubeh-dne.onrender.com",
+        "eduvize-skolni-systemy.onrender.com",
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/image-viewer.html",
+      "line": 19,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/index.html",
+      "line": 2,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/licensing-client.js",
+      "line": 4,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/link-compatibility.js",
+      "line": 25,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/link-contract.js",
+      "line": 14,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com",
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/operator-page.js",
+      "line": 14,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/output-modes.js",
+      "line": 14,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com",
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/output-modes.js",
+      "line": 172,
+      "hosts": [
+        "eduvize-admin.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/tests/account-routing.test.mjs",
+      "line": 16,
+      "hosts": [
+        "2Feduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-styly/design-system/tests/account-routing.test.mjs",
+      "line": 25,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-styly/design-system/tests/microsoft-login.test.mjs",
+      "line": 16,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-styly/design-system/tests/microsoft-login.test.mjs",
+      "line": 23,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-styly/design-system/tests/render-wakeup.test.mjs",
+      "line": 52,
+      "hosts": [],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-styly/design-system/update-runtime.js",
+      "line": 2,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/design-system/update-settings.js",
+      "line": 3,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/editor.html",
+      "line": 22,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/editor.html",
+      "line": 83,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/editor.html",
+      "line": 150,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/fotogalerie/config.html",
+      "line": 19,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/fotogalerie/gallery-common.js",
+      "line": 2,
+      "hosts": [
+        "eduvize-dokumenty-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/fotogalerie/index.html",
+      "line": 19,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/index.html",
+      "line": 7,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/index.html",
+      "line": 8,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/index.html",
+      "line": 11,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/index.html",
+      "line": 12,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/private/editor.html",
+      "line": 22,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/private/editor.html",
+      "line": 83,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/private/editor.html",
+      "line": 150,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/private/licence.html",
+      "line": 35,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    },
+    {
+      "path": "eduvize-styly/tests/admin-navigation.test.mjs",
+      "line": 10,
+      "hosts": [
+        "eduvize-weather.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-styly/tests/admin-navigation.test.mjs",
+      "line": 13,
+      "hosts": [
+        "eduvize-prubeh-dne.onrender.com"
+      ],
+      "classification": "test-fixture"
+    },
+    {
+      "path": "eduvize-styly/ucet.html",
+      "line": 35,
+      "hosts": [
+        "eduvize-design-system-api.onrender.com"
+      ],
+      "classification": "source-review"
+    }
+  ]
+}
