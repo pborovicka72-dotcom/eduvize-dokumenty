@@ -1,0 +1,23 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const html=fs.readFileSync(new URL('../config.html',import.meta.url),'utf8');
+const source=html.slice(html.indexOf('function updateDocumentCategoryOptions(){'),html.indexOf('async function loadCategories(){'));
+function select(value){return {value,options:[],changes:0,replaceChildren(){this.options=[];this.value='';},append(option){this.options.push(option);},onchange(){this.changes++;}};}
+const existing=select('Ostatní'),draft=select('Rozpracovaná kategorie');
+const context={categoryNames:['Ostatní','Nová kategorie'],document:{querySelectorAll:()=>[existing,draft],createElement:()=>({})}};
+vm.runInNewContext(source,context);
+context.updateDocumentCategoryOptions();
+assert.deepEqual(existing.options.map(x=>x.value),['Ostatní','Nová kategorie']);
+assert.equal(existing.value,'Ostatní');
+assert.equal(draft.value,'Rozpracovaná kategorie');
+assert.deepEqual(draft.options.map(x=>x.value),['Ostatní','Nová kategorie','Rozpracovaná kategorie']);
+assert.equal(existing.changes+draft.changes,0,'Refreshing choices must not trigger autosave');
+existing.value='Nová kategorie';
+context.updateDocumentCategoryOptions();
+assert.equal(existing.value,'Nová kategorie');
+assert.equal(existing.options.length,2,'Repeated refresh must not duplicate choices');
+const loader=html.slice(html.indexOf('async function loadCategories(){'),html.indexOf('async function saveOrder(){'));
+assert.match(loader,/updateDocumentCategoryOptions\(\);/);
+assert.match(html,/category\.dataset\.documentCategory=''/);
+console.log('Existing document category choices refresh while preserving selections and drafts.');
