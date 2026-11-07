@@ -34,6 +34,14 @@ async function flushDocumentEdits(){await Promise.all([...documentEditors.values
 async function request(path,options={}){const r=await window.EduvizeAdminAuth.fetch(new URL(path,base).href,options,'documents');const d=await r.json().catch(()=>({}));if(!r.ok){const error=Error(typeof d.detail==='string'?d.detail:d.detail?.message||'Chyba serveru '+r.status);error.detail=d.detail;throw error;}return d}
 
 let categoryNames=[];
+function updateDocumentCategoryOptions(){
+for(const select of document.querySelectorAll('#items select[data-document-category]')){
+const previous=select.value;
+select.replaceChildren();
+for(const name of [...new Set([...categoryNames,previous])]){const option=document.createElement('option');option.value=name;option.textContent=name;select.append(option);}
+select.value=previous;
+}
+}
 async function loadCategories(){
 const result=await request('/api/admin/categories');
 categoryNames=result.categories;
@@ -62,6 +70,7 @@ const select=$('category'),previous=select.value;
 select.replaceChildren();
 for(const name of categoryNames){const option=document.createElement('option');option.value=name;option.textContent=name;select.append(option)}
 select.value=categoryNames.includes(previous)?previous:'Ostatní';
+updateDocumentCategoryOptions();
 }
 async function saveOrder(){
 const ids=[...document.querySelectorAll('#items [data-doc-id]')].map(el=>el.dataset.docId);
@@ -92,7 +101,7 @@ if(editor.dirty())Object.assign(item,editor.value());
 const row=document.createElement('details');row.className='edu-item-editor';row.dataset.docId=item.id;row.draggable=true;row.open=openDocumentEditors.has(item.id);row.addEventListener('toggle',()=>{if(row.open)openDocumentEditors.add(item.id);else openDocumentEditors.delete(item.id)});
 const grip=document.createElement('button');grip.type='button';grip.onclick=e=>{e.preventDefault();e.stopPropagation()};grip.className='edu-item-editor__drag';grip.textContent='⠿';grip.title='Přetáhněte pro změnu pořadí';grip.setAttribute('aria-label','Přesunout dokument');
 const name=document.createElement('input');name.value=item.name;name.title='Název';
-const title=document.createElement('input');title.value=item.title||'';title.placeholder='Titulek pro zobrazení (nepovinné)';title.title='Titulek v kiosku – původní název souboru se nemění';const category=document.createElement('select');category.title='Kategorie';
+const title=document.createElement('input');title.value=item.title||'';title.placeholder='Titulek pro zobrazení (nepovinné)';title.title='Titulek v kiosku – původní název souboru se nemění';const category=document.createElement('select');category.title='Kategorie';category.dataset.documentCategory='';
 for(const label of [...new Set([...categoryNames,item.category])]){const option=document.createElement('option');option.value=label;option.textContent=label;category.append(option)}
 category.value=item.category;
 const visible=document.createElement('label');visible.className='document-visible';visible.textContent='Zobrazit ';
