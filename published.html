@@ -1,0 +1,175 @@
+<!doctype html>
+<html data-edu-default-interaction="interactive" data-kiosk-app="documents" lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eduvize – Dokumenty</title><link rel="stylesheet" href="/eduvize-styly/design-system/admin-tokens.css?v=20261104-design-audit-1"><link rel="stylesheet" href="/eduvize-styly/design-system/documents.css?v=20261104-design-audit-1">
+<script id="pdf-library" src="/eduvize-styly/design-system/vendor/pdfjs-3.11.174/pdf.min.js" defer></script><script>const pdfLibraryReady=new Promise(resolve=>{const script=document.getElementById("pdf-library");script.addEventListener("load",()=>resolve(true),{once:true});script.addEventListener("error",()=>resolve(false),{once:true});});</script><link rel="stylesheet" href="/eduvize-styly/design-system/document-viewport.css?v=20261104-design-audit-1"><script src="/eduvize-styly/design-system/document-viewport.js?v=20261104-design-audit-1"></script><link rel="stylesheet" href="/eduvize-styly/design-system/navigation.css?v=20261104-design-audit-1"><link rel="stylesheet" href="/eduvize-styly/design-system/app-icons.css?v=20261104-design-audit-1"><script defer src="/eduvize-styly/design-system/app-icons.js?v=20261104-design-audit-1"></script><link rel="stylesheet" href="/eduvize-styly/design-system/output-header.css?v=20261104-kiosk-consistent-1"><script src="/eduvize-styly/design-system/segment-profile.js?v=20261104-design-audit-1"></script><script src="/eduvize-styly/design-system/output-header.js?v=20261104-kiosk-consistent-1"></script><link rel="stylesheet" href="/eduvize-styly/design-system/kiosk-output.css?v=20261104-design-audit-1"><link rel="stylesheet" href="/eduvize-styly/design-system/output-integrity.css?v=20261104-design-audit-1"><script src="/eduvize-styly/design-system/nsp-geometry.js?v=20261104-design-audit-1"></script><link rel="icon" type="image/svg+xml" href="/eduvize-styly/design-system/assets/eduvize-favicon.svg?v=20261031-unified-1"><style>[hidden]{display:none!important}html[data-edu-interaction=display] button{display:none!important}</style></head><body><main class="shell" hidden><div id="documentLoading" role="status" aria-live="polite">Načítám dokument…</div><nav id="documentNavigation" class="edu-navigation edu-output-header" aria-label="Navigace dokumentů"><div class="edu-navigation-heading edu-navigation__heading edu-app-heading edu-header-group"><span data-edu-app-icon="documents"></span><div><h1 id="heading-title" class="edu-navigation-title edu-header-title">Dokumenty školy</h1><p id="heading-count" class="edu-navigation-subtitle edu-header-meta"></p></div></div><div class="edu-navigation__actions"><button id="back" type="button" class="edu-navigation-button" hidden><span aria-hidden="true">←</span>Zpět</button><button id="documentsHome" type="button" class="edu-navigation-button" hidden><span aria-hidden="true">⌂</span>Kategorie</button></div></nav><section class="card">
+
+<div id="browse"></div>
+<div id="detail" class="hidden edu-document-fullscreen"><div id="viewer-title" hidden></div><div id="pdfTools"></div><div class="viewer" id="viewer"></div><div class="controls" id="controls"><button class="edu-document-tool" id="prev">← Předchozí</button><span class="edu-pagination-status" id="kioskPdfPosition" role="status" aria-live="polite"></span><button class="edu-document-tool" id="next">Další →</button><button class="edu-document-tool hidden" id="returnCatalog">Zpět na dokumenty</button><button class="edu-document-tool hidden" id="pdfOverview">Přehled stránek</button><span class="edu-document-zoom" id="pdfPosition" role="status" aria-live="polite"></span></div></div>
+</section></main>
+<script src="/eduvize-styly/design-system/output-client.js?v=output-actions-v2-48bd6c1e"></script><script src="/eduvize-styly/design-system/output-runtime.js"></script>
+<script>
+let dispose=()=>{},update;
+function publishedAutoplay(host,advance,seconds=12){const id=setInterval(()=>{if(!document.hidden&&!window.EduvizeOutputModes.isInteractive())advance();},Math.max(3,Math.min(120,Number(seconds)||12))*1000);const before=dispose;dispose=()=>{before();clearInterval(id);};return()=>clearInterval(id);}
+function boot(snapshot){
+
+const $=id=>document.getElementById(id),params=new URLSearchParams();
+let signage=snapshot.presentation.mode==='nsp',kiosk=snapshot.presentation.mode==='kiosk';
+let webOutput=snapshot.presentation.mode==='web';const standaloneDocument=false;let directDocument=standaloneDocument&&!webOutput;if(directDocument)document.documentElement.classList.add('document-output');
+if(signage)document.body.classList.add('signage');if(kiosk)document.documentElement.classList.add('kiosk-output');
+let videoSound=snapshot.payload.videoSound;let pdfColumns=directDocument?1:Math.max(1,Math.min(6,parseInt(params.get('pdf_columns')||'1',10)||1));
+let docs=[],category=null,selected=null,index=0,pdfPage=0,pdfTotal=0,pdfGrid=null,pdfFile=null,pdfZoomed=false,pdfOverviewColumns=1,pdfOverviewSample=[],imageView=null,screen='folders';
+const pdfViewport=window.EduvizeDocumentViewport.mount($('pdfTools'),{onChange:()=>{if(pdfGrid&&pdfFile)redrawPdf();},fullscreenTarget:kiosk?document.querySelector('.shell'):$('detail')});
+const categoryOf=d=>d.category||'Ostatní';const displayTitle=d=>d.title?.trim()||d.name;
+let media=new Map();
+const fileUrl=d=>{const entry=media.get(d.mediaId);if(!entry)throw Error('Médium není součástí výstupu.');return entry.url;};
+const folderIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 6a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+function documentReady(){if(directDocument)document.documentElement.classList.add('document-ready');}
+function node(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
+function setHeading(title,count){$('heading-title').textContent=title;$('heading-count').textContent=count;$('heading-count').hidden=!count;$('documentNavigation').hidden=standaloneDocument&&!webOutput;$('back').hidden=screen==='folders';$('documentsHome').hidden=screen==='folders';{$('back').hidden=screen!=='document'||category===null;document.querySelector('.edu-document-navigation').hidden=screen==='folders';document.querySelector('.edu-document-navigation-actions').hidden=standaloneDocument;$('controls').classList.toggle('hidden',screen!=='document');}}
+function categoryDocs(){return category===null?docs:docs.filter(d=>categoryOf(d)===category)}
+function leaveDocument(){imageView?.destroy();imageView=null;if(standaloneDocument)return;directDocument=false;document.documentElement.classList.remove('document-output','document-ready');pdfViewport.activate(false);pdfRenderId++;}
+
+let catalogPage=0,catalogCapacity=1,catalogPages=1,catalogQueued=false;
+const catalogNav=node('nav','docs-catalog-pagination');catalogNav.hidden=true;catalogNav.setAttribute('aria-label','Stránkování dokumentů');
+const catalogPrevious=node('button','','← Předchozí'),catalogStatus=node('span'),catalogNext=node('button','','Další →');
+catalogPrevious.type=catalogNext.type='button';catalogStatus.setAttribute('role','status');
+catalogNav.append(catalogPrevious,catalogStatus,catalogNext);
+{
+ catalogNav.classList.add('edu-kiosk-pagination');catalogPrevious.classList.add('edu-pagination-button');catalogNext.classList.add('edu-pagination-button');catalogStatus.classList.add('edu-pagination-status');
+ const navigation=node('nav','edu-document-navigation');navigation.setAttribute('aria-label','Navigace dokumentů');
+ const actions=node('div','edu-document-navigation-actions');actions.append($('back'),$('documentsHome'));navigation.append(actions,$('controls'));document.querySelector('.shell').append(navigation);
+ $('controls').classList.add('edu-kiosk-pagination');$('prev').classList.add('edu-pagination-button');$('next').classList.add('edu-pagination-button');
+}$('browse').after(catalogNav);
+catalogPrevious.onclick=()=>{catalogPage--;layoutCatalog()};catalogNext.onclick=()=>{catalogPage++;layoutCatalog()};
+function layoutCatalog(){
+ catalogQueued=false;
+ const grid=$('browse').querySelector('.grid');
+ if(!grid||$('browse').classList.contains('hidden')||webOutput){catalogNav.hidden=true;return;}
+ const tiles=[...grid.children],w=$('browse').clientWidth,h=$('browse').clientHeight+(catalogNav.hidden?0:catalogNav.offsetHeight+12);
+ if(!w||!h||!tiles.length)return;
+ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+ const heading=parseFloat(getComputedStyle($('heading-title')).fontSize)||64;
+ let policy=window.EduvizeSegmentProfile.documentCatalog(w,h,{heading,count:tiles.length,folder:screen==='folders'});
+ catalogCapacity=policy.columns*policy.rows;catalogPages=Math.ceil(tiles.length/catalogCapacity);
+ catalogNav.hidden=catalogPages<=1;
+ if(!catalogNav.hidden)policy=window.EduvizeSegmentProfile.documentCatalog(w,Math.max(1,h-catalogNav.offsetHeight-12),{heading,count:tiles.length,folder:screen==='folders'});
+ const {columns:cols,gap,pad,cardHeight}=policy;
+ catalogCapacity=cols*policy.rows;catalogPages=Math.ceil(tiles.length/catalogCapacity);
+ catalogPage=clamp(catalogPage,0,catalogPages-1);catalogNav.hidden=catalogPages<=1;
+ const visibleCount=Math.min(catalogCapacity,tiles.length-catalogPage*catalogCapacity),rows=Math.ceil(visibleCount/cols);
+ let {title,label,icon}=policy;
+ for(const [key,value] of Object.entries({columns:cols,rows,gap:gap+'px',pad:pad+'px',title:title+'px',label:label+'px',icon:icon+'px','card-height':cardHeight+'px','grid-width':policy.gridWidth+'px'}))$('browse').style.setProperty('--docs-'+key,value);
+ $('browse').toggleAttribute('data-docs-compact',cardHeight<340);
+ tiles.forEach((tile,i)=>{tile.hidden=i<catalogPage*catalogCapacity||i>=(catalogPage+1)*catalogCapacity;});
+ // Fit the whole visible page together, preserving a consistent hierarchy.
+ const visible=tiles.filter(tile=>!tile.hidden);
+ for(let attempt=0;attempt<24;attempt++){
+  const overflow=visible.some(tile=>tile.scrollHeight>tile.clientHeight+1||[...tile.querySelectorAll('.tile-title,.doc-title,.tile-foot,.doc-type')].some(el=>el.scrollWidth>el.clientWidth+1||el.scrollHeight>el.clientHeight+1));
+  if(!overflow)break;
+  title*=.92;label*=.92;icon*=.92;
+  for(const [key,value] of Object.entries({title,label,icon}))$('browse').style.setProperty('--docs-'+key,value+'px');
+ }
+ catalogPrevious.disabled=catalogPage===0;catalogNext.disabled=catalogPage===catalogPages-1;catalogStatus.textContent=(catalogPage+1)+' / '+catalogPages;
+}
+function queueCatalog(){if(!catalogQueued){catalogQueued=true;requestAnimationFrame(layoutCatalog)}}
+new ResizeObserver(queueCatalog).observe($('browse'));document.fonts?.ready.then(queueCatalog);window.addEventListener('resize',queueCatalog);
+
+function showFolders(){catalogPage=0;stopPdfPreviews();leaveDocument();screen='folders';category=null;selected=null;$('detail').classList.add('hidden');$('browse').classList.remove('hidden');$('browse').replaceChildren();const cats=[...new Set(docs.map(categoryOf))];setHeading('Kategorie dokumentů',cats.length+' '+(cats.length>=1&&cats.length<=4?'kategorie':'kategorií'));if(!cats.length){$('browse').append(node('div','empty','Zatím nejsou zveřejněné žádné dokumenty.'));return}const grid=node('div','grid');for(const name of cats){const count=docs.filter(d=>categoryOf(d)===name).length;const b=node('button','tile folder-tile');b.type='button';const icon=node('span','folder-icon');icon.innerHTML=folderIcon;const title=node('div','tile-title',name);const foot=node('div','tile-foot');foot.append(node('span','',count+' '+(count===1?'dokument':count<5?'dokumenty':'dokumentů')),node('span','arrow','→'));b.append(icon,title,foot);b.onclick=()=>showCategory(name);grid.append(b)}$('browse').append(grid);queueCatalog()}
+const previewCache=new Map();
+function loadPdf(doc){
+ let pending=previewCache.get(doc.id);if(pending)return pending;
+ pending=(async()=>{
+  if(!window.pdfjsLib)await pdfLibraryReady;
+  if(!window.pdfjsLib)throw Error('Knihovna PDF.js není dostupná');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc='/eduvize-styly/design-system/vendor/pdfjs-3.11.174/pdf.worker.min.js';
+  const response=await fetch(fileUrl(doc));if(!response.ok)throw Error('HTTP '+response.status);
+  return await window.pdfjsLib.getDocument({isEvalSupported:false,data:await response.arrayBuffer()}).promise;
+ })();previewCache.set(doc.id,pending);pending.catch(()=>{if(previewCache.get(doc.id)===pending)previewCache.delete(doc.id);});return pending;
+}
+let pendingPreviews=[],activePreviews=0;
+function pumpPreviews(){
+ while(activePreviews<1&&pendingPreviews.length){const job=pendingPreviews.shift();if(!job.container.isConnected||screen!=='category')continue;activePreviews++;renderPdfPreview(job.doc,job.container).finally(()=>{activePreviews--;pumpPreviews();});}
+}
+const previewJobs=new WeakMap(),previewObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){const job=previewJobs.get(entry.target);previewObserver.unobserve(entry.target);if(job){pendingPreviews.push(job);previewJobs.delete(entry.target);}}pumpPreviews();},{rootMargin:'150px'}):null;
+function schedulePdfPreview(doc,container){const job={doc,container};if(previewObserver){previewJobs.set(container,job);previewObserver.observe(container);}else{pendingPreviews.push(job);queueMicrotask(pumpPreviews);}}
+function stopPdfPreviews(){pendingPreviews=[];previewObserver?.disconnect();}
+async function renderPdfPreview(doc,container){
+ const fallback=()=>{container.replaceChildren();const box=node('div','preview-fallback');box.append(node('span','pdf-icon','PDF'),node('span','','Náhled není dostupný'));container.append(box)};
+ try{
+  const documentPdf=await loadPdf(doc);const page=await documentPdf.getPage(1);const base=page.getViewport({scale:1});
+  const scale=Math.min(420/base.width,300/base.height,2);const viewport=page.getViewport({scale});
+  const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
+  const ctx=canvas.getContext('2d');await page.render({canvasContext:ctx,viewport}).promise;
+  if(container.isConnected)container.replaceChildren(canvas);
+ }catch(e){if(container.isConnected)fallback()}
+}
+function thumbnail(doc){const t=node('div','thumb');if(doc.mime&&doc.mime.startsWith('image/')){const img=node('img');img.loading='lazy';img.alt='Náhled: '+doc.name;img.src=fileUrl(doc);img.onerror=()=>{t.replaceChildren(node('span','pdf-icon','OBR'))};t.append(img)}else if(doc.mime==='application/pdf'){t.append(node('span','pdf-icon','PDF'));schedulePdfPreview(doc,t)}else if(doc.mime?.startsWith('video/')){t.append(node('span','pdf-icon','▶ VIDEO'))}else{t.append(node('span','pdf-icon','SOUBOR'))}return t}
+function showCategory(name){catalogPage=0;stopPdfPreviews();leaveDocument();screen='category';category=name;selected=null;$('detail').classList.add('hidden');$('browse').classList.remove('hidden');$('browse').replaceChildren();const list=categoryDocs();setHeading(name,list.length+' dokumentů');const grid=node('div','grid');for(const d of list){const b=node('button','tile');b.type='button';b.append(thumbnail(d));const body=node('div','tile-body');body.append(node('div','doc-title',displayTitle(d)),node('div','doc-type',d.mime==='application/pdf'?'PDF dokument':d.mime?.startsWith('video/')?'Video':'Obrázek'));b.append(body);b.onclick=()=>showDocument(d.id);grid.append(b)}$('browse').append(grid);queueCatalog()}
+let pdfRenderId=0;
+async function showPdfPages(doc,viewer,renderId){
+ const grid=node('div','pdf-pages');grid.style.setProperty('--pdf-columns',String(pdfColumns));grid.append(node('div','muted','Načítám stránky PDF…'));viewer.append(grid);
+ try{
+  const pdf=await loadPdf(doc);
+  if(renderId!==pdfRenderId)return;
+  grid.replaceChildren();pdfTotal=pdf.numPages;pdfGrid=grid;pdfPage=0;if(directDocument){pdfOverviewColumns=1;pdfColumns=1;pdfZoomed=false;pdfViewport.activate(false);}updatePageButtons();
+  const overviewSample=await Promise.all(Array.from({length:Math.min(3,pdf.numPages)},async(_,i)=>(await pdf.getPage(i+1)).getViewport({scale:1})));if(renderId!==pdfRenderId)return;pdfOverviewSample=overviewSample;
+  pdfFile=pdf;await renderPdfSheets(pdf,grid,renderId);if(renderId===pdfRenderId)documentReady();
+
+ }catch(e){if(renderId===pdfRenderId){grid.replaceChildren(node('div','pdf-error','Stránky PDF se nepodařilo zobrazit: '+e.message));documentReady();}}
+}
+async function renderPdfSheets(pdf,grid,renderId){
+ if(renderId!==pdfRenderId)return;
+ if(directDocument&&!pdfZoomed){
+   pdfOverviewColumns=window.EduvizeDocumentViewport.overview(pdfOverviewSample,grid.clientWidth,grid.clientHeight).columns;
+   pdfPage=Math.floor(pdfPage/pdfOverviewColumns)*pdfOverviewColumns;
+   pdfColumns=Math.min(pdfOverviewColumns,pdf.numPages-pdfPage);updatePageButtons();
+ }
+ if(directDocument){grid.replaceChildren();grid.style.setProperty('--pdf-columns',String(pdfColumns));grid.classList.add('edu-document-canvas');grid.classList.toggle('is-zoomed',pdfZoomed);pdfViewport.bind(grid);}
+  const maxWidth=Math.max(directDocument?1:120,Math.floor((grid.clientWidth-24-(pdfColumns-1)*12)/pdfColumns));
+  for(let n=directDocument?pdfPage+1:1;n<=(directDocument?Math.min(pdf.numPages,pdfPage+pdfColumns):pdf.numPages);n++){
+   if(renderId!==pdfRenderId)return;
+   const page=await pdf.getPage(n),original=page.getViewport({scale:1});if(renderId!==pdfRenderId)return;
+   const displayScale=directDocument&&pdfZoomed?pdfViewport.scale(original,Math.max(1,grid.clientWidth-24),Math.max(1,grid.clientHeight-24)):Math.min(maxWidth/original.width,directDocument?Math.max(1,grid.clientHeight-24)/original.height:Infinity);
+   const viewport=page.getViewport({scale:Math.min(4,displayScale)});
+   const canvas=node('canvas','pdf-page');if(directDocument){canvas.style.width=original.width*displayScale+'px';canvas.style.height=original.height*displayScale+'px';}canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
+   canvas.setAttribute('aria-label','Stránka '+n+' z '+pdf.numPages);canvas.dataset.page=String(n-1);
+   if(directDocument&&pdfTotal>0&&window.EduvizeOutputModes.isInteractive()){canvas.setAttribute('role','button');canvas.tabIndex=0;canvas.title=pdfZoomed?'Zpět na přehled':'Zvětšit stránku '+n;canvas.classList.toggle('is-zoomed',pdfZoomed);canvas.onclick=()=>pdfZoomed?pdfViewport.zoomIn():enlargePdfPage(n-1);canvas.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();canvas.onclick();}};}
+   grid.append(canvas);
+   await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
+   if(directDocument&&renderId===pdfRenderId&&n===pdfPage+1)documentReady();
+  }
+}
+function updatePageButtons(){const pdf=screen==='document'&&categoryDocs().find(d=>d.id===selected)?.mime==='application/pdf';$('prev').disabled=!pdf||pdfPage<=0;$('next').disabled=!pdf||pdfPage+pdfColumns>=pdfTotal;$('controls').classList.toggle('hidden',!pdf);$('returnCatalog').classList.add('hidden');$('prev').classList.toggle('hidden',!pdf||pdfTotal<=pdfColumns);$('next').classList.toggle('hidden',!pdf||pdfTotal<=pdfColumns);$('pdfOverview').classList.toggle('hidden',!directDocument||!pdfZoomed);$('pdfPosition').textContent=directDocument&&pdfTotal?(pdfColumns>1?String(pdfPage+1)+'–'+Math.min(pdfTotal,pdfPage+pdfColumns):String(pdfPage+1))+' / '+pdfTotal:'';{document.querySelector('.edu-document-navigation').hidden=screen==='folders'||(standaloneDocument&&!pdf);$('kioskPdfPosition').textContent=$('pdfPosition').textContent;$('pdfPosition').hidden=true;}}
+function redrawPdf(){updatePageButtons();const id=++pdfRenderId;renderPdfSheets(pdfFile,pdfGrid,id).then(()=>{if(id===pdfRenderId)documentReady();}).catch(error=>{if(id===pdfRenderId){pdfGrid.replaceChildren(node('div','pdf-error',error.message));documentReady();}});}
+function enlargePdfPage(index){pdfPage=index;pdfZoomed=true;pdfColumns=1;pdfViewport.activate(true);redrawPdf();}
+function showPdfOverview(){pdfZoomed=false;pdfViewport.activate(false);redrawPdf();}
+function movePages(delta){if(!pdfGrid||!pdfTotal)return;const step=directDocument&&!pdfZoomed?pdfOverviewColumns:pdfColumns;const lastStart=directDocument?Math.floor((pdfTotal-1)/step)*step:Math.max(0,pdfTotal-step);pdfPage=Math.max(0,Math.min(lastStart,pdfPage+delta*step));if(directDocument&&pdfFile){redrawPdf();return;}const page=pdfGrid.querySelector('[data-page="'+pdfPage+'"]');if(page)pdfGrid.scrollTo({top:page.offsetTop-pdfGrid.offsetTop,behavior:'smooth'});updatePageButtons()}
+$('pdfOverview').onclick=showPdfOverview;$('returnCatalog').onclick=()=>category===null?showFolders():showCategory(category);
+function showDocument(id){stopPdfPreviews();imageView?.destroy();imageView=null;directDocument=!webOutput;document.documentElement.classList.toggle('document-output',directDocument);const list=categoryDocs();const position=list.findIndex(d=>d.id===id);if(position<0){if(signage){showFolders()}else if(category!==null){showCategory(category)}else{showFolders()}return}catalogNav.hidden=true;screen='document';index=position;selected=id;const doc=list[index];$('browse').classList.add('hidden');$('detail').classList.remove('hidden');$('viewer-title').hidden=!webOutput;$('viewer-title').textContent=displayTitle(doc);setHeading(displayTitle(doc),category||'Dokumenty školy');pdfGrid=null;pdfFile=null;pdfOverviewSample=[];pdfZoomed=false;pdfViewport.activate(false);pdfTotal=0;pdfPage=0;if(directDocument)document.documentElement.classList.remove('document-ready');updatePageButtons();const viewer=$('viewer');viewer.replaceChildren();const renderId=++pdfRenderId;let el;if(doc.mime==='application/pdf'){showPdfPages(doc,viewer,renderId)}else if(doc.mime?.startsWith('video/')){el=node('video');el.controls=window.EduvizeOutputModes.isInteractive();el.playsInline=true;el.preload='metadata';el.src=fileUrl(doc);if(signage||!window.EduvizeOutputModes.isInteractive()){el.autoplay=true;el.muted=!videoSound||!window.EduvizeOutputModes.isInteractive();el.loop=true;el.play().catch(()=>{if(videoSound&&window.EduvizeOutputModes.isInteractive()){el.controls=window.EduvizeOutputModes.isInteractive();const notice=node('div','muted','Pro přehrávání se zvukem klepněte na video.');viewer.append(notice)}})}}else{imageView=window.EduvizeDocumentViewport.mountImage(viewer,fileUrl(doc),{fullscreenTarget:kiosk?document.querySelector('.shell'):$('detail'),alt:doc.name,onReady:()=>{if(renderId===pdfRenderId)documentReady();},onError:()=>{if(renderId===pdfRenderId)documentReady();}})}if(el){if(el.tagName==='VIDEO'){el.addEventListener('loadeddata',documentReady,{once:true});el.addEventListener('error',()=>{viewer.replaceChildren(node('div','pdf-error','Dokument se nepodařilo načíst.'));documentReady();},{once:true});}else documentReady();viewer.append(el);}$('back').onclick=()=>category===null?showFolders():showCategory(category)}
+$('documentsHome').onclick=showFolders;$('back').onclick=()=>screen==='document'&&category!==null?showCategory(category):showFolders();$('prev').onclick=()=>movePages(-1);$('next').onclick=()=>movePages(1);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&directDocument&&pdfZoomed){showPdfOverview();return;}if(e.key==='Escape'&&screen==='document'&&!signage&&!standaloneDocument&&!pdfZoomed)$('returnCatalog').click();if(screen==='document'&&e.key==='ArrowRight')movePages(1);if(screen==='document'&&e.key==='ArrowLeft')movePages(-1)});
+function refresh(){if(!docs.length){showFolders();documentReady();return;}if(!window.EduvizeOutputModes.isInteractive()){category=null;showDocument(docs[0].id);}else showFolders();}
+let pdfResize=0;window.addEventListener('resize',()=>{if(!directDocument||!pdfFile||!pdfGrid)return;cancelAnimationFrame(pdfResize);pdfResize=requestAnimationFrame(redrawPdf);});
+
+if(!window.EduvizeOutputModes.isInteractive())document.body.dataset.eduScrollManaged='true';
+publishedAutoplay(document.querySelector('.shell'),()=>{if(screen!=='document'||!docs.length||document.getElementById('documentLoading')?.offsetParent)return;if(webOutput&&pdfFile){const bottom=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight)-innerHeight;if(scrollY<bottom-4){scrollTo({top:Math.min(bottom,scrollY+innerHeight*.85),behavior:'smooth'});return;}if(standaloneDocument){scrollTo({top:0,behavior:'smooth'});return;}}else if(pdfFile&&pdfPage+pdfColumns<pdfTotal){movePages(1);return;}if(standaloneDocument){if(pdfFile&&pdfTotal>pdfColumns){pdfPage=0;redrawPdf();}return;}const current=docs.findIndex(d=>d.id===selected);showDocument(docs[(current+1)%docs.length].id);if(webOutput)scrollTo({top:0});},20);
+
+function releasePdfCache(){for(const pending of previewCache.values())Promise.resolve(pending).then(pdf=>pdf.destroy()).catch(()=>{});previewCache.clear();}
+function replaceSnapshot(next){
+ const id=next.id;if(!/^[a-f0-9]{32}$/.test(id))throw Error('Neplatný výstup.');
+ const entries=next.media||[],seen=new Set(),nextMedia=new Map();
+ for(const entry of entries){if(!/^[a-f0-9]{32}$/.test(entry.id)||seen.has(entry.id)||entry.url!=='/api/public/v1/outputs/'+id+'/media/'+entry.id)throw Error('Neplatné médium.');seen.add(entry.id);nextMedia.set(entry.id,entry);}
+ const items=next.payload.items;if(!Array.isArray(items)||!items.length||items.length>100||typeof next.payload.videoSound!=='boolean')throw Error('Neplatný katalog.');
+ for(const item of items){if(!/^[a-f0-9]{32}$/.test(item.id)||!nextMedia.has(item.mediaId)||nextMedia.get(item.mediaId).mime!==item.mime||typeof item.name!=='string'||typeof item.category!=='string')throw Error('Neplatný dokument.');}
+ stopPdfPreviews();imageView?.destroy();imageView=null;pdfRenderId++;releasePdfCache();media=nextMedia;
+ docs=items;category=null;selected=null;videoSound=next.payload.videoSound;
+ signage=next.presentation.mode==='nsp';kiosk=next.presentation.mode==='kiosk';webOutput=next.presentation.mode==='web';
+ document.body.classList.toggle('signage',signage);document.documentElement.classList.toggle('kiosk-output',kiosk);
+ document.querySelector('.shell').hidden=false;refresh();
+}
+update=replaceSnapshot;
+const before=dispose;dispose=()=>{before();stopPdfPreviews();imageView?.destroy();imageView=null;pdfRenderId++;releasePdfCache();pdfGrid=null;pdfFile=null;pdfTotal=0;pdfViewport.activate(false);media.clear();docs=[];selected=null;$('heading-title').textContent='Dokumenty';$('heading-count').textContent='';$('viewer').replaceChildren();$('browse').replaceChildren();document.querySelector('.shell').hidden=true;};
+}
+window.EduvizeOutputRuntime.start({appId:'documents',render:async snapshot=>{document.documentElement.dataset.eduInteraction=snapshot.presentation.interaction;if(!update)boot(snapshot);update(snapshot);},onReady:()=>{document.getElementById('publication-status').hidden=true;},clear:()=>{dispose();document.getElementById('publication-status').hidden=false;document.getElementById('publication-status').textContent='Výstup není dostupný.';}});
+</script><script src="/eduvize-styly/design-system/segment-display.js?v=20261104-design-audit-1"></script><div class="edu-kiosk-style-version" aria-label="Verze stylu kiosku">Dokumenty · styl kiosku v2026.11.02.01</div><p id="publication-status" role="status">Načítám dokumenty…</p></body></html>
+
