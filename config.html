@@ -171,22 +171,8 @@ status('Kategorie „'+name+'“ byla přidána a vybrána pro nahrávání.','s
 };window.EduvizeDocumentUpload.bind({form:$('upload'),file:$('file'),category:$('category'),button:$('upload-button'),progress:$('upload-progress'),bar:$('upload-bar'),message:$('upload-text'),getToken:()=>window.EduvizeAdminAuth.getToken('documents'),endpoint:window.EduvizeAdminAuth.DOCS+'/api/admin/documents',onSuccess:async()=>{status('Dokument nahrán.','success','upload-text');await load()},onError:message=>status(message,'error','upload-text')});
 
 function link(){const u=new URL('/display',base);const profile=window.EduvizeAdminAuth.status().profileId||new URL(location.href).searchParams.get('edu-profile');if(profile)u.searchParams.set('edu-profile',profile);u.searchParams.set('v','20261101-catalog-2');if($('layout').value==='signage')u.searchParams.set('layout','signage');if(window.EduvizeSegmentSelection&&$('layout').value==='signage'){const seg=window.EduvizeSegmentSelection.params();u.searchParams.set('segment_orientation',seg.orientation);u.searchParams.set('segment_style',seg.style);u.searchParams.set('segment_block',seg.block)}u.searchParams.set('video_sound',$('video-sound').checked?'on':'off');return window.EduvizeOutputModes.url(u,$('layout').value==='kiosk'?'kiosk':$('layout').value==='normal'?'web':'nsp').href}
-const SETTINGS_KEY='eduvize-documents-display-settings-v1';
-function restoreDisplaySettings(){
- try{
-  const saved=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null');
-  if(!saved||typeof saved!=='object')return;
-  if(['signage','normal','kiosk'].includes(saved.layout))$('layout').value=saved.layout;
-  $('video-sound').checked=saved.videoSound===true;
-  $('layout').dispatchEvent(new Event('change',{bubbles:true}));
- }catch(e){console.warn('Nelze obnovit nastavení dokumentů',e)}
-}
-// Authoritative profile load and explicit scoped recovery own startup; never apply unscoped local settings.
-$('save-settings').onclick=()=>{
- const saved={layout:$('layout').value,videoSound:$('video-sound').checked};
- try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(saved));status('Nastavení aplikace uloženo v tomto prohlížeči.','success')}
- catch(e){status('Nastavení se nepodařilo uložit: '+e.message)}
-};
+// Native node retained for shared Save integration; never write local settings or reset dirty state.
+$('save-settings').onclick=()=>{};
 // Copy/Open are exclusively bound by the shared OutputActions V2 controller.
 
 // The segment picker can mount before session validation finishes. Refresh
@@ -201,7 +187,7 @@ window.EduvizeAdminAuth.ready.then(async()=>{
  }catch(error){status(error.message);}
 });
 </script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=20261104-design-audit-1"></script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261104-design-audit-1"></script><div class="edu-document-version">Dokumenty · administrace v2026.11.06.01</div>
-<script src="/eduvize-styly/design-system/output-client.js?v=output-actions-v2-48bd6c1e"></script><script src="/eduvize-styly/design-system/load-saved-app.js?v=aaed6374-v2"></script><script src="/eduvize-styly/design-system/output-actions.js?v=48bd6c1e"></script><script src="/eduvize-dokumenty/documents-output-adapter.js?v=20261109-saved-workflow-1"></script><script src="/eduvize-dokumenty/documents-output-actions.js?v=20261109-saved-workflow-1"></script><script id="eduvize-profile-adapter">
+<script src="/eduvize-styly/design-system/output-client.js?v=output-actions-v2-48bd6c1e"></script><script src="/eduvize-styly/design-system/load-saved-app.js?v=aaed6374-v2"></script><script src="/eduvize-styly/design-system/output-actions.js?v=48bd6c1e"></script><script src="/eduvize-dokumenty/documents-output-adapter.js?v=20261109-saved-workflow-no-drafts-2"></script><script src="/eduvize-dokumenty/documents-output-actions.js?v=20261109-saved-workflow-no-drafts-2"></script><script id="eduvize-profile-adapter">
 function documentPresentation(config){
 const mode={signage:'nsp',normal:'web',kiosk:'kiosk'}[config.values.layout];
 const viewport=mode==='kiosk'?window.EduvizeSegmentSelection?.kioskGeometry?.():null;
@@ -213,10 +199,6 @@ window.EduvizeOutputModes.setInteraction(p.interaction,{notify:false});
 if(p.mode==='kiosk'){window.EduvizeOutputModes.setKioskLayout(p.kioskLayout,{notify:false});if(window.EduvizeSegmentSelection?.setKioskGeometry?.(p.geometry)!==true)throw Error('Rozměry uloženého kiosku nyní nelze obnovit.');}
 });
 window.EduvizeDocumentsPreviewUrl=()=>{const url=new URL(link(),location.href);url.searchParams.set('preview','1');return url.href;};
-window.EduvizeProfileAdapter.recovery=window.EduvizeDocumentsOutputAdapter.recovery({
-readNative:()=>({schemaVersion:1,values:window.EduvizeProfiles.fields(["layout","video-sound"]).read(),segment:window.EduvizeProfiles.segment()}),
-applyNative:async config=>{window.EduvizeProfiles.fields(["layout","video-sound"]).apply(config.values);if(config.segment)window.EduvizeProfiles.applySegment(config.segment);}
-});
 window.dispatchEvent(new Event("eduvize-profile-adapter-ready"));
 const documentSettingsSave=document.querySelector("[data-edu-profile-save]");if(documentSettingsSave)documentSettingsSave.textContent="Uložit nastavení";
 // Preserve the existing positions of Copy and Open; no Generate action.

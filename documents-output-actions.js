@@ -76,7 +76,6 @@
   const client=root.EduvizeOutputClient.create({origin:root.location.origin,getAuthorization:()=>{const token=auth.getToken('configurations')||auth.getToken('documents');return token?'Bearer '+token:'';}});
   const actions=controller({auth,profileAdapter,saved:root.EduvizeSavedOutputSettings.create(),client,actions:root.EduvizeOutputActions,elements,readPresentation:config=>config.presentation,registeredAdapter:()=>root.EduvizeDocumentsOutputAdapter});
   root.EduvizeDocumentsOutputActions=actions;
-  root.dispatchEvent(new root.Event('eduvize-profile-adapter-ready'));
   const refresh=()=>actions.refresh().catch(e=>{elements.status.textContent=e.message||'Odkaz nyní není dostupný.';});
   for(const name of ['eduvize-admin-auth-change','eduvize-profile-selected'])root.addEventListener(name,refresh);
   document.addEventListener('change',event=>{if(event.target.matches?.('#layout,#edu-output-interaction,#edu-output-kiosk-layout')||event.target.closest?.('.ev-segments'))refresh();});
