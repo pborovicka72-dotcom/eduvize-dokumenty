@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
 (async()=>{
-let checks=0;const root={EduvizeNSPLayouts:{layouts:{landscape:{1:[[3840,2160]]},portrait:{1:[[2160,3840]]}}}};
+let checks=0;const root={EduvizeOutputActions:{canonicalSlot:p=>p},EduvizeNSPLayouts:{layouts:{landscape:{1:[[3840,2160]]},portrait:{1:[[2160,3840]]}}}};
 vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../documents-output-actions.js'),'utf8'),{window:root});
 vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../documents-output-adapter.js'),'utf8'),{window:root});
 const b=root.EduvizeDocumentsOutputBridge;
@@ -15,12 +15,13 @@ let state={connected:true,schoolId:'a'.repeat(32),profileId:'b'.repeat(32)},curr
 const buttons={generateButton:{},copyButton:{onclick:()=>{throw Error('legacy');}},openButton:{onclick:()=>{throw Error('legacy');}},status:{}};
 const adapter=root.EduvizeDocumentsOutputAdapter;
 let savedLoads=0;
-b.controller({auth:{status:()=>state},profileAdapter:{read:()=>current},saved:{load:async ctx=>{savedLoads++;assert.equal(ctx.profileId,state.profileId);return {config:stored,data:stored.presentation};}},client:{},actions:{mount:o=>{options=o;return {refresh:async()=>{}};}},elements:buttons,readPresentation:c=>c.presentation,registeredAdapter:()=>adapter});
+b.controller({auth:{status:()=>state},profileAdapter:{read:()=>current},saved:{load:async ctx=>{savedLoads++;assert.equal(ctx.profileId,state.profileId);return {config:stored,data:stored.presentation};}},client:{},actions:{mount:o=>{options=o;return {workflow:'saved-copy-preview',withSavedCommit(){},ensurePublishedFromSaved(){},previewDraft(){},refresh:async()=>{}};}},elements:buttons,readPresentation:c=>c.presentation,registeredAdapter:()=>adapter});
 assert.equal(buttons.copyButton.onclick,null);assert.equal(buttons.openButton.onclick,null);assert.equal(options.context().presentation.mode,'web');assert.equal('slotId' in options.context(),false);assert.equal('resolve' in options,false);checks++;
 // Reordering the server JSON keys is semantically equivalent.
 stored.values={'video-sound':false,layout:'normal'};const draft=await options.draft();assert.deepEqual(plain(draft.payload),{selection:'visible-library',videoSound:false});assert.equal(savedLoads,1);checks++;
-current=plain(config);current.values['video-sound']=true;await assert.rejects(options.draft(),e=>e.code==='SETTINGS_REQUIRED');checks++;
+current=plain(config);current.values['video-sound']=true;assert.equal((await options.draft()).payload.videoSound,false,'First Copy must use saved settings despite newer form edits');checks++;
 current=config;state={...state,connected:false};assert.throws(()=>options.context(),e=>e.code==='CONTEXT_REQUIRED');state={...state,connected:true};checks++;
-b.controller({auth:{status:()=>state},profileAdapter:{read:()=>config},saved:{load:async()=>{state={...state,profileId:'c'.repeat(32)};return {config:stored,data:stored.presentation};}},client:{},actions:{mount:o=>{options=o;return {};}},elements:buttons,readPresentation:c=>c.presentation,registeredAdapter:()=>adapter});await assert.rejects(options.draft(),e=>e.code==='CONTEXT_CHANGED');checks++;
+b.controller({auth:{status:()=>state},profileAdapter:{read:()=>config},saved:{load:async()=>{state={...state,profileId:'c'.repeat(32)};return {config:stored,data:stored.presentation};}},client:{},actions:{mount:o=>{options=o;return {workflow:'saved-copy-preview',withSavedCommit(){},ensurePublishedFromSaved(){},previewDraft(){}};}},elements:buttons,readPresentation:c=>c.presentation,registeredAdapter:()=>adapter});await assert.rejects(options.draft(),e=>e.code==='CONTEXT_CHANGED');checks++;
 console.log('Documents V2 bridge:',checks,'behavior checks PASS');return checks;
 })();
+

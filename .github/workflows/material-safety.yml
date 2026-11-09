@@ -27,3 +27,6 @@ jobs:
         run: |
           node tests/safe-deletion.test.mjs
           node tests/preview-profile.test.mjs
+          node tests/documents-output-bridge.test.cjs
+          node tests/documents-saved-workflow.test.cjs
+          node tests/documents-published.test.cjs
