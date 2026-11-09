@@ -32,32 +32,51 @@
    if(!s.connected||!s.schoolId||!/^[a-f0-9]{32}$/.test(s.profileId||''))fail('CONTEXT_REQUIRED','Vyberte uložený profil své školy.');
    return {schoolId:String(s.schoolId),profileId:s.profileId,appId:'documents',presentation:readPresentation(profileAdapter.read())};
   }
-  async function draft(){
-   const before=context(),current=profileAdapter.read(),stored=await saved.load(before);
-   if(!equal(before,context())||!equal(current,profileAdapter.read()))fail('CONTEXT_CHANGED','Profil nebo nastavení se během načítání změnily.');
-   if(!equal(stored.config.presentation,before.presentation)||!equal(stored.config.values,current.values)||!equal(stored.config.segment,current.segment))fail('SETTINGS_REQUIRED','Nejprve uložte aktuální nastavení Dokumentů.');
+  async function draft({savedCommit=null}={}){
+   const before=context();let config;
+   if(savedCommit){
+    if(savedCommit.profileId!==before.profileId||savedCommit.appId!=='documents'||!Number.isSafeInteger(savedCommit.revision)||savedCommit.revision<0)fail('CONTEXT_CHANGED','Uložené nastavení patří jinému profilu.');
+    config=copy(savedCommit.config);
+   }else{
+    config=copy((await saved.load(before)).config);
+    if(!equal(before,context()))fail('CONTEXT_CHANGED','Profil nebo výstup se během načítání změnil.');
+   }
    const adapter=registeredAdapter();
-   if(typeof adapter?.draft!=='function')fail('UNSUPPORTED_APP','Vytváření odkazu Dokumentů není připojené k ověřenému adaptéru.');
-   const value=await adapter.draft(copy(stored.config),copy(stored.config.presentation));
-   if(!equal(context(),before)||!value||value.schemaVersion!==1||value.payloadVersion!==1||!equal(value.presentation,stored.config.presentation))fail('INVALID_DRAFT','Adaptér vrátil neplatný uložený výstup.');
+   if(typeof adapter?.draft!=='function')fail('UNSUPPORTED_APP','Výstup Dokumentů není připojený k ověřenému adaptéru.');
+   if(!equal(config.presentation,before.presentation))fail('SETTINGS_REQUIRED','Nejprve uložte zvolený typ výstupu Dokumentů.');
+   const value=await adapter.draft(config,copy(config.presentation));
+   if(!equal(context(),before)||!value||value.schemaVersion!==1||value.payloadVersion!==1||!equal(value.presentation,config.presentation))fail('INVALID_DRAFT','Adaptér vrátil neplatný uložený výstup.');
    return value;
   }
   // Remove only the old property handlers; the shared controller binds once.
   elements.copyButton.onclick=null;elements.openButton.onclick=null;
-  return actions.mount({client,context,draft,elements});
+  const instance=actions.mount({workflow:'saved-copy-preview',client,context,draft,elements,previewDraftUrl:()=>{
+   if(typeof root.EduvizeDocumentsPreviewUrl!=='function')fail('DEPENDENCY_UNAVAILABLE','Náhled Dokumentů nyní není dostupný.');
+   const url=new URL(root.EduvizeDocumentsPreviewUrl(),root.location.href);
+   if(url.origin!==root.location.origin||url.username||url.password)fail('INVALID_PREVIEW','Náhled musí zůstat v Dokumentech.');
+   url.searchParams.set('preview','1');return url.href;
+  }});
+  if(instance.workflow!=='saved-copy-preview'||typeof instance.withSavedCommit!=='function'||typeof instance.ensurePublishedFromSaved!=='function'||typeof instance.previewDraft!=='function')fail('DEPENDENCY_UNAVAILABLE','Nové společné ovládání výstupů nyní není dostupné.');
+  profileAdapter.outputActions=instance;
+  return instance;
  }
  async function install(){
   if(root.EduvizeDocumentsOutputActions)return;
   const elements={generateButton:document.getElementById('generate-document-output'),copyButton:document.getElementById('copy'),openButton:document.getElementById('open'),status:document.getElementById('document-output-status')};
-  if(!elements.generateButton)return;
+  if(!elements.copyButton||!elements.openButton||!elements.status)return;
   elements.copyButton.onclick=null;elements.openButton.onclick=null;
   const auth=root.EduvizeAdminAuth;
   if(!auth||!root.EduvizeOutputActions||!root.EduvizeOutputClient||!root.EduvizeSavedOutputSettings){elements.status.textContent='Vytváření odkazů nyní není dostupné.';return;}
   await auth.ready;
+  // Shared profile tools may arrive after the native inline adapter registers.
+  // Do not evaluate its read() until those dependencies have actually loaded.
+  for(let attempt=0;attempt<100&&typeof root.EduvizeProfiles?.fields!=='function';attempt++)await new Promise(resolve=>root.setTimeout(resolve,50));
+  if(typeof root.EduvizeProfiles?.fields!=='function'||typeof root.EduvizeProfiles?.segment!=='function')fail('DEPENDENCY_UNAVAILABLE','Nastavení Dokumentů nyní nelze načíst. Zkuste stránku obnovit.');
   const profileAdapter=root.EduvizeProfileAdapter;
   const client=root.EduvizeOutputClient.create({origin:root.location.origin,getAuthorization:()=>{const token=auth.getToken('configurations')||auth.getToken('documents');return token?'Bearer '+token:'';}});
   const actions=controller({auth,profileAdapter,saved:root.EduvizeSavedOutputSettings.create(),client,actions:root.EduvizeOutputActions,elements,readPresentation:config=>config.presentation,registeredAdapter:()=>root.EduvizeDocumentsOutputAdapter});
   root.EduvizeDocumentsOutputActions=actions;
+  root.dispatchEvent(new root.Event('eduvize-profile-adapter-ready'));
   const refresh=()=>actions.refresh().catch(e=>{elements.status.textContent=e.message||'Odkaz nyní není dostupný.';});
   for(const name of ['eduvize-admin-auth-change','eduvize-profile-selected'])root.addEventListener(name,refresh);
   document.addEventListener('change',event=>{if(event.target.matches?.('#layout,#edu-output-interaction,#edu-output-kiosk-layout')||event.target.closest?.('.ev-segments'))refresh();});

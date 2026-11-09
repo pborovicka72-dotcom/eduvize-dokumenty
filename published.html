@@ -6,9 +6,50 @@
 <div id="browse"></div>
 <div id="detail" class="hidden edu-document-fullscreen"><div id="viewer-title" hidden></div><div id="pdfTools"></div><div class="viewer" id="viewer"></div><div class="controls" id="controls"><button class="edu-document-tool" id="prev">← Předchozí</button><span class="edu-pagination-status" id="kioskPdfPosition" role="status" aria-live="polite"></span><button class="edu-document-tool" id="next">Další →</button><button class="edu-document-tool hidden" id="returnCatalog">Zpět na dokumenty</button><button class="edu-document-tool hidden" id="pdfOverview">Přehled stránek</button><span class="edu-document-zoom" id="pdfPosition" role="status" aria-live="polite"></span></div></div>
 </section></main>
-<script src="/eduvize-styly/design-system/output-client.js?v=output-actions-v2-48bd6c1e"></script><script src="/eduvize-styly/design-system/output-runtime.js"></script>
+<script src="/eduvize-styly/design-system/output-client.js?v=output-actions-v2-48bd6c1e"></script><script src="/eduvize-styly/design-system/output-runtime.js"></script><script>/* Bind the shared published metrics; never infer presentation from URL or preferences. */
+(function(root){'use strict';
+ const headerKeys=['height','icon','title','meta','padding','gap'];
+ const textKeys=['body','title','label','caption','footnote','value'];
+ const frameKeys=['width','height','min-height','max-width','margin','position','left','top','transform','transform-origin'];
+ function create(stage){
+  const html=root.document.documentElement,body=root.document.body;let current=null,queued=false;
+  function queueHeader(){if(queued)return;queued=true;root.requestAnimationFrame(()=>{queued=false;if(!current)return;for(const [selector,key] of [['.edu-header-title','title'],['.edu-header-meta','meta']])for(const node of stage.querySelectorAll('#documentNavigation '+selector)){let size=current.metrics.header[key];node.style.setProperty('font-size',size+'px','important');if(!node.clientWidth)continue;for(let attempt=0;attempt<12&&node.scrollWidth>node.clientWidth+1;attempt++){size=Math.max(1,size*node.clientWidth/node.scrollWidth-.2);node.style.setProperty('font-size',size+'px','important');}}});}
+  function fit(){
+   if(!current)return;
+   const {presentation:p,metrics:m}=current;
+   if(p.mode==='web'){for(const key of frameKeys)stage.style.removeProperty(key);body.style.removeProperty('overflow');queueHeader();return;}
+   const g=m.geometry;
+   if(!(root.innerWidth>0&&root.innerHeight>0))return;
+   const scale=Math.min(root.innerWidth/g.width,root.innerHeight/g.height);
+   // The same canonical box as the administration iframe, scaled as a whole.
+   // Important inline dimensions outrank legacy kiosk 100dvh/100% framing rules.
+   for(const [key,value] of Object.entries({width:g.width+'px',height:g.height+'px','min-height':'0','max-width':'none',margin:'0',position:'absolute',left:'50%',top:'0',transform:'translateX(-50%) scale('+scale+')','transform-origin':'top center'}))stage.style.setProperty(key,value,'important');
+   body.style.setProperty('overflow','hidden');queueHeader();
+  }
+  function apply(p,m){
+   if(!['web','nsp','kiosk'].includes(p?.mode)||!m?.geometry||![m.geometry.width,m.geometry.height].every(n=>Number.isFinite(n)&&n>0))throw Error('Invalid published geometry');
+   for(const [values,keys] of [[m.header,headerKeys],[m.text,textKeys]])for(const key of keys)if(!Number.isFinite(values?.[key])||values[key]<0)throw Error('Invalid shared published metrics');
+   current={presentation:p,metrics:m};
+   html.dataset.outputMode=p.mode;
+   for(const mode of ['web','nsp','kiosk'])html.classList.toggle(mode+'-output',p.mode===mode);
+   for(const key of headerKeys)html.style.setProperty('--edu-header-'+key,m.header[key]+'px');
+   for(const key of textKeys)html.style.setProperty('--edu-text-'+key,m.text[key]+'px');
+   // Match the existing shared header controller's symmetric identity inset.
+   const inset=(m.header.height-m.header.icon)/2;
+   html.style.setProperty('--edu-header-inset',inset+'px');
+   html.style.setProperty('--edu-header-gap',inset+'px');
+   fit();
+  }
+  root.addEventListener('resize',fit);
+  root.document.fonts?.ready.then(queueHeader);
+  return Object.freeze({apply,queueHeader,destroy(){root.removeEventListener('resize',fit);current=null;}});
+ }
+ root.EduvizeDocumentsPublishedPresentation=Object.freeze({create});
+})(window);
+</script>
 <script>
 let dispose=()=>{},update;
+const publishedPresentation=window.EduvizeDocumentsPublishedPresentation.create(document.querySelector('.shell'));
 function publishedAutoplay(host,advance,seconds=12){const id=setInterval(()=>{if(!document.hidden&&!window.EduvizeOutputModes.isInteractive())advance();},Math.max(3,Math.min(120,Number(seconds)||12))*1000);const before=dispose;dispose=()=>{before();clearInterval(id);};return()=>clearInterval(id);}
 function boot(snapshot){
 
@@ -25,7 +66,7 @@ const fileUrl=d=>{const entry=media.get(d.mediaId);if(!entry)throw Error('Médiu
 const folderIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 6a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
 function documentReady(){if(directDocument)document.documentElement.classList.add('document-ready');}
 function node(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
-function setHeading(title,count){$('heading-title').textContent=title;$('heading-count').textContent=count;$('heading-count').hidden=!count;$('documentNavigation').hidden=standaloneDocument&&!webOutput;$('back').hidden=screen==='folders';$('documentsHome').hidden=screen==='folders';{$('back').hidden=screen!=='document'||category===null;document.querySelector('.edu-document-navigation').hidden=screen==='folders';document.querySelector('.edu-document-navigation-actions').hidden=standaloneDocument;$('controls').classList.toggle('hidden',screen!=='document');}}
+function setHeading(title,count){$('heading-title').textContent=title;$('heading-count').textContent=count;$('heading-count').hidden=!count;$('documentNavigation').hidden=standaloneDocument&&!webOutput;$('back').hidden=screen==='folders';$('documentsHome').hidden=screen==='folders';{$('back').hidden=screen!=='document'||category===null;document.querySelector('.edu-document-navigation').hidden=screen==='folders';document.querySelector('.edu-document-navigation-actions').hidden=standaloneDocument;$('controls').classList.toggle('hidden',screen!=='document');}publishedPresentation.queueHeader();}
 function categoryDocs(){return category===null?docs:docs.filter(d=>categoryOf(d)===category)}
 function leaveDocument(){imageView?.destroy();imageView=null;if(standaloneDocument)return;directDocument=false;document.documentElement.classList.remove('document-output','document-ready');pdfViewport.activate(false);pdfRenderId++;}
 
@@ -170,6 +211,6 @@ function replaceSnapshot(next){
 update=replaceSnapshot;
 const before=dispose;dispose=()=>{before();stopPdfPreviews();imageView?.destroy();imageView=null;pdfRenderId++;releasePdfCache();pdfGrid=null;pdfFile=null;pdfTotal=0;pdfViewport.activate(false);media.clear();docs=[];selected=null;$('heading-title').textContent='Dokumenty';$('heading-count').textContent='';$('viewer').replaceChildren();$('browse').replaceChildren();document.querySelector('.shell').hidden=true;};
 }
-window.EduvizeOutputRuntime.start({appId:'documents',render:async snapshot=>{document.documentElement.dataset.eduInteraction=snapshot.presentation.interaction;if(!update)boot(snapshot);update(snapshot);},onReady:()=>{document.getElementById('publication-status').hidden=true;},clear:()=>{dispose();document.getElementById('publication-status').hidden=false;document.getElementById('publication-status').textContent='Výstup není dostupný.';}});
+window.EduvizeOutputRuntime.start({appId:'documents',render:async (snapshot,metrics)=>{publishedPresentation.apply(snapshot.presentation,metrics);document.documentElement.dataset.eduInteraction=snapshot.presentation.interaction;if(!update)boot(snapshot);update(snapshot);},onReady:()=>{document.getElementById('publication-status').hidden=true;},clear:()=>{dispose();document.getElementById('publication-status').hidden=false;document.getElementById('publication-status').textContent='Výstup není dostupný.';}});
 </script><script src="/eduvize-styly/design-system/segment-display.js?v=20261104-design-audit-1"></script><div class="edu-kiosk-style-version" aria-label="Verze stylu kiosku">Dokumenty · styl kiosku v2026.11.02.01</div><p id="publication-status" role="status">Načítám dokumenty…</p></body></html>
 
