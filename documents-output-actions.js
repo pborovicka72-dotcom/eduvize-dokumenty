@@ -64,9 +64,10 @@
   if(root.EduvizeDocumentsOutputActions)return;
   const elements={generateButton:document.getElementById('generate-document-output'),copyButton:document.getElementById('copy'),openButton:document.getElementById('open'),status:document.getElementById('document-output-status')};
   if(!elements.copyButton||!elements.openButton||!elements.status)return;
+  const reportError=message=>{const sink=root.EduvizeProfiles?.statusFor?.('documents');if(sink)sink.result(message,'error');else{elements.status.dataset.state='error';elements.status.textContent=message;}};
   elements.copyButton.onclick=null;elements.openButton.onclick=null;
   const auth=root.EduvizeAdminAuth;
-  if(!auth||!root.EduvizeOutputActions||!root.EduvizeOutputClient||!root.EduvizeSavedOutputSettings){elements.status.textContent='Vytváření odkazů nyní není dostupné.';return;}
+  if(!auth||!root.EduvizeOutputActions||!root.EduvizeOutputClient||!root.EduvizeSavedOutputSettings){reportError('Vytváření odkazů nyní není dostupné.');return;}
   await auth.ready;
   // Shared profile tools may arrive after the native inline adapter registers.
   // Do not evaluate its read() until those dependencies have actually loaded.
@@ -76,10 +77,7 @@
   const client=root.EduvizeOutputClient.create({origin:root.location.origin,getAuthorization:()=>{const token=auth.getToken('configurations')||auth.getToken('documents');return token?'Bearer '+token:'';}});
   const actions=controller({auth,profileAdapter,saved:root.EduvizeSavedOutputSettings.create(),client,actions:root.EduvizeOutputActions,elements,readPresentation:config=>config.presentation,registeredAdapter:()=>root.EduvizeDocumentsOutputAdapter});
   root.EduvizeDocumentsOutputActions=actions;
-  const refresh=()=>actions.refresh().catch(e=>{elements.status.textContent=e.message||'Odkaz nyní není dostupný.';});
-  for(const name of ['eduvize-admin-auth-change','eduvize-profile-selected'])root.addEventListener(name,refresh);
-  document.addEventListener('change',event=>{if(event.target.matches?.('#layout,#edu-output-interaction,#edu-output-kiosk-layout')||event.target.closest?.('.ev-segments'))refresh();});
-  await refresh();
+  // Shared Save, Copy and Preview validate their fresh context when explicitly used.
  }
  root.EduvizeDocumentsOutputBridge=Object.freeze({presentation,withPresentation,wrapProfileAdapter,controller,install});
 })(typeof window==='undefined'?globalThis:window);
