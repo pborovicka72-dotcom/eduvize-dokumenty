@@ -134,7 +134,9 @@ async def list_categories(authorization:str|None=Header(default=None),scope:str=
     await check_admin(authorization)
     folder=await ensure_folder()
     data=await manifest_data(folder)
-    return {"categories":category_names(data,document_scope(scope)),"hidden_categories":data.get("hidden_categories",[])}
+    selected_scope=document_scope(scope)
+    counts={name:sum(item.get("category")==name and in_document_scope(item,selected_scope) for item in data["items"]) for name in category_names(data,selected_scope)}
+    return {"categories":list(counts),"custom_categories":data.get("categories",[]) if selected_scope=="documents" else [],"counts":counts,"hidden_categories":data.get("hidden_categories",[])}
 
 @app.post("/api/admin/categories")
 async def create_category(request:Request,authorization:str|None=Header(default=None)):
@@ -151,6 +153,53 @@ async def create_category(request:Request,authorization:str|None=Header(default=
         current=(await manifest_data(folder)).get("categories",[])
         await save_manifest(folder,items,current+[name])
     return {"name":name}
+
+def rename_category_data(data,current,new_name):
+    if current not in data.get("categories",[]) or current in DEFAULT_CATEGORIES:
+        raise HTTPException(404,"Přejmenovat lze pouze vlastní kategorii")
+    if not isinstance(new_name,str):raise HTTPException(422,"Neplatný název kategorie")
+    new_name=new_name.strip()
+    if not new_name or len(new_name)>80 or any(ord(c)<32 for c in new_name):
+        raise HTTPException(422,"Název kategorie musí mít 1–80 znaků")
+    if any(name.casefold()==new_name.casefold() and name!=current for name in category_names(data)):
+        raise HTTPException(409,"Kategorie již existuje")
+    categories=[new_name if name==current else name for name in data["categories"]]
+    items=[{**item,"category":new_name} if item.get("category")==current else item for item in data["items"]]
+    hidden=[new_name if name==current else name for name in data.get("hidden_categories",[])]
+    return items,categories,hidden
+
+def delete_category_data(data,name,replacement=None):
+    if name not in data.get("categories",[]) or name in DEFAULT_CATEGORIES:
+        raise HTTPException(404,"Odstranit lze pouze vlastní kategorii")
+    affected=sum(item.get("category")==name for item in data["items"])
+    if affected and (replacement==name or replacement not in category_names(data)):
+        raise HTTPException(422,"Vyberte existující kategorii pro přesun dokumentů")
+    items=[{**item,"category":replacement} if item.get("category")==name else item for item in data["items"]]
+    categories=[value for value in data["categories"] if value!=name]
+    hidden=[value for value in data.get("hidden_categories",[]) if value!=name]
+    return items,categories,hidden,affected
+
+@app.patch("/api/admin/categories")
+async def rename_category(request:Request,authorization:str|None=Header(default=None)):
+    await check_admin(authorization)
+    body=await request.json()
+    async with lock:
+        folder=await ensure_folder()
+        data=await manifest_data(folder)
+        items,names,hidden=rename_category_data(data,body.get("current"),body.get("name"))
+        await save_manifest(folder,items,category_names=names,hidden_categories=hidden)
+    return {"name":body["name"].strip()}
+
+@app.delete("/api/admin/categories")
+async def delete_category(request:Request,authorization:str|None=Header(default=None)):
+    await check_admin(authorization)
+    body=await request.json()
+    async with lock:
+        folder=await ensure_folder()
+        data=await manifest_data(folder)
+        items,names,hidden,affected=delete_category_data(data,body.get("name"),body.get("replacement"))
+        await save_manifest(folder,items,category_names=names,hidden_categories=hidden)
+    return {"deleted":body["name"],"moved":affected}
 
 @app.post("/api/admin/documents")
 async def upload(file:UploadFile=File(...),category:str=Form("Ostatní"),scope:str=Form("documents"),authorization:str|None=Header(default=None)):
@@ -327,3 +376,4 @@ async def import_documents(request:Request,authorization:str=Header(default=''))
         except HTTPException as error:
             results.append({'name':item.get('name','Soubor'),'uploaded':False,'error':str(error.detail)})
     return {'items':results,'uploaded':sum(x['uploaded'] for x in results)}
+
