@@ -29,7 +29,9 @@ async function sendDocumentBatch(){
  finally{documentBatchRunning=false;if(pendingDocumentWrites.size)documentBatchTimer=setTimeout(sendDocumentBatch,0);}
 }
 const documentEditors=new Map();
-window.addEventListener('beforeunload',event=>{if([...documentEditors.values()].some(editor=>editor.dirty())){event.preventDefault();event.returnValue='';}});
+const hasUnsavedDocumentEdits=()=>[...documentEditors.values()].some(editor=>editor.dirty());
+window.EduvizeAdminNavigation?.registerExitGuard(hasUnsavedDocumentEdits);
+window.addEventListener('beforeunload',event=>{if(!window.EduvizeAdminNavigation?.isApprovedDeparture()&&hasUnsavedDocumentEdits()){event.preventDefault();event.returnValue='';}});
 async function flushDocumentEdits(){await Promise.all([...documentEditors.values()].map(editor=>editor.flush()));}
 async function request(path,options={}){const r=await window.EduvizeAdminAuth.fetch(new URL(path,base).href,options,'documents');const d=await r.json().catch(()=>({}));if(!r.ok){const error=Error(typeof d.detail==='string'?d.detail:d.detail?.message||'Chyba serveru '+r.status);error.detail=d.detail;throw error;}return d}
 
