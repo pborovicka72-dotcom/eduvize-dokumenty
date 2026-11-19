@@ -35,7 +35,7 @@ async function run({items=[],cancel=false,complete=true,race=false,offline=false
   $:id=>{assert.equal(id,'items');return container;},refreshDocumentCatalogPreview(){} };
  vm.runInNewContext(source,context);await del.onclick();
  assert.equal(del.disabled,false);assert.equal(save.disabled,false);assert.equal(flushes,1);
- return {requests,confirms,text:content(context.usagePanel),messages};
+ return {requests,confirms,text:content(vm.runInNewContext('usagePanel',context)),messages};
 }
 let result=await run({items:[{app:'kiosk',name:'Hala',state:'publikovaný výstup',location:'Řády'}]});
 assert.equal(result.requests.length,1);assert.equal(result.confirms,0);assert.match(result.text,/Hala/);assert.match(result.text,/Řády/);
