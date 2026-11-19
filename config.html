@@ -1,4 +1,4 @@
-<!doctype html><html lang="cs" data-edu-default-interaction="interactive"><head><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-navigation.js?v=20261104-design-audit-1"></script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/output-modes.js?v=20261104-design-audit-1"></script><meta charset="utf-8"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-account.css?v=20261105-cloud-3"><script data-edu-theme-first-paint="20261104-design-audit-1">/* Apply only the selected school's cached theme before painting.
+<!doctype html><html lang="cs" data-edu-default-interaction="interactive"><head><script src="/eduvize-styly/design-system/admin-navigation.js?v=20261119-global-departure-dialog-r2"></script><script src="/eduvize-styly/design-system/output-modes.js?v=71d22a46bba8006dd932"></script><meta charset="utf-8"><link rel="stylesheet" href="/eduvize-styly/design-system/admin-account.css?v=71d22a46bba8006dd932"><script data-edu-theme-first-paint="20261104-design-audit-1">/* Apply only the selected school's cached theme before painting.
    A missing cache uses the shared CSS baseline immediately, never a blank page. */
 (function(){
  var key='eduvize-active-theme-v1', map={background:'bg',text:'text',surface:'surface',muted:'muted',primary:'primary',primaryText:'primary-text',secondary:'secondary',secondaryText:'secondary-text',accent:'accent',border:'border'};
@@ -16,7 +16,7 @@
   var radius=theme.icons?.radiusPx;style.setProperty('--ev-icon-radius',(Number.isFinite(radius)?Math.max(0,Math.min(24,radius)):10)+'px');
  }catch(_){}
 })();
-</script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-auth.js?v=20261105-cloud-3"></script><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize – Správa dokumentů</title><script>(function(){try{var t=JSON.parse(localStorage.getItem('eduvize-active-theme-v1')||'null');if(!t||!t.colors)return;var m={background:'bg',text:'text',surface:'surface',muted:'muted',primary:'primary',primaryText:'primary-text',secondary:'secondary',secondaryText:'secondary-text',accent:'accent',border:'border'};for(var k in m){var v=t.colors[k];if(/^#[0-9a-fA-F]{6}$/.test(v||''))document.documentElement.style.setProperty('--ev-'+m[k],v)}if(t.controls){document.documentElement.style.setProperty('--ev-control-height',t.controls.heightPx+'px');document.documentElement.style.setProperty('--ev-control-radius',t.controls.radiusPx+'px')}if(t.cards)document.documentElement.style.setProperty('--ev-card-radius',t.cards.radiusPx+'px')}catch(e){}})();</script><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/active-theme.js?v=20261105-cloud-3"></script><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/documents-admin.css?v=20261104-design-audit-1"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.css?v=20261104-design-audit-1"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-tokens.css?v=20261104-design-audit-1"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-shell.css?v=20261104-design-audit-1"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-components.css?v=20261104-design-audit-1"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/document-upload.css?v=20261105-cloud-3"><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/preview-viewport.css?v=20261104-design-audit-1"><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/preview-viewport.js?v=20261104-design-audit-1"></script><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.css?v=20261104-design-audit-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/app-icons.js?v=20261104-design-audit-1"></script><link rel="icon" type="image/svg+xml" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/assets/eduvize-favicon.svg?v=20261031-unified-1"><script defer src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-header.js?v=20261104-design-audit-1"></script><link rel="stylesheet" href="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/item-editor.css?v=20261104-design-audit-1"><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/admin-autosave.js?v=20261104-design-audit-1"></script><link rel="preconnect" href="https://pborovicka72-dotcom.github.io"><link rel="preconnect" href="https://eduvize-design-system-api.onrender.com" crossorigin></head><body class="ev-admin"><main class="wrap edu-admin-page"><header class="edu-page-header"><div class="edu-page-header__identity"><div class="edu-page-header__icon" aria-hidden="true" data-edu-app-icon="documents"></div><div class="edu-page-header__titles"><div class="edu-page-header__eyebrow">EDUVIZE · DOKUMENTY</div><h1 class="edu-page-header__title">Administrace dokumentů</h1></div></div><p class="edu-page-header__description">Nahrajte veřejné dokumenty školy. PDF, obrázky a videa lze zobrazit v kiosku. Dokumenty Word a PowerPoint nejprve exportujte do PDF. Limit každého souboru je 100 MB.</p></header><section class="card edu-admin__card"><div class="edu-admin__actions"><button id="connect" type="button" class="edu-admin__button edu-admin__button--secondary">Načíst dokumenty</button></div><p id="auth-status" role="status" aria-live="polite"></p></section><section class="card edu-admin__card"><h2 id="documents-list-heading" tabindex="-1">Správa dokumentů</h2><p id="items-status" class="edu-admin__hint" role="status" aria-live="polite"></p><div id="items">Pro správu dokumentů se přihlaste na rozcestníku Eduvize.</div></section><section class="card edu-admin__card"><h2>Nahrát dokumenty</h2><form id="upload" class="edu-document-upload"><div class="edu-admin__field-grid"><label>PDF, obrázek nebo video<input id="file" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.mp4,.webm" required></label><label>Kategorie<select id="category"><option>Ostatní</option></select></label></div><div class="edu-admin__control-row edu-document-category-row"><label class="edu-admin__field">Vlastní kategorie<input id="new-category" type="text" maxlength="80" placeholder="Název nové kategorie"></label><div class="edu-admin__actions"><button id="add-category" type="button" class="edu-admin__button edu-admin__button--secondary">Přidat kategorii</button></div></div><p id="category-status" class="edu-admin__hint" role="status" aria-live="polite"></p><button id="upload-button" class="edu-admin__button" type="submit">Nahrát vybrané soubory</button><div id="upload-progress" hidden aria-live="polite"><progress id="upload-bar" max="100" value="0"></progress><div id="upload-text">Připravuji nahrávání…</div></div></form></section><section class="card edu-admin__card edu-admin__flow"><h2>Importovat z OneDrivu</h2><p class="edu-admin__hint">Zkopíruje soubor nebo soubory z vybrané složky do Eduvize. Pro tento import připojte OneDrive na stránce účtu; po importu již připojení není potřeba.</p><form id="import-documents" class="edu-admin__flow"><label class="edu-admin__field">Odkaz na soubor nebo složku<input id="import-drive-url" type="url" required maxlength="4000" placeholder="https://…sharepoint.com/…"></label><p class="edu-admin__hint">Použije se kategorie vybraná výše u nahrávání dokumentů.</p><button class="edu-admin__button" type="submit">Importovat do Eduvize</button><ul id="import-results" aria-live="polite"></ul></form></section><section class="card edu-admin__card"><h2>Nastavení aplikace</h2><div class="edu-app-settings edu-admin__field-grid"><div class="edu-checkbox-options"><label><input id="video-sound" type="checkbox">Přehrávat videa se zvukem</label></div><p class="muted edu-settings-hint"><small>Samostatně otevřený dokument zobrazuje automaticky 1–3 stránky podle dostupné plochy. Ve výchozím nastavení jsou videa bez zvuku. Automatické přehrávání se zvukem může prohlížeč blokovat.</small></p></div></section><section class="card edu-output-section edu-admin__card"><h2>Výstup aplikace</h2><div class="edu-output-mode-row"><label class="edu-output-type">Typ výstupu<select id="layout"><option value="signage">Newline Signage Pro</option><option value="normal">Běžná stránka</option><option value="kiosk">Kiosek</option></select></label></div><div class="edu-output-actions edu-admin__actions"><button id="open" class="edu-admin__button" type="button">Otevřít náhled</button><button id="copy" type="button" class="edu-admin__button edu-admin__button--secondary">Kopírovat odkaz</button><button id="save-settings" hidden style="display:none!important" type="button" class="edu-admin__button edu-admin__button--secondary">Uložit v prohlížeči</button></div><p id="document-output-status" class="edu-admin__hint edu-admin__status" role="status" aria-live="polite" aria-atomic="true" data-edu-action-result></p></section></main><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/document-upload.js?v=20261105-cloud-3"></script><script>
+</script><script src="/eduvize-styly/design-system/admin-auth.js?v=20261119-profile-first-r5"></script><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize – Správa dokumentů</title><script>(function(){try{var t=JSON.parse(localStorage.getItem('eduvize-active-theme-v1')||'null');if(!t||!t.colors)return;var m={background:'bg',text:'text',surface:'surface',muted:'muted',primary:'primary',primaryText:'primary-text',secondary:'secondary',secondaryText:'secondary-text',accent:'accent',border:'border'};for(var k in m){var v=t.colors[k];if(/^#[0-9a-fA-F]{6}$/.test(v||''))document.documentElement.style.setProperty('--ev-'+m[k],v)}if(t.controls){document.documentElement.style.setProperty('--ev-control-height',t.controls.heightPx+'px');document.documentElement.style.setProperty('--ev-control-radius',t.controls.radiusPx+'px')}if(t.cards)document.documentElement.style.setProperty('--ev-card-radius',t.cards.radiusPx+'px')}catch(e){}})();</script><script defer src="/eduvize-styly/design-system/active-theme.js?v=20261119-global-departure-dialog-r2"></script><link rel="stylesheet" href="/eduvize-styly/design-system/documents-admin.css?v=20261116-documents-kiosk-delete-r1"><link rel="stylesheet" href="/eduvize-styly/design-system/nsp-segments.css?v=71d22a46bba8006dd932"><link rel="stylesheet" href="/eduvize-styly/design-system/admin-tokens.css?v=71d22a46bba8006dd932"><link rel="stylesheet" href="/eduvize-styly/design-system/admin-shell.css?v=71d22a46bba8006dd932"><link rel="stylesheet" href="/eduvize-styly/design-system/admin-components.css?v=71d22a46bba8006dd932"><link rel="stylesheet" href="/eduvize-styly/design-system/document-upload.css?v=71d22a46bba8006dd932"><link rel="stylesheet" href="/eduvize-styly/design-system/preview-viewport.css?v=71d22a46bba8006dd932"><script src="/eduvize-styly/design-system/preview-viewport.js?v=71d22a46bba8006dd932"></script><link rel="stylesheet" href="/eduvize-styly/design-system/app-icons.css?v=71d22a46bba8006dd932"><script defer src="/eduvize-styly/design-system/app-icons.js?v=71d22a46bba8006dd932"></script><link rel="icon" type="image/svg+xml" href="/eduvize-styly/design-system/assets/eduvize-favicon.svg?v=20261031-unified-1"><script defer src="/eduvize-styly/design-system/admin-header.js?v=71d22a46bba8006dd932"></script><link rel="stylesheet" href="/eduvize-styly/design-system/item-editor.css?v=71d22a46bba8006dd932"><script src="/eduvize-styly/design-system/admin-autosave.js?v=20261116-documents-current-r1"></script><link rel="preconnect" href=""><link rel="preconnect" href="" crossorigin><script src="/_environment.js" defer></script></head><body class="ev-admin"><main class="wrap edu-admin-page"><header class="edu-page-header"><div class="edu-page-header__identity"><div class="edu-page-header__icon" aria-hidden="true" data-edu-app-icon="documents"></div><div class="edu-page-header__titles"><div class="edu-page-header__eyebrow">EDUVIZE · DOKUMENTY</div><h1 class="edu-page-header__title">Administrace dokumentů</h1></div></div><p class="edu-page-header__description">Nahrajte veřejné dokumenty školy. PDF, obrázky a videa lze zobrazit v kiosku. Dokumenty Word a PowerPoint nejprve exportujte do PDF. Limit každého souboru je 100 MB.</p></header><section class="card edu-admin__card"><div class="edu-admin__actions"><button id="connect" type="button" class="edu-admin__button edu-admin__button--secondary">Načíst dokumenty</button></div><p id="auth-status" role="status" aria-live="polite"></p></section><section class="card edu-admin__card"><h2 id="documents-list-heading" tabindex="-1">Správa dokumentů</h2><p id="items-status" class="edu-admin__hint" role="status" aria-live="polite"></p><div id="items">Pro správu dokumentů se přihlaste na rozcestníku Eduvize.</div></section><section class="card edu-admin__card"><h2>Nahrát dokumenty</h2><form id="upload" class="edu-document-upload"><div class="edu-admin__field-grid"><label>PDF, obrázek nebo video<input id="file" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.mp4,.webm" required></label><label>Kategorie<select id="category"><option>Ostatní</option></select></label></div><div class="edu-admin__control-row edu-document-category-row"><label class="edu-admin__field">Vlastní kategorie<input id="new-category" type="text" maxlength="80" placeholder="Název nové kategorie"></label><div class="edu-admin__actions"><button id="add-category" type="button" class="edu-admin__button edu-admin__button--secondary">Přidat kategorii</button></div></div><p id="category-status" class="edu-admin__hint" role="status" aria-live="polite"></p><button id="upload-button" class="edu-admin__button" type="submit">Nahrát vybrané soubory</button><div id="upload-progress" hidden aria-live="polite"><progress id="upload-bar" max="100" value="0"></progress><div id="upload-text">Připravuji nahrávání…</div></div></form></section><section class="card edu-admin__card edu-admin__flow"><h2>Importovat z OneDrivu</h2><p class="edu-admin__hint">Zkopíruje soubor nebo soubory z vybrané složky do Eduvize. Pro tento import připojte OneDrive na stránce účtu; po importu již připojení není potřeba.</p><form id="import-documents" class="edu-admin__flow"><label class="edu-admin__field">Odkaz na soubor nebo složku<input id="import-drive-url" type="url" required maxlength="4000" placeholder="https://…sharepoint.com/…"></label><p class="edu-admin__hint">Použije se kategorie vybraná výše u nahrávání dokumentů.</p><button class="edu-admin__button" type="submit">Importovat do Eduvize</button><ul id="import-results" aria-live="polite"></ul></form></section><section class="card edu-admin__card"><h2>Nastavení aplikace</h2><div class="edu-app-settings edu-admin__field-grid"><div class="edu-checkbox-options"><label><input id="video-sound" type="checkbox">Přehrávat videa se zvukem</label></div><p class="muted edu-settings-hint"><small>Samostatně otevřený dokument zobrazuje automaticky 1–3 stránky podle dostupné plochy. Ve výchozím nastavení jsou videa bez zvuku. Automatické přehrávání se zvukem může prohlížeč blokovat.</small></p></div></section><section class="card edu-output-section edu-admin__card"><h2>Výstup aplikace</h2><div class="edu-output-mode-row"><label class="edu-output-type">Typ výstupu<select id="layout"><option value="signage">Newline Signage Pro</option><option value="normal">Běžná stránka</option><option value="kiosk">Kiosek</option></select></label></div><div class="edu-output-actions edu-admin__actions"><button id="open" disabled class="edu-admin__button" type="button">Otevřít náhled</button><button id="copy" disabled type="button" class="edu-admin__button edu-admin__button--secondary">Kopírovat odkaz</button><button id="save-settings" hidden style="display:none!important" type="button" class="edu-admin__button edu-admin__button--secondary">Uložit v prohlížeči</button></div><p id="document-output-status" class="edu-admin__hint edu-admin__status" role="status" aria-live="polite" aria-atomic="true" data-edu-action-result></p></section></main><script src="/eduvize-styly/design-system/document-upload.js?v=71d22a46bba8006dd932"></script><script>
 const $=id=>document.getElementById(id);const base=window.EduvizeAdminAuth.DOCS;
 function status(t,kind='error',target='items-status'){const el=$(target);el.textContent=t;el.dataset.state=kind;}
 const pendingDocumentWrites=new Map();let documentBatchTimer,documentBatchRunning=false;
@@ -29,9 +29,53 @@ async function sendDocumentBatch(){
  finally{documentBatchRunning=false;if(pendingDocumentWrites.size)documentBatchTimer=setTimeout(sendDocumentBatch,0);}
 }
 const documentEditors=new Map();
-window.addEventListener('beforeunload',event=>{if([...documentEditors.values()].some(editor=>editor.dirty())){event.preventDefault();event.returnValue='';}});
+let documentDepartureActions=null,documentAggregateSaving=false;
+function documentAggregateRead(){
+ return {config:JSON.parse(JSON.stringify(window.EduvizeProfileAdapter.read())),materials:[...documentEditors.entries()].map(([id,editor])=>({id:String(id),values:editor.value()})).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0)};
+}
+function documentAggregateCanonical(value){return JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a<b?-1:a>b?1:0)):v);}
+function mountDocumentActions(actions){
+ if(documentDepartureActions)throw Error('Ochrana změn Dokumentů je již připojena.');
+ if(typeof actions?.registerDeparture!=='function'||typeof actions?.consumeDepartureApproval!=='function'||typeof actions?.saveProfile!=='function'||typeof actions?.getState!=='function')throw Error('Společné ukládání Dokumentů není připravené.');
+ function state(){const s=actions.getState();if(!s||!s.schoolId||!s.profileId||!Number.isSafeInteger(s.revision)||s.revision<0)throw Error('Identita a verze Dokumentů nejsou ověřené.');return s;}
+ function identity(s){return documentAggregateCanonical([s.schoolId,s.profileId]);}
+ function materialDirty(){return documentBatchRunning||pendingDocumentWrites.size>0||[...documentEditors.values()].some(editor=>editor.dirty());}
+ function dirty(){return materialDirty()||!!actions.getState()?.dirty;}
+ async function save(){
+  if(documentAggregateSaving)throw Error('Ukládání Dokumentů již probíhá.');
+  const before=state();if(before.busy||before.needsLogin||before.needsReload)throw Error('Nejprve načtěte aktuální školní profil.');
+  const snapshot=documentAggregateRead(),fingerprint=documentAggregateCanonical(snapshot),context=identity(before);
+  documentAggregateSaving=true;
+  try{
+   await flushDocumentEdits();
+   const current=state();
+   if(identity(current)!==context||current.revision!==before.revision||current.busy||current.needsLogin||current.needsReload||materialDirty()||documentAggregateCanonical(documentAggregateRead())!==fingerprint)throw Error('Dokumenty se během ukládání změnily. Zkontrolujte neuložené změny.');
+   const result=await actions.saveProfile({expectedSchoolId:before.schoolId,expectedProfileId:before.profileId,expectedRevision:before.revision,config:snapshot.config});
+   const after=state();
+   if(identity(after)!==context||after.busy||after.needsLogin||after.needsReload||result?.settingsSaved!==true||typeof result.outputUpdated!=='boolean'||result.appId!=='documents'||result.schoolId!==before.schoolId||result.profileId!==before.profileId||!Number.isSafeInteger(result.revision)||result.revision<=before.revision||after.revision!==result.revision||result.pendingEdits!==false||documentAggregateCanonical(result.config)!==documentAggregateCanonical(snapshot.config)||dirty()||documentAggregateCanonical(documentAggregateRead())!==fingerprint)throw Object.assign(Error('Úplné uložení Dokumentů nebylo potvrzené. Na stránce zůstávají neuložené nebo nepotvrzené změny.'),{code:'DOCUMENTS_AGGREGATE_INCOMPLETE',settingsSaved:result?.settingsSaved===true});
+   return result;
+  }finally{documentAggregateSaving=false;}
+ }
+ const hooks=Object.freeze({mounted:true,appId:'documents',dirty,read:documentAggregateRead,save});
+ actions.registerDeparture(hooks);documentDepartureActions=actions;
+ return hooks;
+}
+
+window.addEventListener('beforeunload',event=>{if(documentDepartureActions?.consumeDepartureApproval?.(event))return;if(documentAggregateSaving||documentBatchRunning||pendingDocumentWrites.size||[...documentEditors.values()].some(editor=>editor.dirty())){event.preventDefault();event.returnValue='';}});
 async function flushDocumentEdits(){await Promise.all([...documentEditors.values()].map(editor=>editor.flush()));}
 async function request(path,options={}){const r=await window.EduvizeAdminAuth.fetch(new URL(path,base).href,options,'documents');const d=await r.json().catch(()=>({}));if(!r.ok){const error=Error(typeof d.detail==='string'?d.detail:d.detail?.message||'Chyba serveru '+r.status);error.detail=d.detail;throw error;}return d}
+let documentDeleteAuthEpoch=0;
+window.addEventListener('eduvize-admin-auth-change',()=>{documentDeleteAuthEpoch++;});
+function captureDocumentDeleteContext(){
+ const auth=window.EduvizeAdminAuth,token=auth.getToken('documents'),state=auth.status(),epoch=documentDeleteAuthEpoch;
+ if(!token||!state.connected)throw Error('Pro smazání se znovu přihlaste.');
+ return ()=>{const current=auth.status();if(window.EduvizeAdminAuth!==auth||auth.getToken('documents')!==token||!current.connected||current.schoolId!==state.schoolId||current.profileId!==state.profileId||documentDeleteAuthEpoch!==epoch)throw Error('Přihlášení nebo vybraná škola se změnily. Zopakujte kontrolu a potvrzení smazání.');};
+}
+async function documentDeleteRequest(path,options,check){
+ check();const headers=options.headers;
+ const guarded={...options};Object.defineProperty(guarded,'headers',{enumerable:true,get(){check();return headers;}});
+ const result=await request(path,guarded);check();return result;
+}
 
 let categoryNames=[];
 function updateDocumentCategoryOptions(){
@@ -42,8 +86,8 @@ for(const name of [...new Set([...categoryNames,previous])]){const option=docume
 select.value=previous;
 }
 }
-async function loadCategories(){
-const result=await request('/api/admin/categories');
+async function loadCategories(result){
+result=result||await request('/api/admin/categories');
 categoryNames=result.categories;
 const old=document.getElementById('category-visibility');if(old)old.remove();
 const panel=document.createElement('details');panel.id='category-visibility';panel.open=window.eduvizeCategoryPanelOpen===true;
@@ -77,13 +121,16 @@ const ids=[...document.querySelectorAll('#items [data-doc-id]')].map(el=>el.data
 await request('/api/admin/documents/reorder',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids})});
 status('Pořadí dokumentů uloženo.','success');
 }
-let loadingDocuments=false;const openDocumentEditors=new Set();
+let loadingDocuments=false,pendingDocumentReload=false,loadingDocumentProfile='',loadedDocumentProfile='';const openDocumentEditors=new Set();
 async function load({reveal=false}={}){
-if(loadingDocuments)return;loadingDocuments=true;$('connect').disabled=true;$('connect').textContent='Načítám…';$('items').setAttribute('aria-busy','true');$('items-status').textContent='';status('Načítám dokumenty z Eduvize…','pending','auth-status');
+if(loadingDocuments){pendingDocumentReload=true;return;}loadingDocuments=true;$('connect').disabled=true;$('connect').textContent='Načítám…';$('items').setAttribute('aria-busy','true');$('items-status').textContent='';status('Načítám dokumenty z Eduvize…','pending','auth-status');
 try{
 await flushDocumentEdits();
-await loadCategories();
+const requestedProfile=window.EduvizeAdminAuth.status().profileId;
+loadingDocumentProfile=requestedProfile;
 const data=await request('/api/admin/documents');
+if(requestedProfile!==window.EduvizeAdminAuth.status().profileId){pendingDocumentReload=true;return;}
+await loadCategories(data);
 const container=$('items');container.replaceChildren();
 if(!data.items.length){container.textContent='Zatím nebyly nahrány žádné dokumenty.';}
 const groups=new Map();
@@ -110,22 +157,66 @@ const save=document.createElement('button');save.type='button';save.className='e
 const rowStatus=document.createElement('span');rowStatus.className='edu-admin__hint';rowStatus.setAttribute('role','status');rowStatus.setAttribute('aria-live','polite');
 save.textContent='Uložit nyní';save.onclick=()=>editor.flush().catch(()=>{});
 const del=document.createElement('button');del.type='button';del.className='edu-admin__button';del.textContent='Smazat';
-const usagePanel=document.createElement('div');usagePanel.setAttribute('role','status');usagePanel.setAttribute('aria-live','polite');
-function showUsage(items,message){usagePanel.replaceChildren();const heading=document.createElement('p');heading.textContent=message;usagePanel.append(heading);if(items?.length){const list=document.createElement('ul');for(const use of items){const entry=document.createElement('li');entry.textContent=[use.app,use.name,use.profileId?'Profil '+use.profileId:'',use.state,use.outputId?'Výstup '+use.outputId:'',use.location].filter(Boolean).join(' · ');list.append(entry);}usagePanel.append(list);}}
+const usagePanel=document.createElement('div');usagePanel.className='edu-document-usage';usagePanel.setAttribute('role','status');usagePanel.setAttribute('aria-live','polite');
+function showUsage(items,message,target=usagePanel){
+ target.replaceChildren();
+ const heading=document.createElement('p');heading.textContent=message;target.append(heading);
+ const unique=new Map(),groups=new Map(),labels={kiosk:'Kiosek','generated-links':'Knihovna odkazů',documents:'Dokumenty',news:'Aktuality'};
+ for(const use of Array.isArray(items)?items:[]){
+  if(!use||typeof use!=='object')continue;
+  const fields=['app','name','profileId','state','outputId','location'].map(key=>typeof use[key]==='string'?use[key]:'');
+  const key=JSON.stringify(fields);if(unique.has(key))continue;unique.set(key,fields);
+  const groupKey=JSON.stringify(fields.slice(0,2));
+  if(!groups.has(groupKey))groups.set(groupKey,{label:[labels[fields[0]]||fields[0]||'Propojená aplikace',fields[1]].filter(Boolean).join(' · '),catalog:false});
+  if(fields[5].includes('živý katalog dokumentů'))groups.get(groupKey).catalog=true;
+ }
+ if(!unique.size)return;
+ const list=document.createElement('ul');list.className='edu-document-usage__places';
+ for(const group of [...groups.values()].slice(0,5)){const entry=document.createElement('li');entry.textContent=group.label+(group.catalog?' — katalog dokumentů':'');list.append(entry);}
+ if(groups.size>5){const entry=document.createElement('li');entry.textContent='Další místa použití: '+(groups.size-5)+'. Najdete je v podrobnostech.';list.append(entry);}
+ target.append(list);
+ const detail=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Podrobnosti vazeb ('+unique.size+')';
+ const technical=document.createElement('ul');technical.className='edu-document-usage__details';
+ for(const fields of unique.values()){const entry=document.createElement('li');entry.textContent=[fields[0],fields[1],fields[2]?'Profil '+fields[2]:'',fields[3],fields[4]?'Výstup '+fields[4]:'',fields[5]].filter(Boolean).join(' · ');technical.append(entry);}
+ detail.append(summary,technical);target.append(detail);
+}
+function confirmDocumentDeletion(name){return new Promise(resolve=>{
+ const dialog=document.createElement('dialog');dialog.className='edu-admin__card edu-document-delete-dialog';
+ const heading=document.createElement('h2');heading.textContent='Skutečně chcete smazat soubor „'+name+'“?';
+ heading.id='document-delete-'+item.id;dialog.setAttribute('aria-labelledby',heading.id);
+ const text=document.createElement('p');text.textContent='Soubor bude odstraněn ze seznamu dokumentů. Odkazy na tento soubor mohou přestat fungovat.';
+ const actions=document.createElement('div');actions.className='edu-admin__actions';
+ const cancel=document.createElement('button');cancel.type='button';cancel.className='edu-admin__button edu-admin__button--secondary';cancel.textContent='Zrušit';
+ const remove=document.createElement('button');remove.type='button';remove.className='edu-admin__button';remove.textContent='Smazat';
+ let finished=false;function finish(value){if(finished)return;finished=true;if(dialog.open)dialog.close();dialog.remove();resolve(value);}
+ cancel.onclick=()=>finish(false);remove.onclick=()=>finish(true);dialog.addEventListener('cancel',event=>{event.preventDefault();finish(false);});dialog.addEventListener('close',()=>finish(false));
+ actions.append(cancel,remove);dialog.append(heading,text,actions);document.body.append(dialog);
+ if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');cancel.focus();
+});}
 del.onclick=async()=>{
  del.disabled=true;save.disabled=true;row.setAttribute('aria-busy','true');
  try{
-  await editor.flush();
-  showUsage([],'Ověřuji použití souboru…');
-  const usage=await request('/api/admin/documents/'+encodeURIComponent(item.id)+'/usage');
-  if(!usage.complete)throw Error('Použití souboru se nepodařilo úplně ověřit. Soubor nebyl smazán.');
-  if(!usage.canDelete){showUsage(usage.items,'Soubor se používá a nelze jej smazat. Nejprve jej v uvedených místech odeberte nebo nahraďte.');return;}
-  showUsage([],usage.coverage);
-  if(!confirm('Smazat soubor „'+usage.name+'“ ze školní knihovny?\nV uložených konfiguracích a registrovaných výstupech nebylo nalezeno použití. Externí odkazy mimo Eduvizi nelze ověřit.'))return;
-  del.textContent='Mažu…';
-  await request('/api/admin/documents/'+encodeURIComponent(item.id),{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirm:item.id,expectedRevision:usage.revision})});
-  documentEditors.delete(item.id);status('Soubor byl smazán.','success');await load();
- }catch(e){if(e.detail?.code==='material_in_use')showUsage(e.detail.items,e.message);else showUsage([],e.message);status(e.message);}
+  const checkDeleteContext=captureDocumentDeleteContext();
+  await editor.flush();checkDeleteContext();
+  const deletion=await documentDeleteRequest('/api/admin/documents/'+encodeURIComponent(item.id)+'/usage',{},checkDeleteContext);
+  if(deletion.id!==item.id||typeof deletion.revision!=='string'||!deletion.revision||typeof deletion.name!=='string')throw Error('Dokument se nepodařilo ověřit. Obnovte seznam.');
+  if(!await confirmDocumentDeletion(deletion.name))return;
+  checkDeleteContext();del.textContent='Mažu…';
+  await documentDeleteRequest('/api/admin/documents/'+encodeURIComponent(item.id),{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirm:item.id,expectedRevision:deletion.revision})},checkDeleteContext);
+  documentEditors.delete(item.id);openDocumentEditors.delete(item.id);
+  const container=$('items');
+  for(const deletedRow of [...container.querySelectorAll('[data-doc-id]')].filter(element=>element.dataset.docId===String(item.id))){
+   const deletedList=deletedRow.parentElement,deletedSection=deletedList?.parentElement;
+   deletedRow.remove();
+   if(deletedList&&!deletedList.children.length)deletedSection?.remove();
+   else if(deletedSection){const groupHeading=deletedSection.querySelector('h3');if(groupHeading)groupHeading.textContent=groupHeading.textContent.replace(/ \(\d+\)$/, ' ('+deletedList.children.length+')');}
+  }
+  const remaining=container.querySelectorAll('[data-doc-id]').length;
+  if(!remaining)container.textContent='Zatím nebyly nahrány žádné dokumenty.';
+  status('Načteno dokumentů: '+remaining+'.','success','auth-status');
+  status('Soubor byl smazán.','success');
+  refreshDocumentCatalogPreview();
+ }catch(error){showUsage([],error.message);status(error.message);}
  finally{del.disabled=false;save.disabled=false;del.textContent='Smazat';row.removeAttribute('aria-busy');}
 };
 const summary=document.createElement('summary');summary.className='edu-item-editor__summary';
@@ -152,10 +243,11 @@ list.append(row);
 }
 section.append(list);container.append(section);
 }
+loadedDocumentProfile=requestedProfile;
 status('Načteno dokumentů: '+data.items.length+'.','success','auth-status');
 if(reveal){$('documents-list-heading').scrollIntoView({behavior:'smooth',block:'start'});$('documents-list-heading').focus({preventScroll:true});}
 }catch(error){status('Načtení dokumentů se nezdařilo: '+error.message,'error','auth-status')}
-finally{loadingDocuments=false;$('connect').disabled=false;$('connect').textContent='Načíst dokumenty';$('items').removeAttribute('aria-busy');}
+finally{loadingDocuments=false;loadingDocumentProfile='';$('connect').disabled=false;$('connect').textContent='Načíst dokumenty';$('items').removeAttribute('aria-busy');if(pendingDocumentReload){pendingDocumentReload=false;void load();}}
 }
 $('connect').onclick=()=>load({reveal:true});
 $('add-category').onclick=async()=>{
@@ -168,7 +260,7 @@ if(![...$('category').options].some(option=>option.value===name))$('category').a
 $('category').value=name;$('new-category').value='';
 status('Kategorie „'+name+'“ byla přidána a vybrána pro nahrávání.','success','category-status');
 }catch(error){status('Kategorii se nepodařilo přidat: '+error.message,'error','category-status');}finally{button.disabled=false;}
-};window.EduvizeDocumentUpload.bind({form:$('upload'),file:$('file'),category:$('category'),button:$('upload-button'),progress:$('upload-progress'),bar:$('upload-bar'),message:$('upload-text'),getToken:()=>window.EduvizeAdminAuth.getToken('documents'),endpoint:window.EduvizeAdminAuth.DOCS+'/api/admin/documents',onSuccess:async()=>{status('Dokument nahrán.','success','upload-text');await load()},onError:message=>status(message,'error','upload-text')});
+};window.EduvizeDocumentUpload.bind({form:$('upload'),file:$('file'),category:$('category'),button:$('upload-button'),progress:$('upload-progress'),bar:$('upload-bar'),message:$('upload-text'),getToken:()=>window.EduvizeAdminAuth.getToken('documents'),endpoint:window.EduvizeAdminAuth.DOCS+'/api/admin/documents',onSuccess:async()=>{status('Dokument nahrán.','success','upload-text');refreshDocumentCatalogPreview();await load()},onError:message=>status(message,'error','upload-text')});
 
 function link(){const u=new URL('/display',base);const profile=window.EduvizeAdminAuth.status().profileId||new URL(location.href).searchParams.get('edu-profile');if(profile)u.searchParams.set('edu-profile',profile);u.searchParams.set('v','20261101-catalog-2');if($('layout').value==='signage')u.searchParams.set('layout','signage');if(window.EduvizeSegmentSelection&&$('layout').value==='signage'){const seg=window.EduvizeSegmentSelection.params();u.searchParams.set('segment_orientation',seg.orientation);u.searchParams.set('segment_style',seg.style);u.searchParams.set('segment_block',seg.block)}u.searchParams.set('video_sound',$('video-sound').checked?'on':'off');return window.EduvizeOutputModes.url(u,$('layout').value==='kiosk'?'kiosk':$('layout').value==='normal'?'web':'nsp').href}
 // Native node retained for shared Save integration; never write local settings or reset dirty state.
@@ -177,23 +269,63 @@ $('save-settings').onclick=()=>{};
 
 // The segment picker can mount before session validation finishes. Refresh
 // its URL when school context becomes available, without moving any controls.
+function refreshDocumentCatalogPreview(){
+ // Reload only the existing live preview, retaining URL, geometry and controls.
+ // The display renderer fetches the current catalog with cache:no-store on boot.
+ for(const frame of document.querySelectorAll('#ev-preview iframe')){const src=frame.getAttribute('src');if(src)frame.setAttribute('src',src);}
+}
 function refreshDocumentPreview(){const picker=window.EduvizeSegmentSelection;if(picker)picker.set(picker.params());}
 window.addEventListener('eduvize-admin-auth-change',refreshDocumentPreview);
-window.addEventListener('eduvize-profile-selected',refreshDocumentPreview);
+window.addEventListener('eduvize-profile-selected',()=>{refreshDocumentPreview();const profile=window.EduvizeAdminAuth.status().profileId;if(profile&&profile!==loadingDocumentProfile&&profile!==loadedDocumentProfile)void load();});
 window.EduvizeAdminAuth.ready.then(async()=>{
  try{
   if(await window.EduvizeAdminAuth.ensureConnection('documents'))await load();
   refreshDocumentPreview();
  }catch(error){status(error.message);}
 });
-</script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-geometry.js?v=20261104-design-audit-1"></script><script src="https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/nsp-segments.js?v=20261104-design-audit-1"></script><div class="edu-document-version">Dokumenty · administrace v2026.11.06.01</div>
-<script src="/eduvize-styly/design-system/output-client.js?v=output-actions-v2-48bd6c1e"></script><script src="/eduvize-styly/design-system/load-saved-app.js?v=aaed6374-v2"></script><script src="/eduvize-styly/design-system/output-actions.js?v=48bd6c1e"></script><script src="/eduvize-dokumenty/documents-output-adapter.js?v=20261109-saved-workflow-no-drafts-2"></script><script src="/eduvize-dokumenty/documents-output-actions.js?v=20261110-documents-context-1"></script><script id="eduvize-profile-adapter">
+</script><script src="/eduvize-styly/design-system/nsp-geometry.js?v=71d22a46bba8006dd932"></script><script src="/eduvize-styly/design-system/nsp-segments.js?v=20261119-profile-first-r5"></script>
+<link rel="stylesheet" data-edu-profiles-css href="/eduvize-styly/design-system/configuration-profiles.css?v=20261116-documents-current-r1"><script data-edu-profiles src="/eduvize-styly/design-system/configuration-profiles.js?v=20261119-global-departure-dialog-r2"></script>
+<script src="/eduvize-styly/design-system/output-client.js?v=20261116-documents-current-r1"></script><script src="/eduvize-styly/design-system/load-saved-app.js?v=20261119-global-reader-r1"></script><script src="/eduvize-styly/design-system/output-actions.js?v=20261118-documents-protected-preview-r1"></script><script src="/eduvize-dokumenty/documents-output-adapter.js?v=71d22a46bba8006dd932"></script><script src="/eduvize-dokumenty/documents-output-actions.js?v=20261119-documents-profile-r1"></script><script id="eduvize-profile-adapter">
 function documentPresentation(config){
 const mode={signage:'nsp',normal:'web',kiosk:'kiosk'}[config.values.layout];
 const viewport=mode==='kiosk'?window.EduvizeSegmentSelection?.kioskGeometry?.():null;
 return window.EduvizeDocumentsOutputBridge.presentation(config,mode,window.EduvizeOutputModes.selection(),window.EduvizeOutputModes.layoutSelection?.(),viewport);
 }
-window.EduvizeProfileAdapter=window.EduvizeDocumentsOutputBridge.wrapProfileAdapter({app:"documents",read:()=>({schemaVersion:1,values:window.EduvizeProfiles.fields(["layout", "video-sound"]).read(),segment:window.EduvizeProfiles.segment()}),
+/* News bootstrap only; assign this Promise to adapter.ready BEFORE publishing the adapter. */
+async function documentsDependenciesReady(root,document){
+ const required=[
+  {name:'EduvizeOutputActions',file:'/eduvize-styly/design-system/output-actions.js',valid:v=>v?.schemaVersion===2&&typeof v.canonicalSlot==='function'&&typeof v.mount==='function'&&typeof v.create==='function'},
+  {name:'EduvizeOutputClient',file:'/eduvize-styly/design-system/output-client.js',valid:v=>v?.schemaVersion===1&&typeof v.create==='function'}
+ ];
+ // Capture the exact existing parser-inserted URLs, including CURRENT cache queries.
+ const scripts=required.map(dep=>{
+  const nodes=[...document.scripts].filter(node=>{try{const u=new URL(node.src,root.location.href);return !!node.src&&u.origin===root.location.origin&&u.pathname===dep.file&&!u.username&&!u.password&&!u.hash;}catch{return false;}});
+  if(nodes.length!==1)throw Object.assign(Error('Společné soubory Dokumentů nelze jednoznačně ověřit. Obnovte stránku.'),{code:'DEPENDENCY_UNAVAILABLE'});
+  return new URL(nodes[0].src,root.location.href).href;
+ });
+ const domReady=document.readyState==='loading'?new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true})):Promise.resolve();
+ function retry(dep,url){
+  if(root[dep.name]!==undefined){if(dep.valid(root[dep.name]))return Promise.resolve();return Promise.reject(Object.assign(Error('Společné rozhraní Dokumentů nemá podporovanou verzi. Obnovte stránku.'),{code:'DEPENDENCY_UNAVAILABLE'}));}
+  return new Promise((resolve,reject)=>{
+   const script=document.createElement('script');let settled=false,timer;
+   function finish(error){if(settled)return;settled=true;root.clearTimeout(timer);script.onload=script.onerror=null;if(error){script.remove();reject(error);}else resolve();}
+   const unavailable=()=>Object.assign(Error('Společné ovládání Dokumentů se nepodařilo načíst. Obnovte stránku.'),{code:'DEPENDENCY_UNAVAILABLE'});
+   script.src=url;script.async=false;script.dataset.eduDocumentsDependencyRetry='1';
+   script.onload=()=>finish(dep.valid(root[dep.name])?null:unavailable());script.onerror=()=>finish(unavailable());
+   timer=root.setTimeout(()=>finish(unavailable()),8000);document.head.append(script);
+  });
+ }
+ return domReady.then(async()=>{
+  // No adapter.read(), geometry fallback, auth/profile calls or writes before this gate.
+  for(let i=0;i<required.length;i++)await retry(required[i],scripts[i]);
+  if(typeof root.EduvizeDocumentsOutputBridge?.wrapProfileAdapter!=='function'||typeof root.EduvizeDocumentsOutputBridge?.install!=='function'||typeof root.EduvizeDocumentsOutputAdapter?.draft!=='function')throw Object.assign(Error('Nativní ovládání Dokumentů není dostupné. Obnovte stránku.'),{code:'DEPENDENCY_UNAVAILABLE'});
+ });
+}
+
+function reportDocumentOutputError(error){const sink=window.EduvizeProfiles?.statusFor?.('documents');if(sink)sink.result(error.message,'error');else{const result=document.getElementById('document-output-status');result.dataset.state='error';result.textContent=error.message;}}
+const documentDependencies=documentsDependenciesReady(window,document);
+documentDependencies.catch(reportDocumentOutputError);
+window.EduvizeProfileAdapter=window.EduvizeDocumentsOutputBridge.wrapProfileAdapter({app:"documents",ready:documentDependencies,mountDocumentActions,read:()=>({schemaVersion:1,values:window.EduvizeProfiles.fields(["layout", "video-sound"]).read(),segment:window.EduvizeProfiles.segment()}),
 apply:async config=>{window.EduvizeProfiles.fields(["layout", "video-sound"]).apply(config.values);window.EduvizeProfiles.applySegment(config.segment);}},documentPresentation,async p=>{
 window.EduvizeOutputModes.setInteraction(p.interaction,{notify:false});
 if(p.mode==='kiosk'){window.EduvizeOutputModes.setKioskLayout(p.kioskLayout,{notify:false});if(window.EduvizeSegmentSelection?.setKioskGeometry?.(p.geometry)!==true)throw Error('Rozměry uloženého kiosku nyní nelze obnovit.');}
@@ -202,11 +334,11 @@ window.EduvizeDocumentsPreviewUrl=()=>{const url=new URL(link(),location.href);u
 window.dispatchEvent(new Event("eduvize-profile-adapter-ready"));
 const documentSettingsSave=document.querySelector("[data-edu-profile-save]");if(documentSettingsSave)documentSettingsSave.textContent="Uložit nastavení";
 // Preserve the existing positions of Copy and Open; no Generate action.
-window.EduvizeDocumentsOutputBridge.install().catch(error=>{const sink=window.EduvizeProfiles?.statusFor?.("documents");if(sink)sink.result(error.message,"error");else{const result=document.getElementById("document-output-status");result.dataset.state="error";result.textContent=error.message;}});
+documentDependencies.then(()=>window.EduvizeDocumentsOutputBridge.install()).catch(reportDocumentOutputError);
 </script>
 </body></html>
 
 
 <script>
-document.getElementById('import-documents').onsubmit=async function(event){event.preventDefault();const button=this.querySelector('button'),results=document.getElementById('import-results');button.disabled=true;results.textContent='Importuji kopie do Eduvize…';try{const data=await request('/api/admin/documents/import',{method:'POST',body:JSON.stringify({url:document.getElementById('import-drive-url').value,category:document.getElementById('category').value})});results.replaceChildren();for(const item of data.items){const li=document.createElement('li');li.textContent=item.name+' · '+(item.uploaded?'Uloženo do Eduvize':item.error);results.append(li);}await load();}catch(e){results.textContent=e.message;}finally{button.disabled=false;}};
+document.getElementById('import-documents').onsubmit=async function(event){event.preventDefault();const button=this.querySelector('button'),results=document.getElementById('import-results');button.disabled=true;results.textContent='Importuji kopie do Eduvize…';try{const data=await request('/api/admin/documents/import',{method:'POST',body:JSON.stringify({url:document.getElementById('import-drive-url').value,category:document.getElementById('category').value})});results.replaceChildren();for(const item of data.items){const li=document.createElement('li');li.textContent=item.name+' · '+(item.uploaded?'Uloženo do Eduvize':item.error);results.append(li);}if(data.items.some(item=>item.uploaded))refreshDocumentCatalogPreview();await load();}catch(e){results.textContent=e.message;}finally{button.disabled=false;}};
 </script>
