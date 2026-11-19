@@ -77,15 +77,16 @@ const ids=[...document.querySelectorAll('#items [data-doc-id]')].map(el=>el.data
 await request('/api/admin/documents/reorder',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids})});
 status('Pořadí dokumentů uloženo.','success');
 }
-let loadingDocuments=false,pendingDocumentReload=false;const openDocumentEditors=new Set();
+let loadingDocuments=false,pendingDocumentReload=false,loadingDocumentProfile='',loadedDocumentProfile='';const openDocumentEditors=new Set();
 async function load({reveal=false}={}){
 if(loadingDocuments){pendingDocumentReload=true;return;}loadingDocuments=true;$('connect').disabled=true;$('connect').textContent='Načítám…';$('items').setAttribute('aria-busy','true');$('items-status').textContent='';status('Načítám dokumenty z Eduvize…','pending','auth-status');
 try{
 await flushDocumentEdits();
 const requestedProfile=window.EduvizeAdminAuth.status().profileId;
-const [categories,data]=await Promise.all([request('/api/admin/categories'),request('/api/admin/documents')]);
+loadingDocumentProfile=requestedProfile;
+const data=await request('/api/admin/documents');
 if(requestedProfile!==window.EduvizeAdminAuth.status().profileId){pendingDocumentReload=true;return;}
-await loadCategories(categories);
+await loadCategories(data);
 const container=$('items');container.replaceChildren();
 if(!data.items.length){container.textContent='Zatím nebyly nahrány žádné dokumenty.';}
 const groups=new Map();
@@ -154,10 +155,11 @@ list.append(row);
 }
 section.append(list);container.append(section);
 }
+loadedDocumentProfile=requestedProfile;
 status('Načteno dokumentů: '+data.items.length+'.','success','auth-status');
 if(reveal){$('documents-list-heading').scrollIntoView({behavior:'smooth',block:'start'});$('documents-list-heading').focus({preventScroll:true});}
 }catch(error){status('Načtení dokumentů se nezdařilo: '+error.message,'error','auth-status')}
-finally{loadingDocuments=false;$('connect').disabled=false;$('connect').textContent='Načíst dokumenty';$('items').removeAttribute('aria-busy');if(pendingDocumentReload){pendingDocumentReload=false;void load();}}
+finally{loadingDocuments=false;loadingDocumentProfile='';$('connect').disabled=false;$('connect').textContent='Načíst dokumenty';$('items').removeAttribute('aria-busy');if(pendingDocumentReload){pendingDocumentReload=false;void load();}}
 }
 $('connect').onclick=()=>load({reveal:true});
 $('add-category').onclick=async()=>{
@@ -181,7 +183,7 @@ $('save-settings').onclick=()=>{};
 // its URL when school context becomes available, without moving any controls.
 function refreshDocumentPreview(){const picker=window.EduvizeSegmentSelection;if(picker)picker.set(picker.params());}
 window.addEventListener('eduvize-admin-auth-change',refreshDocumentPreview);
-window.addEventListener('eduvize-profile-selected',()=>{refreshDocumentPreview();void load();});
+window.addEventListener('eduvize-profile-selected',()=>{refreshDocumentPreview();const profile=window.EduvizeAdminAuth.status().profileId;if(profile&&profile!==loadingDocumentProfile&&profile!==loadedDocumentProfile)void load();});
 window.EduvizeAdminAuth.ready.then(async()=>{
  try{
   if(await window.EduvizeAdminAuth.ensureConnection('documents'))await load();
