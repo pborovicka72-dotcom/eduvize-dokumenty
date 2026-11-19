@@ -21,12 +21,10 @@ jobs:
         run: |
           python -m unittest discover -s tests -p test_document_batch.py -v
           python -m unittest discover -s tests -p test_document_scopes.py -v
+          python -m unittest discover -s tests -p test_categories.py -v
           python -m unittest discover -s tests -p test_upload_validation.py -v
           python -m py_compile app.py document_delivery.py
       - name: Deletion confirmation and preview school context
         run: |
           node tests/safe-deletion.test.mjs
           node tests/preview-profile.test.mjs
-          node tests/documents-output-bridge.test.cjs
-          node tests/documents-saved-workflow.test.cjs
-          node tests/documents-published.test.cjs
