@@ -127,8 +127,10 @@ async def list_public(scope:str="documents"):
     return {"items":public_items(items if scope=="all" else [x for x in items if in_document_scope(x,scope)])}
 @app.get("/api/admin/documents")
 async def list_admin(authorization:str|None=Header(default=None),scope:str="documents"):
-    await check_admin(authorization);document_scope(scope);_,items=await all_items();items=[x for x in items if in_document_scope(x,scope)]
-    return {"items":sorted(items,key=lambda x:(x.get("position",0),x["name"]))}
+    await check_admin(authorization);document_scope(scope)
+    data=await manifest_data(await ensure_folder())
+    items=[x for x in data["items"] if in_document_scope(x,scope)]
+    return {"items":sorted(items,key=lambda x:(x.get("position",0),x["name"])),"categories":category_names(data,scope),"hidden_categories":data.get("hidden_categories",[])}
 @app.get("/api/admin/categories")
 async def list_categories(authorization:str|None=Header(default=None),scope:str="documents"):
     await check_admin(authorization)

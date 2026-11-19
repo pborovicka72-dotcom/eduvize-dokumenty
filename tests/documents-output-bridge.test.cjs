@@ -11,6 +11,21 @@ assert.equal(b.presentation(native,'nsp','display').geometry.segmentId,1);assert
 assert.equal(b.presentation(native,'kiosk','display','menu',{width:3840,height:2160}).interaction,'interactive');assert.throws(()=>b.presentation(native,'kiosk','interactive','menu',{width:100,height:10}));checks++;
 const config=b.withPresentation(native,p);assert.deepEqual(plain(config.values),native.values);assert.deepEqual(plain(config.presentation),plain(p));assert.equal(native.data,undefined);checks++;
 let applied,appliedPresentation;const wrapped=b.wrapProfileAdapter({app:'documents',read:()=>native,apply:v=>{applied=v;}},()=>p,v=>{appliedPresentation=v;});assert.deepEqual(plain(wrapped.read().presentation),plain(p));await wrapped.apply(config);assert.equal(applied,config);assert.deepEqual(plain(appliedPresentation),plain(p));checks++;
+// Switching to a kiosk profile changes the native layout before its geometry.
+let geometryReady=false,reentrantPresentation;
+const switchingNative=plain(native),kioskPresentation=b.presentation(native,'kiosk','interactive','menu',{width:1920,height:1080});
+let switchingAdapter;
+switchingAdapter=b.wrapProfileAdapter({app:'documents',read:()=>switchingNative,apply:async target=>{
+ switchingNative.values.layout=target.values.layout;
+ reentrantPresentation=switchingAdapter.read().presentation;
+}},()=>{
+ if(switchingNative.values.layout==='kiosk'&&!geometryReady)throw Error('Chybí platné rozměry kiosku.');
+ return kioskPresentation;
+},async()=>{geometryReady=true;});
+const kioskConfig={...plain(native),values:{...native.values,layout:'kiosk'},presentation:kioskPresentation};
+await switchingAdapter.apply(kioskConfig);
+assert.deepEqual(plain(reentrantPresentation),plain(kioskPresentation));
+assert.deepEqual(plain(switchingAdapter.read().presentation),plain(kioskPresentation));checks++;
 let state={connected:true,schoolId:'a'.repeat(32),profileId:'b'.repeat(32)},current=config,stored=plain(config),options;
 const buttons={generateButton:{},copyButton:{onclick:()=>{throw Error('legacy');}},openButton:{onclick:()=>{throw Error('legacy');}},status:{}};
 const adapter=root.EduvizeDocumentsOutputAdapter;
@@ -24,4 +39,5 @@ current=config;state={...state,connected:false};assert.throws(()=>options.contex
 b.controller({auth:{status:()=>state},profileAdapter:{read:()=>config},saved:{load:async()=>{state={...state,profileId:'c'.repeat(32)};return {config:stored,data:stored.presentation};}},client:{},actions:{mount:o=>{options=o;return {workflow:'saved-copy-preview',withSavedCommit(){},ensurePublishedFromSaved(){},previewDraft(){}};}},elements:buttons,readPresentation:c=>c.presentation,registeredAdapter:()=>adapter});await assert.rejects(options.draft(),e=>e.code==='CONTEXT_CHANGED');checks++;
 console.log('Documents V2 bridge:',checks,'behavior checks PASS');return checks;
 })();
+
 
