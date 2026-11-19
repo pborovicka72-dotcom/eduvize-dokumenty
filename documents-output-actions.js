@@ -24,7 +24,16 @@
   return {...copy(config),presentation:copy(p)};
  }
  function wrapProfileAdapter(adapter,readPresentation,applyPresentation){
-  return {...adapter,read(){const config=adapter.read();return withPresentation(config,readPresentation(config));},async apply(config){await adapter.apply(config);if(config.presentation)await applyPresentation(config.presentation);}};
+  let applyingPresentation=null;
+  return {...adapter,
+   read(){const config=adapter.read();return withPresentation(config,applyingPresentation||readPresentation(config));},
+   async apply(config){
+    // Native field changes can trigger a read before kiosk geometry is restored.
+    applyingPresentation=config.presentation||null;
+    try{await adapter.apply(config);if(config.presentation)await applyPresentation(config.presentation);}
+    finally{applyingPresentation=null;}
+   }
+  };
  }
  function controller({auth,profileAdapter,saved,client,actions,elements,readPresentation,registeredAdapter}){
   function context(){
@@ -50,7 +59,7 @@
   }
   // Remove only the old property handlers; the shared controller binds once.
   elements.copyButton.onclick=null;elements.openButton.onclick=null;
-  const instance=actions.mount({workflow:'saved-copy-preview',client,context,draft,elements,previewDraftUrl:()=>{
+  const instance=actions.mount({workflow:'saved-copy-preview',client,context,draft,elements,previewHost:'documents-protected-physical-v1',previewDraftUrl:()=>{
    if(typeof root.EduvizeDocumentsPreviewUrl!=='function')fail('DEPENDENCY_UNAVAILABLE','Náhled Dokumentů nyní není dostupný.');
    const url=new URL(root.EduvizeDocumentsPreviewUrl(),root.location.href);
    if(url.origin!==root.location.origin||url.username||url.password)fail('INVALID_PREVIEW','Náhled musí zůstat v Dokumentech.');
@@ -66,8 +75,9 @@
   if(!elements.copyButton||!elements.openButton||!elements.status)return;
   const reportError=message=>{const sink=root.EduvizeProfiles?.statusFor?.('documents');if(sink)sink.result(message,'error');else{elements.status.dataset.state='error';elements.status.textContent=message;}};
   elements.copyButton.onclick=null;elements.openButton.onclick=null;
+  elements.copyButton.disabled=elements.openButton.disabled=true;
   const auth=root.EduvizeAdminAuth;
-  if(!auth||!root.EduvizeOutputActions||!root.EduvizeOutputClient||!root.EduvizeSavedOutputSettings){reportError('Vytváření odkazů nyní není dostupné.');return;}
+  if(!auth||root.EduvizeOutputActions?.documentsPreviewHost!=='documents-protected-physical-v1'||!root.EduvizeOutputClient||!root.EduvizeSavedOutputSettings)fail('DEPENDENCY_UNAVAILABLE','Společné ovládání Dokumentů nyní není dostupné. Obnovte stránku.');
   await auth.ready;
   // Shared profile tools may arrive after the native inline adapter registers.
   // Do not evaluate its read() until those dependencies have actually loaded.
@@ -77,6 +87,8 @@
   const client=root.EduvizeOutputClient.create({origin:root.location.origin,getAuthorization:()=>{const token=auth.getToken('configurations')||auth.getToken('documents');return token?'Bearer '+token:'';}});
   const actions=controller({auth,profileAdapter,saved:root.EduvizeSavedOutputSettings.create(),client,actions:root.EduvizeOutputActions,elements,readPresentation:config=>config.presentation,registeredAdapter:()=>root.EduvizeDocumentsOutputAdapter});
   root.EduvizeDocumentsOutputActions=actions;
+  elements.copyButton.disabled=elements.openButton.disabled=false;
+  return actions;
   // Shared Save, Copy and Preview validate their fresh context when explicitly used.
  }
  root.EduvizeDocumentsOutputBridge=Object.freeze({presentation,withPresentation,wrapProfileAdapter,controller,install});
