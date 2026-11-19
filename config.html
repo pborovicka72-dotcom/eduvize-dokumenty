@@ -227,6 +227,8 @@ del.onclick=async()=>{
   const checkDeleteContext=captureDocumentDeleteContext();
   await editor.flush();checkDeleteContext();
   const deletion=await documentDeleteRequest('/api/admin/documents/'+encodeURIComponent(item.id)+'/usage',{},checkDeleteContext);
+  if(!deletion.complete)throw Error('Použití souboru se nepodařilo úplně ověřit. Soubor nebyl smazán.');
+  if(!deletion.canDelete){showUsage(deletion.items,'Soubor se používá a nelze jej smazat. Nejprve jej v uvedených místech odeberte nebo nahraďte.');return;}
   if(deletion.id!==item.id||typeof deletion.revision!=='string'||!deletion.revision||typeof deletion.name!=='string')throw Error('Dokument se nepodařilo ověřit. Obnovte seznam.');
   if(!await confirmDocumentDeletion(deletion.name))return;
   checkDeleteContext();del.textContent='Mažu…';
@@ -244,7 +246,7 @@ del.onclick=async()=>{
   status('Načteno dokumentů: '+remaining+'.','success','auth-status');
   status('Soubor byl smazán.','success');
   refreshDocumentCatalogPreview();
- }catch(error){showUsage([],error.message);status(error.message);}
+ }catch(error){showUsage(error.detail?.code==='material_in_use'?error.detail.items:[],error.message);status(error.message);}
  finally{del.disabled=false;save.disabled=false;del.textContent='Smazat';row.removeAttribute('aria-busy');}
 };
 const summary=document.createElement('summary');summary.className='edu-item-editor__summary';
