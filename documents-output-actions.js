@@ -24,7 +24,17 @@
   return {...copy(config),presentation:copy(p)};
  }
  function wrapProfileAdapter(adapter,readPresentation,applyPresentation){
-  return {...adapter,read(){const config=adapter.read();return withPresentation(config,readPresentation(config));},async apply(config){await adapter.apply(config);if(config.presentation)await applyPresentation(config.presentation);}};
+  let applyingPresentation=null;
+  return {...adapter,
+   read(){const config=adapter.read();return withPresentation(config,applyingPresentation||readPresentation(config));},
+   async apply(config){
+    // Native fields dispatch change before kiosk geometry has been restored.
+    // Reentrant reads must use the selected profile's presentation meanwhile.
+    applyingPresentation=config.presentation||null;
+    try{await adapter.apply(config);if(config.presentation)await applyPresentation(config.presentation);}
+    finally{applyingPresentation=null;}
+   }
+  };
  }
  function controller({auth,profileAdapter,saved,client,actions,elements,readPresentation,registeredAdapter}){
   function context(){
@@ -81,3 +91,4 @@
  }
  root.EduvizeDocumentsOutputBridge=Object.freeze({presentation,withPresentation,wrapProfileAdapter,controller,install});
 })(typeof window==='undefined'?globalThis:window);
+
